@@ -48,6 +48,10 @@ function calcLifePath(dob) {
   while (sum>9&&sum!==11&&sum!==22&&sum!==33) sum=String(sum).split("").reduce((a,d)=>a+parseInt(d),0);
   return sum;
 }
+
+const MONTHS_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const MONTHS_RU = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+const MONTHS_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 async function load(key){try{const r=await window.storage.get(key);return r?JSON.parse(r.value):null;}catch{return null;}}
 async function save(key,val){try{await window.storage.set(key,JSON.stringify(val));}catch{}}
 
@@ -76,6 +80,37 @@ const VALUES_CHALLENGE_SYSTEM = (lang, values) => `You are Alex Soleil. Generate
 
 const VALUES_RESULT_SYSTEM = (lang) => `You are Alex Soleil. A user completed a values challenge. Analyze their answers and produce a reflection. Respond ENTIRELY in ${lang==="RU"?"warm colloquial Russian":lang==="ES"?"warm colloquial Latin American Spanish":"English"}. Output strict JSON only: {"revealed":["top 2-3 values that showed up most strongly in their choices"],"reflection":"2-3 sentences: what their choices reveal about their true values under pressure vs on paper. Warm, direct, not clinical.","alignment":"one sentence on whether their chosen values and revealed values align or diverge — and what that means"}`;
 
+function DobDropdown({ lang, day, month, year, onDay, onMonth, onYear, onClear }) {
+  const months = lang==="RU" ? MONTHS_RU : lang==="ES" ? MONTHS_ES : MONTHS_EN;
+  const dayLabel = lang==="RU"?"День":lang==="ES"?"Día":"Day";
+  const monthLabel = lang==="RU"?"Месяц":lang==="ES"?"Mes":"Month";
+  const yearLabel = lang==="RU"?"Год":lang==="ES"?"Año":"Year";
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({length:100},(_,i)=>currentYear-i);
+  const days = Array.from({length:31},(_,i)=>i+1);
+  const sel = {background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.1)",borderRadius:9,padding:"10px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",cursor:"pointer",flex:1,appearance:"none",WebkitAppearance:"none"};
+  const hasAll = day&&month&&year;
+  return (
+    <div style={{width:"100%"}}>
+      <div style={{display:"flex",gap:7}}>
+        <select value={day} onChange={e=>onDay(e.target.value)} style={sel}>
+          <option value="">{dayLabel}</option>
+          {days.map(d=><option key={d} value={d}>{d}</option>)}
+        </select>
+        <select value={month} onChange={e=>onMonth(e.target.value)} style={{...sel,flex:2}}>
+          <option value="">{monthLabel}</option>
+          {months.map((m,i)=><option key={i+1} value={i+1}>{m}</option>)}
+        </select>
+        <select value={year} onChange={e=>onYear(e.target.value)} style={sel}>
+          <option value="">{yearLabel}</option>
+          {years.map(y=><option key={y} value={y}>{y}</option>)}
+        </select>
+        {hasAll&&<button style={{background:"none",border:"none",color:"rgba(240,236,228,.35)",fontSize:13,cursor:"pointer",padding:"0 4px",fontFamily:"'DM Sans',sans-serif"}} onClick={onClear}>✕</button>}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [lang, setLang]         = useState("EN");
   const [screen, setScreen]     = useState("boot");
@@ -87,6 +122,9 @@ export default function App() {
   const [onbStep, setOnbStep]   = useState(0);
   const [nameInput, setNameInput] = useState("");
   const [dobInput, setDobInput] = useState("");
+  const [dobDay, setDobDay]     = useState("");
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobYear, setDobYear]   = useState("");
   const [selValues, setSelValues] = useState([]);
   const [tooltipVal, setTooltipVal] = useState(null);
   const [showValChallenge, setShowValChallenge] = useState(false);
@@ -132,6 +170,9 @@ export default function App() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [editName, setEditName] = useState("");
   const [editDob, setEditDob]   = useState("");
+  const [editDobDay, setEditDobDay]     = useState("");
+  const [editDobMonth, setEditDobMonth] = useState("");
+  const [editDobYear, setEditDobYear]   = useState("");
 
   // values challenge state
   const [vcScenarios, setVcScenarios] = useState([]);
@@ -185,7 +226,7 @@ export default function App() {
     setVcContext(ctx); setVcScenarios([]); setVcIdx(0); setVcAnswers([]); setVcResult(null); setVcLoading(true);
     setShowValChallenge(true);
     try {
-      const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
+      const res = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1200,system:VALUES_CHALLENGE_SYSTEM(lang,vals.length?vals:VALUES_LIST.slice(0,10)),messages:[{role:"user",content:"Generate the values challenge now."}]})});
       const data=await res.json();
       const clean=(data.content?.[0]?.text||"").replace(/```json|```/g,"").trim();
@@ -207,7 +248,7 @@ export default function App() {
     const summary=answers.map((a,i)=>`Scenario ${i+1}: "${a.scenario}" → chose option revealing: ${a.reveals.join(", ")}`).join("\n");
     const userVals=(vcContext==="onboarding"?selValues:profile?.values)||[];
     try {
-      const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,system:VALUES_RESULT_SYSTEM(lang),
           messages:[{role:"user",content:`Selected values: ${userVals.join(", ")||"not yet selected"}\nChallenge answers:\n${summary}\nGenerate the reflection.`}]})});
       const data=await res.json();
@@ -233,9 +274,12 @@ export default function App() {
   };
 
   // ── ONBOARDING ──
+  const buildDob = (y,m,d) => (y&&m&&d) ? `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}` : null;
+
   const saveProfile = async () => {
-    const lp=dobInput?calcLifePath(dobInput):null;
-    const p={name:nameInput.trim()||"Friend",dob:dobInput||null,lifePath:lp,values:selValues,lang,createdAt:new Date().toISOString()};
+    const dob = buildDob(dobYear, dobMonth, dobDay);
+    const lp=dob?calcLifePath(dob):null;
+    const p={name:nameInput.trim()||"Friend",dob:dob||null,lifePath:lp,values:selValues,lang,createdAt:new Date().toISOString()};
     setProfile(p); await save("profile",p); setShowValChallenge(false); goTo("checkin");
   };
 
@@ -290,7 +334,7 @@ export default function App() {
 
   const callAI=async(messages,isFinal,depth)=>{
     try{
-      const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1400,system:SYSTEM(lang),messages})});
       const data=await res.json();
       const clean=(data.content?.[0]?.text||"").replace(/```json|```/g,"").trim();
@@ -308,7 +352,7 @@ export default function App() {
     setReadiness(r);setLoading(true);
     const tone=r>=7?"high commitment — bold concrete":r>=4?"some ambivalence — gentle exploratory":"low — one tiny micro-step";
     try{
-      const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,system:SYSTEM(lang),
           messages:[{role:"user",content:`Readiness: ${r}/10 (${tone}). Insight: "${plan?.insight}". Generate 4 first step options calibrated to readiness. JSON only: {"options":["a","b","c","d"]}`}]})});
       const data=await res.json();
@@ -328,7 +372,12 @@ export default function App() {
 
   // Who Am I saves
   const saveEditedValues=async()=>{const u={...profile,values:editVals};setProfile(u);await save("profile",u);setEditingValues(false);};
-  const saveEditedProfile=async()=>{const lp=editDob?calcLifePath(editDob):profile.lifePath;const u={...profile,name:editName||profile.name,dob:editDob||profile.dob,lifePath:lp};setProfile(u);await save("profile",u);setEditingProfile(false);};
+  const saveEditedProfile=async()=>{
+    const dob = buildDob(editDobYear,editDobMonth,editDobDay) || profile.dob;
+    const lp=dob?calcLifePath(dob):profile.lifePath;
+    const u={...profile,name:editName||profile.name,dob,lifePath:lp};
+    setProfile(u);await save("profile",u);setEditingProfile(false);
+  };
 
   const fbQ=(d)=>[
     {question:"What's really at stake for you right now?",options:["My sense of who I'm becoming","I'm tired of the same cycle","Someone I care about is affected","I know I'm capable of more"],depth_label:"What's at stake",phase:"opening"},
@@ -401,12 +450,12 @@ export default function App() {
     <div className="modal-bg" onClick={()=>setShowValChallenge(false)}>
       <div className="modal" style={{maxWidth:480,maxHeight:"80vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
         {vcLoading&&!vcScenarios.length ? (
-          <p style={{color:"rgba(240,236,228,.4)",fontSize:14,textAlign:"center",padding:"30px 0"}}>{L("Generating your challenge","Создаю испытание")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p>
+          <p style={{color:"rgba(240,236,228,.4)",fontSize:14,textAlign:"center",padding:"30px 0"}}>{L("Generating your challenge","Создаю испытание","Generando tu desafío")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p>
         ) : vcResult ? (
           <div>
-            <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".08em",marginBottom:12}}>{L("Your values under pressure","Твои ценности под давлением")}</p>
+            <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".08em",marginBottom:12}}>{L("Your values under pressure","Твои ценности под давлением","Tus valores bajo presión")}</p>
             <div style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.18)",borderRadius:12,padding:"14px 16px",marginBottom:14}}>
-              <p style={{fontSize:12,color:"rgba(240,236,228,.4)",marginBottom:8}}>{L("Values that showed up strongest:","Ценности, которые проявились сильнее всего:")}</p>
+              <p style={{fontSize:12,color:"rgba(240,236,228,.4)",marginBottom:8}}>{L("Values that showed up strongest:","Ценности, которые проявились сильнее всего:","Valores que se mostraron con más fuerza:")}</p>
               <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:12}}>
                 {vcResult.revealed?.map(v=><span key={v} style={{background:"rgba(212,163,89,.15)",border:"0.5px solid #d4a359",borderRadius:20,padding:"4px 12px",fontSize:13,color:"#d4a359"}}>{valLabel(v)}</span>)}
               </div>
@@ -414,15 +463,15 @@ export default function App() {
               <p style={{fontSize:13,color:"rgba(240,236,228,.55)",lineHeight:1.6}}>{vcResult.alignment}</p>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-              {vcContext==="onboarding" && <button className="pbtn" style={{fontSize:13,padding:"9px 18px"}} onClick={()=>{setShowValChallenge(false);}}>{L("Continue with my values →","Продолжить с моими ценностями →")}</button>}
-              <button className="gbtn" style={{fontSize:13}} onClick={()=>{setVcIdx(0);setVcAnswers([]);setVcResult(null);startValChallenge(vcContext==="onboarding"?selValues:profile?.values||[],vcContext);}}>{L("Retake","Пройти снова")}</button>
-              <button className="gbtn" style={{fontSize:13}} onClick={()=>setShowValChallenge(false)}>{L("Close","Закрыть")}</button>
+              {vcContext==="onboarding" && <button className="pbtn" style={{fontSize:13,padding:"9px 18px"}} onClick={()=>{setShowValChallenge(false);}}>{L("Continue with my values →","Продолжить с моими ценностями →","Continuar con mis valores →")}</button>}
+              <button className="gbtn" style={{fontSize:13}} onClick={()=>{setVcIdx(0);setVcAnswers([]);setVcResult(null);startValChallenge(vcContext==="onboarding"?selValues:profile?.values||[],vcContext);}}>{L("Retake","Пройти снова","Repetir")}</button>
+              <button className="gbtn" style={{fontSize:13}} onClick={()=>setShowValChallenge(false)}>{L("Close","Закрыть","Cerrar")}</button>
             </div>
           </div>
         ) : vcScenarios.length>0 ? (
           <div>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-              <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".08em"}}>{L("Values Challenge","Испытание ценностей")} · {vcIdx+1}/{vcScenarios.length}</p>
+              <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".08em"}}>{L("Values Challenge","Испытание ценностей","Desafío de Valores")} · {vcIdx+1}/{vcScenarios.length}</p>
               <button className="tbtn" onClick={()=>setShowValChallenge(false)}>✕</button>
             </div>
             <div style={{height:2,background:"rgba(255,255,255,.07)",borderRadius:2,marginBottom:18,overflow:"hidden"}}>
@@ -444,11 +493,11 @@ export default function App() {
   const OverwriteModal = () => (
     <div className="modal-bg">
       <div className="modal">
-        <p style={{fontFamily:"Fraunces,serif",fontSize:17,fontWeight:600,marginBottom:10,lineHeight:1.3}}>{L("You already have a practice saved for today.","У тебя уже есть практика за сегодня.")}</p>
-        <p style={{fontSize:14,color:"rgba(240,236,228,.55)",lineHeight:1.6,marginBottom:20}}>{L("Starting a new quest will replace it. Are you sure?","Новый квест заменит её. Продолжить?")}</p>
+        <p style={{fontFamily:"Fraunces,serif",fontSize:17,fontWeight:600,marginBottom:10,lineHeight:1.3}}>{L("You already have a practice saved for today.","У тебя уже есть практика за сегодня.","Ya tienes una práctica guardada para hoy.")}</p>
+        <p style={{fontSize:14,color:"rgba(240,236,228,.55)",lineHeight:1.6,marginBottom:20}}>{L("Starting a new quest will replace it. Are you sure?","Новый квест заменит её. Продолжить?","Iniciar un nuevo quest la reemplazará. ¿Continuar?")}</p>
         <div style={{display:"flex",gap:9}}>
-          <button className="pbtn" style={{fontSize:13,padding:"9px 18px"}} onClick={()=>{setShowOverwrite(false);setPendingNavigate(false);goTo("challenges");}}>{L("Yes, continue","Да, продолжить")}</button>
-          <button className="gbtn" style={{fontSize:13}} onClick={()=>{setShowOverwrite(false);setPendingNavigate(false);setTab("practices");goTo("practices");}}>{L("View my practice","Смотреть практику")}</button>
+          <button className="pbtn" style={{fontSize:13,padding:"9px 18px"}} onClick={()=>{setShowOverwrite(false);setPendingNavigate(false);goTo("challenges");}}>{L("Yes, continue","Да, продолжить","Sí, continuar")}</button>
+          <button className="gbtn" style={{fontSize:13}} onClick={()=>{setShowOverwrite(false);setPendingNavigate(false);setTab("practices");goTo("practices");}}>{L("View my practice","Смотреть практику","Ver mi práctica")}</button>
         </div>
       </div>
     </div>
@@ -461,7 +510,7 @@ export default function App() {
         <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".06em",marginBottom:6}}>{L(`Honoring ${tooltipVal}`,`Как чтить "${valLabel(tooltipVal)}"`)}</p>
         <p style={{fontSize:15,fontWeight:500,color:"#f0ece4",marginBottom:4}}>{valLabel(tooltipVal)}</p>
         <p style={{fontSize:13,color:"rgba(240,236,228,.5)",lineHeight:1.5,marginBottom:14,fontStyle:"italic"}}>{valDesc(tooltipVal)}</p>
-        <p style={{fontSize:11,color:"rgba(240,236,228,.28)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{L("What it looks like","Как это выглядит")}</p>
+        <p style={{fontSize:11,color:"rgba(240,236,228,.28)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{L("What it looks like","Как это выглядит","Cómo se ve en la vida real")}</p>
         <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:16}}>
           {honorEx(tooltipVal).map((ex,i)=>(
             <div key={i} style={{display:"flex",gap:9,alignItems:"flex-start"}}>
@@ -470,7 +519,7 @@ export default function App() {
             </div>
           ))}
         </div>
-        <button className="gbtn" style={{fontSize:13}} onClick={()=>setTooltipVal(null)}>{L("Close","Закрыть")}</button>
+        <button className="gbtn" style={{fontSize:13}} onClick={()=>setTooltipVal(null)}>{L("Close","Закрыть","Cerrar")}</button>
       </div>
     </div>
   ) : null;
@@ -495,7 +544,7 @@ export default function App() {
         <div style={{position:"sticky",top:0,zIndex:50,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",gap:6}}>
           <span style={{fontFamily:"Fraunces,serif",fontSize:13,color:"#d4a359",fontWeight:600,flexShrink:0}}>Alex Soleil</span>
           <div style={{display:"flex",gap:2,overflowX:"auto",flexShrink:0}}>
-            {[["home",L("Soleil Quest","Soleil Quest")],["whoami",L("Who Am I","Кто Я")],["practices",L("My Practices","Мои практики")],["howto",L("How It Works","Как это работает")]].map(([k,label])=>(
+            {[["home",L("Soleil Quest","Soleil Quest")],["whoami",L("Who Am I","Кто Я","Quién Soy")],["practices",L("My Practices","Мои практики","Mis Prácticas")],["howto",L("How It Works","Как это работает","Cómo Funciona")]].map(([k,label])=>(
               <button key={k} className={`ntab ${tab===k?"on":"off"}`} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k);}}>{label}</button>
             ))}
           </div>
@@ -524,7 +573,7 @@ export default function App() {
       <div style={{maxWidth:600,margin:"0 auto",padding:"0 18px 80px",position:"relative",zIndex:1}}>
 
         {/* BOOT */}
-        {screen==="boot"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><p style={{color:"rgba(240,236,228,.3)",fontSize:14}}>{L("Loading","Загрузка")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p></div>}
+        {screen==="boot"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><p style={{color:"rgba(240,236,228,.3)",fontSize:14}}>{L("Loading","Загрузка","Cargando")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p></div>}
 
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
@@ -549,19 +598,22 @@ export default function App() {
             </div>
             {onbStep===0&&(
               <div>
-                <p className="up d1" style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:14}}>{L("Welcome","Добро пожаловать")}</p>
+                <p className="up d1" style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:14}}>{L("Welcome","Добро пожаловать","Bienvenida")}</p>
                 <h1 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:36,fontWeight:600,lineHeight:1.1,marginBottom:14,letterSpacing:"-1px"}}>{L("Find your ","Найди свою ","Encuentra tu ")}<em style={{color:"#d4a359"}}>{L("inner spark.","искру.","chispa interior.")}</em></h1>
-                <p className="up d3" style={{fontSize:15,lineHeight:1.75,color:"rgba(240,236,228,.52)",marginBottom:28}}>{L("A daily coaching practice that starts from the inside out. Before we begin, let's get to know each other.","Ежедневная коучинговая практика, которая начинается изнутри. Прежде чем начать, давай познакомимся.")}</p>
+                <p className="up d3" style={{fontSize:15,lineHeight:1.75,color:"rgba(240,236,228,.52)",marginBottom:28}}>{L("A daily coaching practice that starts from the inside out. Before we begin, let's get to know each other.","Ежедневная коучинговая практика, которая начинается изнутри. Прежде чем начать, давай познакомимся.","Una práctica de coaching diaria que empieza desde adentro. Antes de comenzar, conozcámonos.")}</p>
                 <div className="up d3" style={{marginBottom:14}}>
-                  <p style={{fontSize:13,color:"rgba(240,236,228,.42)",marginBottom:7}}>{L("What's your name?","Как тебя зовут?")}</p>
-                  <input type="text" placeholder={L("Your name","Твоё имя")} value={nameInput} onChange={e=>setNameInput(e.target.value)}/>
+                  <p style={{fontSize:13,color:"rgba(240,236,228,.42)",marginBottom:7}}>{L("What's your name?","Как тебя зовут?","¿Cómo te llamas?")}</p>
+                  <input type="text" placeholder={L("Your name","Твоё имя","Tu nombre")} value={nameInput} onChange={e=>setNameInput(e.target.value)}/>
                 </div>
                 <div className="up d4" style={{marginBottom:24}}>
-                  <p style={{fontSize:13,color:"rgba(240,236,228,.42)",marginBottom:3}}>{L("Date of birth","Дата рождения")} <span style={{color:"rgba(240,236,228,.22)"}}>{L("(optional)","(необязательно)")}</span></p>
-                  <p style={{fontSize:12,color:"rgba(240,236,228,.28)",marginBottom:7,lineHeight:1.5}}>{L("Share your date of birth to receive your numerology life path.","Укажи дату рождения, чтобы узнать свой нумерологический путь.")}</p>
+                  <p style={{fontSize:13,color:"rgba(240,236,228,.42)",marginBottom:3}}>{L("Date of birth","Дата рождения","Fecha de nacimiento")} <span style={{color:"rgba(240,236,228,.22)"}}>{L("(optional)","(необязательно)","(opcional)")}</span></p>
+                  <p style={{fontSize:12,color:"rgba(240,236,228,.28)",marginBottom:7,lineHeight:1.5}}>{L("Share your date of birth to receive your numerology life path.","Укажи дату рождения, чтобы узнать свой нумерологический путь.","Comparte tu fecha de nacimiento para recibir tu camino de vida numerológico.")}</p>
                   <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                    <input type="date" value={dobInput} onChange={e=>setDobInput(e.target.value)} style={{flex:1}}/>
-                    {dobInput&&<button className="tbtn" onClick={()=>setDobInput("")}>✕</button>}
+                    <DobDropdown
+                      lang={lang} day={dobDay} month={dobMonth} year={dobYear}
+                      onDay={setDobDay} onMonth={setDobMonth} onYear={setDobYear}
+                      onClear={()=>{setDobDay("");setDobMonth("");setDobYear("");}}
+                    />
                   </div>
                 </div>
                 <div className="up d5"><button className="pbtn" onClick={()=>setOnbStep(1)} disabled={!nameInput.trim()}>{L("Continue →","Продолжить →","Continuar →")}</button></div>
@@ -569,10 +621,10 @@ export default function App() {
             )}
             {onbStep===1&&(
               <div>
-                <button className="tbtn" style={{marginBottom:16}} onClick={()=>setOnbStep(0)}>{L("← Back","← Назад")}</button>
-                <p className="up d1" style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:10}}>{L("Your values","Твои ценности")}</p>
-                <h2 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:24,fontWeight:600,marginBottom:10}}>{L("What matters most to you?","Что для тебя по-настоящему важно?")}</h2>
-                <p className="up d3" style={{fontSize:14,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:20}}>{L("Choose up to 5 that feel most true. Tap ↗ on any value to see how it shows up in real life.","Выбери до 5 ценностей, которые ощущаются как твои. Нажми ↗ чтобы увидеть примеры.")}</p>
+                <button className="tbtn" style={{marginBottom:16}} onClick={()=>setOnbStep(0)}>{L("← Back","← Назад","← Volver")}</button>
+                <p className="up d1" style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:10}}>{L("Your values","Твои ценности","Tus valores")}</p>
+                <h2 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:24,fontWeight:600,marginBottom:10}}>{L("What matters most to you?","Что для тебя по-настоящему важно?","¿Qué es lo más importante para ti?")}</h2>
+                <p className="up d3" style={{fontSize:14,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:20}}>{L("Choose up to 5 that feel most true. Tap ↗ on any value to see how it shows up in real life.","Выбери до 5 ценностей, которые ощущаются как твои. Нажми ↗ чтобы увидеть примеры.","Elige hasta 5 que sientas más verdaderas. Toca ↗ en cualquier valor para ver ejemplos.")}</p>
                 <div className="up d4" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:7,marginBottom:14}}>
                   {VALUES_LIST.map(v=>(
                     <div key={v} className={`vcard ${selValues.includes(v)?"sel":""}`} onClick={()=>{if(selValues.includes(v)){setSelValues(p=>p.filter(x=>x!==v));}else if(selValues.length<5){setSelValues(p=>[...p,v]);}}}>
@@ -584,7 +636,7 @@ export default function App() {
                   ))}
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-                  <p style={{fontSize:12,color:"rgba(240,236,228,.28)"}}>{selValues.length} / 5 {L("selected","выбрано")}</p>
+                  <p style={{fontSize:12,color:"rgba(240,236,228,.28)"}}>{selValues.length} / 5 {L("selected","выбрано","seleccionados")}</p>
                   <button className="gbtn" style={{fontSize:12}} onClick={()=>startValChallenge(selValues,"onboarding")}>{L("Not sure? Test your values →","Не уверен? Проверь ценности →","¿No estás seguro? Pon a prueba tus valores →")}</button>
                 </div>
                 <button className="pbtn" onClick={saveProfile} disabled={selValues.length===0}>{L("Begin my practice →","Начать практику →","Comenzar mi práctica →")}</button>
@@ -618,7 +670,7 @@ export default function App() {
         {/* CHALLENGES */}
         {screen==="challenges"&&(
           <div key={animKey} style={{paddingTop:40}}>
-            <button className="tbtn up d1" style={{marginBottom:14}} onClick={()=>goTo("checkin")}>{L("← Back","← Назад")}</button>
+            <button className="tbtn up d1" style={{marginBottom:14}} onClick={()=>goTo("checkin")}>{L("← Back","← Назад","← Volver")}</button>
             {suggested&&(
               <div className="up d2" style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.2)",borderRadius:12,padding:"12px 15px",marginBottom:18,display:"flex",gap:10,alignItems:"flex-start"}}>
                 <span style={{fontSize:15,flexShrink:0}}>✦</span>
@@ -651,7 +703,7 @@ export default function App() {
         {/* PLAYING */}
         {screen==="playing"&&(
           <div key={animKey} style={{paddingTop:40}}>
-            <button className="tbtn up d1" style={{marginBottom:14}} onClick={()=>goTo("challenges")}>{L("← Back","← Назад")}</button>
+            <button className="tbtn up d1" style={{marginBottom:14}} onClick={()=>goTo("challenges")}>{L("← Back","← Назад","← Volver")}</button>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <span style={{fontSize:13,color:"rgba(240,236,228,.34)"}}>{challenge?.emoji} {lang==="RU"?challenge?.labelRU:lang==="ES"?challenge?.labelES:challenge?.labelEN}</span>
               <span style={{fontSize:12,color:"rgba(240,236,228,.34)"}}>{L(`Q${qCount} / 3`,`В${qCount} / 3`)}</span>
@@ -659,14 +711,14 @@ export default function App() {
             <div className="bar"><div className="barfill" style={{width:progress+"%"}}/></div>
             {loading?(
               <div style={{paddingTop:8}}>
-                <p style={{color:"rgba(240,236,228,.25)",fontSize:14,marginBottom:22,textAlign:"center"}}>{L("Going deeper","Иду глубже")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p>
+                <p style={{color:"rgba(240,236,228,.25)",fontSize:14,marginBottom:22,textAlign:"center"}}>{L("Going deeper","Иду глубже","Yendo más profundo")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p>
                 {[85,70,78,62].map((w,i)=><div key={i} style={{height:46,background:"rgba(255,255,255,.04)",borderRadius:10,marginBottom:7,width:w+"%"}}/>)}
               </div>
             ):currentQ&&(
               <div className="up">
                 <span className="pill gold" style={{marginBottom:14,display:"inline-flex"}}>{phaseLabel[currentQ.phase]||currentQ.depth_label}</span>
                 <h2 style={{fontFamily:"Fraunces,serif",fontSize:20,fontWeight:600,lineHeight:1.35,marginBottom:8}}>{currentQ.question}</h2>
-                <p style={{fontSize:12,color:"rgba(240,236,228,.25)",marginBottom:16}}>{L("Select up to 2 that resonate","Выбери до 2 вариантов")}</p>
+                <p style={{fontSize:12,color:"rgba(240,236,228,.25)",marginBottom:16}}>{L("Select up to 2 that resonate","Выбери до 2 вариантов","Selecciona hasta 2 que resuenen")}</p>
                 <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:12}}>
                   {currentQ.options?.map((opt,i)=>(
                     <button key={i} className={`obtn ${sel.includes(i)?"sel":""}`} onClick={()=>toggleSel(i)} disabled={loading}>
@@ -679,7 +731,7 @@ export default function App() {
                     type="text"
                     value={freeText}
                     onChange={e=>setFreeText(e.target.value)}
-                    placeholder={L("Something else on your mind...","Что-то ещё на уме...")}
+                    placeholder={L("Something else on your mind...","Что-то ещё на уме...","¿Algo más en tu mente?")}
                     style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:11,padding:"12px 14px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",width:"100%",transition:"border-color .18s"}}
                     onFocus={e=>e.target.style.borderColor="rgba(212,163,89,.35)"}
                     onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.08)"}
@@ -695,31 +747,31 @@ export default function App() {
         {screen==="readiness"&&plan&&(
           <div key={animKey} style={{paddingTop:40}}>
             <div className="up d1" style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.18)",borderRadius:12,padding:"15px 17px",marginBottom:22}}>
-              <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:7}}>{L("Your insight","Твоё озарение")}</p>
+              <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:7}}>{L("Your insight","Твоё озарение","Tu revelación")}</p>
               <p style={{fontSize:15,lineHeight:1.7,fontStyle:"italic",color:"rgba(240,236,228,.86)"}}>{`"${plan.insight}"`}</p>
             </div>
             {!readiness?(
               <div className="up d2">
-                <h2 style={{fontFamily:"Fraunces,serif",fontSize:21,fontWeight:600,marginBottom:8}}>{L("How ready are you to act on this?","Насколько ты готов действовать?")}</h2>
-                <p style={{fontSize:13,color:"rgba(240,236,228,.38)",marginBottom:20,lineHeight:1.6}}>{L("Be honest — there's no wrong answer.","Отвечай честно — неправильных ответов нет.")}</p>
+                <h2 style={{fontFamily:"Fraunces,serif",fontSize:21,fontWeight:600,marginBottom:8}}>{L("How ready are you to act on this?","Насколько ты готов действовать?","¿Qué tan listo estás para actuar?")}</h2>
+                <p style={{fontSize:13,color:"rgba(240,236,228,.38)",marginBottom:20,lineHeight:1.6}}>{L("Be honest — there's no wrong answer.","Отвечай честно — неправильных ответов нет.","Sé honesto — no hay respuestas incorrectas.")}</p>
                 <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
                   {[1,2,3,4,5,6,7,8,9,10].map(n=><button key={n} className="ratingbtn" onClick={()=>handleReadiness(n)}>{n}</button>)}
                 </div>
                 <div style={{display:"flex",justifyContent:"space-between"}}>
-                  <span style={{fontSize:11,color:"rgba(240,236,228,.2)"}}>{L("Not ready","Не готов")}</span>
-                  <span style={{fontSize:11,color:"rgba(240,236,228,.2)"}}>{L("Completely ready","Полностью готов")}</span>
+                  <span style={{fontSize:11,color:"rgba(240,236,228,.2)"}}>{L("Not ready","Не готов","No listo")}</span>
+                  <span style={{fontSize:11,color:"rgba(240,236,228,.2)"}}>{L("Completely ready","Полностью готов","Completamente listo")}</span>
                 </div>
               </div>
             ):loading?(
-              <p style={{color:"rgba(240,236,228,.28)",fontSize:14}}>{L("Finding your first step","Ищу твой первый шаг")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p>
+              <p style={{color:"rgba(240,236,228,.28)",fontSize:14}}>{L("Finding your first step","Ищу твой первый шаг","Buscando tu primer paso")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p>
             ):(
               <div className="up">
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:20}}>
                   <span className="ratingbtn on" style={{cursor:"default"}}>{readiness}</span>
-                  <p style={{fontSize:13,color:"rgba(240,236,228,.45)"}}>{readiness>=7?L("You're ready. Let's make it real.","Ты готов. Давай сделаем это реальным."):readiness>=4?L("Something in you wants to move.","Что-то внутри хочет двигаться."):L("That's honest. One small thing is enough.","Это честно. Одного маленького шага достаточно.")}</p>
+                  <p style={{fontSize:13,color:"rgba(240,236,228,.45)"}}>{readiness>=7?L("You're ready. Let's make it real.","Ты готов. Давай сделаем это реальным.","Estás listo. Hagámoslo real."):readiness>=4?L("Something in you wants to move.","Что-то внутри хочет двигаться.","Algo en ti quiere moverse."):L("That's honest. One small thing is enough.","Это честно. Одного маленького шага достаточно.","Eso es honesto. Una pequeña cosa es suficiente.")}</p>
                 </div>
-                <h2 style={{fontFamily:"Fraunces,serif",fontSize:20,fontWeight:600,marginBottom:8}}>{L("What's the first step you're willing to take?","Какой первый шаг ты готов сделать?")}</h2>
-                <p style={{fontSize:12,color:"rgba(240,236,228,.25)",marginBottom:16}}>{L("Select up to 2","Выбери до 2")}</p>
+                <h2 style={{fontFamily:"Fraunces,serif",fontSize:20,fontWeight:600,marginBottom:8}}>{L("What's the first step you're willing to take?","Какой первый шаг ты готов сделать?","¿Cuál es el primer paso que estás dispuesto a dar?")}</h2>
+                <p style={{fontSize:12,color:"rgba(240,236,228,.25)",marginBottom:16}}>{L("Select up to 2","Выбери до 2","Selecciona hasta 2")}</p>
                 <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:22}}>
                   {stepOpts.map((opt,i)=>(
                     <button key={i} className={`obtn ${sel.includes(i)?"sel":""}`} onClick={()=>toggleSel(i)}>
@@ -727,7 +779,7 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                {sel.length>0&&<button className="pbtn up" onClick={()=>{setFirstStep(sel[0]);setSel([]);goTo("plan");}}>{L("See my full practice →","Смотреть мою практику →")}</button>}
+                {sel.length>0&&<button className="pbtn up" onClick={()=>{setFirstStep(sel[0]);setSel([]);goTo("plan");}}>{L("See my full practice →","Смотреть мою практику →","Ver mi práctica completa →")}</button>}
               </div>
             )}
           </div>
@@ -739,15 +791,15 @@ export default function App() {
             <div className="up d1" style={{textAlign:"center",marginBottom:22}}>
               <p style={{fontSize:11,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:10}}>{new Date().toLocaleDateString(lang==="RU"?"ru-RU":"en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
               <h2 style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,lineHeight:1.1,marginBottom:14}}>{plan.title}</h2>
-              <span className="pill" style={{fontSize:12}}>{L("Archetype","Архетип")}: <strong style={{color:"#f0ece4",fontWeight:500,marginLeft:4}}>{plan.archetype}</strong></span>
+              <span className="pill" style={{fontSize:12}}>{L("Archetype","Архетип","Arquetipo")}: <strong style={{color:"#f0ece4",fontWeight:500,marginLeft:4}}>{plan.archetype}</strong></span>
             </div>
             {firstStep!==null&&stepOpts[firstStep]&&(
               <div className="up d2" style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.2)",borderRadius:12,padding:"12px 16px",marginBottom:16}}>
-                <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:5,fontWeight:500}}>{L("Your committed first step","Твой первый шаг")}</p>
+                <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:5,fontWeight:500}}>{L("Your committed first step","Твой первый шаг","Tu primer paso comprometido")}</p>
                 <p style={{fontSize:14,color:"rgba(240,236,228,.82)",lineHeight:1.55}}>{stepOpts[firstStep]}</p>
               </div>
             )}
-            <p className="up d2" style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(240,236,228,.26)",marginBottom:11}}>{L("Your practices","Твои практики")}</p>
+            <p className="up d2" style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(240,236,228,.26)",marginBottom:11}}>{L("Your practices","Твои практики","Tus prácticas")}</p>
             {plan.practices?.map((p,i)=>(
               <div key={i} className={`pcard up`} style={{animationDelay:`${.04+i*.09}s`}}>
                 <div style={{display:"flex",justifyContent:"space-between",marginBottom:7}}>
@@ -757,23 +809,23 @@ export default function App() {
                 <p style={{fontSize:14,lineHeight:1.6,marginBottom:7}}>{p.what}</p>
                 <p style={{fontSize:13,color:"rgba(240,236,228,.36)",lineHeight:1.5,marginBottom:11}}>{p.why}</p>
                 <div style={{background:"rgba(212,163,89,.07)",borderRadius:8,padding:"9px 12px"}}>
-                  <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4,fontWeight:500}}>{L("Begin here","Начни здесь")}</p>
+                  <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4,fontWeight:500}}>{L("Begin here","Начни здесь","Empieza aquí")}</p>
                   <p style={{fontSize:13,color:"rgba(240,236,228,.7)",lineHeight:1.5}}>{p.first_step}</p>
                 </div>
               </div>
             ))}
             <div className="up d4" style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.15)",borderRadius:12,padding:"14px 16px",margin:"12px 0 10px"}}>
-              <p style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(160,140,220,.48)",marginBottom:7}}>{L("A question to sit with","Вопрос для размышления")}</p>
+              <p style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(160,140,220,.48)",marginBottom:7}}>{L("A question to sit with","Вопрос для размышления","Una pregunta para reflexionar")}</p>
               <p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.76)"}}>{`"${plan.challenge}"`}</p>
             </div>
             {plan.celebration&&<div style={{padding:"10px 0 4px 12px",borderLeft:"1.5px solid rgba(212,163,89,.18)",margin:"10px 0 20px"}}><p style={{fontSize:13,color:"rgba(240,236,228,.42)",lineHeight:1.65,fontStyle:"italic"}}>{plan.celebration}</p></div>}
             <div className="up d5">
-              <p style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(240,236,228,.26)",marginBottom:10}}>{L("Reflection","Рефлексия")}</p>
-              <p style={{fontSize:13,color:"rgba(240,236,228,.36)",lineHeight:1.6,marginBottom:11}}><em>{L("Prompts if helpful: What landed for you today? What are you carrying forward? What surprised you?","Подсказки: Что тебя затронуло? Что ты уносишь с собой? Что удивило?")}</em></p>
-              <textarea rows={4} placeholder={L("Write your reflection here...","Запиши свои мысли здесь...")} value={reflection} onChange={e=>setReflection(e.target.value)}/>
+              <p style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(240,236,228,.26)",marginBottom:10}}>{L("Reflection","Рефлексия","Reflexión")}</p>
+              <p style={{fontSize:13,color:"rgba(240,236,228,.36)",lineHeight:1.6,marginBottom:11}}><em>{L("Prompts if helpful: What landed for you today? What are you carrying forward? What surprised you?","Подсказки: Что тебя затронуло? Что ты уносишь с собой? Что удивило?","Si te ayuda: ¿Qué te llegó hoy? ¿Qué te llevas? ¿Qué te sorprendió?")}</em></p>
+              <textarea rows={4} placeholder={L("Write your reflection here...","Запиши свои мысли здесь...","Escribe tu reflexión aquí...")} value={reflection} onChange={e=>setReflection(e.target.value)}/>
               <div style={{display:"flex",gap:9,marginTop:12,flexWrap:"wrap"}}>
-                <button className="pbtn" onClick={doSave} disabled={reflSaved}>{reflSaved?L("Saved ✓","Сохранено ✓"):L("Save & complete →","Сохранить и завершить →")}</button>
-                {reflSaved&&<button className="gbtn" onClick={()=>{setTab("practices");goTo("practices");}}>{L("My Practices →","Мои практики →")}</button>}
+                <button className="pbtn" onClick={doSave} disabled={reflSaved}>{reflSaved?L("Saved ✓","Сохранено ✓","Guardado ✓"):L("Save & complete →","Сохранить и завершить →","Guardar y completar →")}</button>
+                {reflSaved&&<button className="gbtn" onClick={()=>{setTab("practices");goTo("practices");}}>{L("My Practices →","Мои практики →","Mis Prácticas →")}</button>}
               </div>
             </div>
           </div>
@@ -783,7 +835,7 @@ export default function App() {
         {screen==="practices"&&(
           <div key={animKey} style={{paddingTop:40}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600}}>{L("My Practices","Мои практики")}</h2>
+              <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600}}>{L("My Practices","Мои практики","Mis Prácticas")}</h2>
               <div style={{display:"flex",gap:5,alignItems:"center"}}>
                 <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>setCalMonth(new Date(calMonth.getFullYear(),calMonth.getMonth()-1))}>‹</button>
                 <span style={{fontSize:12,color:"rgba(240,236,228,.48)",minWidth:88,textAlign:"center"}}>{calMonth.toLocaleDateString(lang==="RU"?"ru-RU":"en-US",{month:"long",year:"numeric"})}</span>
@@ -814,7 +866,7 @@ export default function App() {
             {(()=>{
               const yr=calMonth.getFullYear(),mo=calMonth.getMonth();
               const list=Object.entries(sessions).filter(([d])=>{const dt=new Date(d+"T12:00");return dt.getFullYear()===yr&&dt.getMonth()===mo;}).sort((a,b)=>b[0].localeCompare(a[0]));
-              if(!list.length) return <p style={{fontSize:13,color:"rgba(240,236,228,.28)",textAlign:"center",padding:"20px 0"}}>{L("Complete your first practice to see it here.","Заверши первую практику, чтобы увидеть её здесь.")}</p>;
+              if(!list.length) return <p style={{fontSize:13,color:"rgba(240,236,228,.28)",textAlign:"center",padding:"20px 0"}}>{L("Complete your first practice to see it here.","Заверши первую практику, чтобы увидеть её здесь.","Completa tu primera práctica para verla aquí.")}</p>;
               return list.map(([d,s])=>(
                 <div key={d} className={`calentry ${expanded===d?"open":""}`} onClick={()=>setExpanded(expanded===d?null:d)}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -829,11 +881,28 @@ export default function App() {
                   </div>
                   {expanded===d&&(
                     <div style={{marginTop:13,borderTop:"0.5px solid rgba(255,255,255,.07)",paddingTop:13}}>
-                      {s.plan?.archetype&&<p style={{fontSize:12,color:"rgba(240,236,228,.35)",marginBottom:10}}>{L("Archetype","Архетип")}: <span style={{color:"rgba(240,236,228,.65)"}}>{s.plan.archetype}</span></p>}
-                      {s.plan?.insight&&<p style={{fontSize:13,color:"rgba(240,236,228,.6)",lineHeight:1.6,fontStyle:"italic",marginBottom:12}}>{`"${s.plan.insight}"`}</p>}
-                      {s.firstStep&&<div style={{background:"rgba(212,163,89,.07)",borderRadius:8,padding:"9px 12px",marginBottom:12}}><p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>{L("First step committed","Первый шаг")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.5}}>{s.firstStep}</p></div>}
-                      {s.plan?.practices?.length>0&&<div style={{marginBottom:12}}><p style={{fontSize:11,color:"rgba(240,236,228,.26)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:9}}>{L("Practices","Практики")}</p>{s.plan.practices.map((p,i)=><div key={i} style={{marginBottom:9,paddingLeft:10,borderLeft:"1.5px solid rgba(212,163,89,.18)"}}><p style={{fontSize:13,fontWeight:500,marginBottom:3}}>{p.name}</p><p style={{fontSize:13,color:"rgba(240,236,228,.5)",lineHeight:1.5}}>{p.what}</p></div>)}</div>}
-                      {s.reflection&&<div><p style={{fontSize:11,color:"rgba(240,236,228,.24)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:5}}>{L("Reflection","Рефлексия")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.6)",lineHeight:1.65}}>{s.reflection}</p></div>}
+                      {s.plan?.archetype&&<p style={{fontSize:12,color:"rgba(240,236,228,.35)",marginBottom:10}}>{L("Archetype","Архетип","Arquetipo")}: <span style={{color:"rgba(240,236,228,.65)"}}>{s.plan.archetype}</span></p>}
+                      {s.plan?.insight&&<div style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:10,padding:"12px 14px",marginBottom:14}}><p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.85)"}}>{`"${s.plan.insight}"`}</p></div>}
+                      {s.firstStep&&<div style={{background:"rgba(212,163,89,.07)",borderRadius:8,padding:"9px 12px",marginBottom:14}}><p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>{L("First step committed","Первый шаг","Primer paso")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.82)",lineHeight:1.5}}>{s.firstStep}</p></div>}
+                      {s.plan?.practices?.length>0&&(
+                        <div style={{marginBottom:14}}>
+                          <p style={{fontSize:11,color:"rgba(240,236,228,.26)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{L("Practices","Практики","Prácticas")}</p>
+                          {s.plan.practices.map((p,i)=>(
+                            <div key={i} style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"14px 16px",marginBottom:8,position:"relative",overflow:"hidden"}}>
+                              <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:"linear-gradient(90deg,#d4a359,transparent)"}}/>
+                              <p style={{fontSize:14,fontWeight:500,marginBottom:6}}>{p.name}</p>
+                              <p style={{fontSize:13,color:"rgba(240,236,228,.8)",lineHeight:1.6,marginBottom:6}}>{p.what}</p>
+                              <p style={{fontSize:12,color:"rgba(240,236,228,.4)",lineHeight:1.5,marginBottom:10}}>{p.why}</p>
+                              <div style={{background:"rgba(212,163,89,.07)",borderRadius:8,padding:"9px 12px"}}>
+                                <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4,fontWeight:500}}>{L("Begin here","Начни здесь","Empieza aquí")}</p>
+                                <p style={{fontSize:13,color:"rgba(240,236,228,.75)",lineHeight:1.5}}>{p.first_step}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {s.plan?.challenge&&<div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.15)",borderRadius:12,padding:"13px 15px",marginBottom:14}}><p style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(160,140,220,.5)",marginBottom:7}}>{L("A question to sit with","Вопрос для размышления","Una pregunta para reflexionar")}</p><p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.76)"}}>{`"${s.plan.challenge}"`}</p></div>}
+                      {s.reflection&&<div style={{marginBottom:4}}><p style={{fontSize:11,color:"rgba(240,236,228,.24)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:6}}>{L("Reflection","Рефлексия","Reflexión")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.65)",lineHeight:1.65}}>{s.reflection}</p></div>}
                     </div>
                   )}
                 </div>
@@ -845,29 +914,40 @@ export default function App() {
         {/* WHO AM I */}
         {screen==="whoami"&&(
           <div key={animKey} style={{paddingTop:40}}>
-            <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:22}}>{L("Who Am I","Кто Я")}</h2>
+            <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:22}}>{L("Who Am I","Кто Я","Quién Soy")}</h2>
             {/* Profile */}
             <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
               {!editingProfile?(
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div><p style={{fontSize:15,fontWeight:500,marginBottom:4}}>{profile?.name}</p>{profile?.dob&&<p style={{fontSize:13,color:"rgba(240,236,228,.38)"}}>{profile.dob}</p>}</div>
-                  <button className="tbtn" onClick={()=>{setEditName(profile?.name||"");setEditDob(profile?.dob||"");setEditingProfile(true);}}>{L("Edit","Изменить")}</button>
+                  <button className="tbtn" onClick={()=>{
+                    setEditName(profile?.name||"");
+                    const parts = profile?.dob ? profile.dob.split("-") : ["","",""];
+                    setEditDobYear(parts[0]||""); setEditDobMonth(parts[1]?String(parseInt(parts[1])):""); setEditDobDay(parts[2]?String(parseInt(parts[2])):"");
+                    setEditingProfile(true);
+                  }}>{L("Edit","Изменить","Editar")}</button>
                 </div>
               ):(
                 <div>
-                  <input type="text" value={editName} onChange={e=>setEditName(e.target.value)} style={{marginBottom:9}} placeholder={L("Your name","Твоё имя")}/>
-                  <input type="date" value={editDob} onChange={e=>setEditDob(e.target.value)} style={{marginBottom:13}}/>
-                  <div style={{display:"flex",gap:7}}><button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={saveEditedProfile}>{L("Save","Сохранить")}</button><button className="gbtn" style={{fontSize:13}} onClick={()=>setEditingProfile(false)}>{L("Cancel","Отмена")}</button></div>
+                  <input type="text" value={editName} onChange={e=>setEditName(e.target.value)} style={{marginBottom:9}} placeholder={L("Your name","Твоё имя","Tu nombre")}/>
+                  <div style={{marginBottom:13}}>
+                    <DobDropdown
+                      lang={lang} day={editDobDay} month={editDobMonth} year={editDobYear}
+                      onDay={setEditDobDay} onMonth={setEditDobMonth} onYear={setEditDobYear}
+                      onClear={()=>{setEditDobDay("");setEditDobMonth("");setEditDobYear("");}}
+                    />
+                  </div>
+                  <div style={{display:"flex",gap:7}}><button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={saveEditedProfile}>{L("Save","Сохранить","Guardar")}</button><button className="gbtn" style={{fontSize:13}} onClick={()=>setEditingProfile(false)}>{L("Cancel","Отмена","Cancelar")}</button></div>
                 </div>
               )}
             </div>
             {/* Values */}
             <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                <p style={{fontSize:14,fontWeight:500}}>{L("My values","Мои ценности")}</p>
+                <p style={{fontSize:14,fontWeight:500}}>{L("My values","Мои ценности","Mis valores")}</p>
                 <div style={{display:"flex",gap:7}}>
-                  <button className="gbtn" style={{fontSize:12}} onClick={()=>startValChallenge(profile?.values||[],"whoami")}>{L("Test my values","Проверить ценности")}</button>
-                  {!editingValues?<button className="tbtn" onClick={()=>{setEditVals([...(profile?.values||[])]);setEditingValues(true);}}>{L("Edit","Изменить")}</button>:<button className="tbtn" onClick={saveEditedValues}>{L("Save","Сохранить")}</button>}
+                  <button className="gbtn" style={{fontSize:12}} onClick={()=>startValChallenge(profile?.values||[],"whoami")}>{L("Test my values","Проверить ценности","Probar mis valores")}</button>
+                  {!editingValues?<button className="tbtn" onClick={()=>{setEditVals([...(profile?.values||[])]);setEditingValues(true);}}>{L("Edit","Изменить","Editar")}</button>:<button className="tbtn" onClick={saveEditedValues}>{L("Save","Сохранить","Guardar")}</button>}
                 </div>
               </div>
               {!editingValues?(
@@ -898,7 +978,7 @@ export default function App() {
             {/* Numerology */}
             {profile?.lifePath&&LIFE_PATH_MEANINGS[profile.lifePath]&&(
               <div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.15)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
-                <p style={{fontSize:11,color:"rgba(160,140,220,.5)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:7}}>{L("Numerology","Нумерология")} · {L(`Life Path ${profile.lifePath}`,`Жизненный путь ${profile.lifePath}`)}</p>
+                <p style={{fontSize:11,color:"rgba(160,140,220,.5)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:7}}>{L("Numerology","Нумерология","Numerología")} · {L(`Life Path ${profile.lifePath}`,`Жизненный путь ${profile.lifePath}`,`Camino de Vida ${profile.lifePath}`)}</p>
                 <p style={{fontFamily:"Fraunces,serif",fontSize:17,fontWeight:600,marginBottom:7}}>{LIFE_PATH_MEANINGS[profile.lifePath][lang==="RU"?"ru":lang==="ES"?"es":"en"].title}</p>
                 <p style={{fontSize:14,color:"rgba(240,236,228,.6)",lineHeight:1.65,marginBottom:8}}>{LIFE_PATH_MEANINGS[profile.lifePath][lang==="RU"?"ru":lang==="ES"?"es":"en"].desc}</p>
                 <p style={{fontSize:12,color:"rgba(240,236,228,.22)"}}>{L("Full numerology guidance coming soon.","Полное руководство по нумерологии скоро.")}</p>
