@@ -88,7 +88,7 @@ function DobDropdown({ lang, day, month, year, onDay, onMonth, onYear, onClear }
   const currentYear = new Date().getFullYear();
   const years = Array.from({length:100},(_,i)=>currentYear-i);
   const days = Array.from({length:31},(_,i)=>i+1);
-  const sel = {background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.1)",borderRadius:9,padding:"10px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",cursor:"pointer",flex:1,appearance:"none",WebkitAppearance:"none"};
+  const sel = {background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.1)",borderRadius:9,padding:"10px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",cursor:"pointer",flex:1};
   const hasAll = day&&month&&year;
   return (
     <div style={{width:"100%"}}>
