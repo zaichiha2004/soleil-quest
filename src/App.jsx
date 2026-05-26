@@ -1,4 +1,57 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+const WHEEL_CATEGORIES = {
+  EN: ["Career & Purpose","Health & Energy","Finances","Relationships","Personal Growth","Fun & Joy","Family","Purpose & Meaning"],
+  RU: ["Карьера и призвание","Здоровье и энергия","Финансы","Отношения","Личный рост","Радость и игра","Семья","Смысл и предназначение"],
+  ES: ["Carrera y propósito","Salud y energía","Finanzas","Relaciones","Crecimiento personal","Diversión y alegría","Familia","Sentido y significado"],
+};
+
+const AFFIRMATIONS = {
+  EN: [
+    "Your inner spark is always there — sometimes it just needs a moment of stillness to shine.",
+    "Every honest answer you give yourself is an act of courage.",
+    "You don't have to have it figured out. You just have to begin.",
+    "The version of you that you're becoming is worth the discomfort of growth.",
+    "Your values are your compass. Trust them.",
+    "Today is enough. You are enough.",
+    "The light you're looking for has been inside you all along.",
+    "Small steps taken consistently change everything.",
+    "You are allowed to want what you want.",
+    "Your story isn't over. It's just getting interesting.",
+  ],
+  RU: [
+    "Твоя искра всегда здесь — иногда ей нужен лишь момент тишины, чтобы засиять.",
+    "Каждый честный ответ себе — это акт смелости.",
+    "Не нужно всё понимать. Нужно просто начать.",
+    "Версия тебя, которой ты становишься, стоит дискомфорта роста.",
+    "Твои ценности — твой компас. Доверяй им.",
+    "Сегодняшнего дня достаточно. Тебя достаточно.",
+    "Свет, который ты ищешь, был внутри тебя всё это время.",
+    "Маленькие шаги, сделанные постоянно, меняют всё.",
+    "Тебе разрешено хотеть того, чего ты хочешь.",
+    "Твоя история не закончена. Она только становится интересной.",
+  ],
+  ES: [
+    "Tu chispa interior siempre está ahí — a veces solo necesita un momento de quietud para brillar.",
+    "Cada respuesta honesta que te das es un acto de valentía.",
+    "No tienes que tenerlo todo resuelto. Solo tienes que empezar.",
+    "La versión de ti que estás llegando a ser vale la incomodidad del crecimiento.",
+    "Tus valores son tu brújula. Confía en ellos.",
+    "Hoy es suficiente. Tú eres suficiente.",
+    "La luz que buscas ha estado dentro de ti todo el tiempo.",
+    "Los pequeños pasos dados consistentemente cambian todo.",
+    "Tienes permiso de querer lo que quieres.",
+    "Tu historia no ha terminado. Se está poniendo interesante.",
+  ],
+};
 
 const VALUES_LIST = ["Freedom","Honesty","Growth","Connection","Courage","Peace","Purpose","Creativity","Family","Adventure","Integrity","Joy","Wisdom","Service","Abundance","Authenticity","Health","Love","Solitude","Contribution"];
 const VALUES_RU = { Freedom:"Свобода",Honesty:"Честность",Growth:"Рост",Connection:"Связь",Courage:"Смелость",Peace:"Покой",Purpose:"Призвание",Creativity:"Творчество",Family:"Семья",Adventure:"Приключение",Integrity:"Цельность",Joy:"Радость",Wisdom:"Мудрость",Service:"Служение",Abundance:"Изобилие",Authenticity:"Подлинность",Health:"Здоровье",Love:"Любовь",Solitude:"Уединение",Contribution:"Вклад" };
@@ -55,12 +108,47 @@ const MONTHS_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Ago
 async function load(key){try{const r=await window.storage.get(key);return r?JSON.parse(r.value):null;}catch{return null;}}
 async function save(key,val){try{await window.storage.set(key,JSON.stringify(val));}catch{}}
 
+// ── SUPABASE DB HELPERS ──
+async function dbGetProfile(userId) {
+  const {data} = await supabase.from('profiles').select('*').eq('user_id',userId).single();
+  return data;
+}
+async function dbSaveProfile(userId, profile) {
+  const {data} = await supabase.from('profiles').upsert({user_id:userId,...profile,updated_at:new Date().toISOString()}).select().single();
+  return data;
+}
+async function dbGetSessions(userId) {
+  const {data} = await supabase.from('sessions').select('*').eq('user_id',userId);
+  if (!data) return {};
+  return data.reduce((acc,s)=>({...acc,[s.date]:s}),{});
+}
+async function dbSaveSession(userId, session) {
+  await supabase.from('sessions').upsert({user_id:userId,...session});
+}
+async function dbGetXp(userId) {
+  const {data} = await supabase.from('xp').select('total').eq('user_id',userId).single();
+  return data?.total || 0;
+}
+async function dbSaveXp(userId, total) {
+  await supabase.from('xp').upsert({user_id:userId,total,updated_at:new Date().toISOString()});
+}
+async function dbUpsertUser(googleUser) {
+  const {data} = await supabase.from('users').upsert({
+    google_id: googleUser.sub,
+    email: googleUser.email,
+    name: googleUser.name,
+    avatar_url: googleUser.picture,
+  },{onConflict:'google_id'}).select().single();
+  return data;
+}
+
+
 const SYSTEM = (lang) => `You are Alex Soleil — a warm, direct, deeply perceptive life coach. Mission: help people find their inner spark. Awaken awareness, not give advice. Three layers: surface → pattern → identity. Respond ENTIRELY in ${lang==="RU"?"Russian — warm, colloquial, like a trusted friend":lang==="ES"?"Spanish (Latin American) — warm, direct, conversational, like a trusted friend":"English"}. 
 
 QUESTION RULES: max 15 words, one idea, plain language, lands on first read.
 MULTI-SELECT: two answers complement → weave both. Contradict → name the tension.
 
-ARCHETYPE RULE: Always describe archetypes using fire and light imagery with evocative adjectives. Examples: "The Persistent Ember", "The Storming Wildfire", "The Quiet Lighthouse", "The Rising Flame", "The Restless Spark", "The Blazing Trail", "The Steady Torch", "The Flickering Lantern". Always follow this pattern: [adjective] + [fire/light object].
+ARCHETYPE RULE: Always describe archetypes using fire and light imagery with evocative adjectives. Always follow this pattern: "[adjective] [fire/light object] — [one evocative sentence describing this person's essence]". Examples: "The Persistent Ember — a quiet force that refuses to go out, even when the wind blows hardest.", "The Storming Wildfire — energy that transforms everything it touches, including itself.", "The Quiet Lighthouse — a steady presence that guides others without needing to move." Always include the dash and description — in every language.
 
 QUESTION BANK:
 OPENING: "What's really at stake for you right now?" / "What would it feel like to have this handled?" / "Where are you on clarity — 1 to 10?" / "What's keeping you up about this?"
@@ -74,13 +162,59 @@ Success: "Why is now the right time?" / "What is this teaching you?"
 
 OUTPUT — strict JSON only, no markdown:
 Questions: {"type":"question","question":"text","options":["a","b","c","d"],"depth_label":"label","phase":"opening|deepening|edge"}
-Plan: {"type":"plan","title":"2-3 words","insight":"one sentence pattern","practices":[{"name":"name","what":"what to do","why":"why for them","first_step":"smallest beginning"},{"name":"name","what":"what","why":"why","first_step":"begin"},{"name":"name","what":"what","why":"why","first_step":"begin"}],"challenge":"short reframe question","archetype":"[adjective] [fire/light object] — e.g. The Persistent Ember","celebration":"one warm genuine sentence"}`;
+Plan: {"type":"plan","title":"2-3 words","insight":"one sentence pattern","practices":[{"name":"name","what":"what to do","why":"why for them","first_step":"smallest beginning"},{"name":"name","what":"what","why":"why","first_step":"begin"},{"name":"name","what":"what","why":"why","first_step":"begin"}],"challenge":"short reframe question","archetype":"[adjective] [fire/light object] — [one evocative sentence about their essence]","celebration":"one warm genuine sentence"}`;
 
 const VALUES_CHALLENGE_SYSTEM = (lang, values) => `You are Alex Soleil. Generate a values challenge for someone whose selected values are: ${values.join(", ")}. Create 5 scenario-based questions that test which values are truly core under pressure. Each scenario should create a genuine tension between two or more of their values. Respond in ${lang==="RU"?"Russian":lang==="ES"?"Latin American Spanish":"English"}. Output strict JSON only: {"scenarios":[{"situation":"brief scenario (1-2 sentences)","options":[{"text":"choice text","reveals":["Value1"]},{"text":"choice text","reveals":["Value2"]},{"text":"choice text","reveals":["Value1","Value2"]}]}]}. Make scenarios feel real and specific to these exact values.`;
 
 const VALUES_RESULT_SYSTEM = (lang) => `You are Alex Soleil. A user completed a values challenge. Analyze their answers and produce a reflection. Respond ENTIRELY in ${lang==="RU"?"warm colloquial Russian":lang==="ES"?"warm colloquial Latin American Spanish":"English"}. Output strict JSON only: {"revealed":["top 2-3 values that showed up most strongly in their choices"],"reflection":"2-3 sentences: what their choices reveal about their true values under pressure vs on paper. Warm, direct, not clinical.","alignment":"one sentence on whether their chosen values and revealed values align or diverge — and what that means"}`;
 
-function DobDropdown({ lang, day, month, year, onDay, onMonth, onYear, onClear }) {
+function WheelChart({ ratings, lang }) {
+  const cats = WHEEL_CATEGORIES[lang] || WHEEL_CATEGORIES.EN;
+  const n = cats.length;
+  const cx = 120, cy = 120, r = 90;
+  const points = (scale) => cats.map((_,i) => {
+    const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+    return [cx + scale * r * Math.cos(angle), cy + scale * r * Math.sin(angle)];
+  });
+  const grid = [0.2,0.4,0.6,0.8,1.0];
+  const toPath = (pts) => pts.map((p,i)=>`${i===0?"M":"L"}${p[0]},${p[1]}`).join(" ")+"Z";
+  const dataPoints = cats.map((_,i)=>{
+    const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
+    const scale = (ratings[i]||0) / 10;
+    return [cx + scale * r * Math.cos(angle), cy + scale * r * Math.sin(angle)];
+  });
+  const labelPoints = points(1.22);
+  return (
+    <svg viewBox="0 0 240 240" style={{width:"100%",maxWidth:220,display:"block",margin:"0 auto"}}>
+      {/* Grid rings */}
+      {grid.map((s,gi) => (
+        <polygon key={gi} points={points(s).map(p=>p.join(",")).join(" ")}
+          fill="none" stroke="rgba(255,255,255,.08)" strokeWidth={gi===4?1:0.5}/>
+      ))}
+      {/* Spokes */}
+      {cats.map((_,i) => {
+        const [x,y] = points(1)[i];
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="rgba(255,255,255,.08)" strokeWidth={0.5}/>;
+      })}
+      {/* Data area */}
+      <path d={toPath(dataPoints)} fill="rgba(212,163,89,.2)" stroke="#d4a359" strokeWidth={1.5}/>
+      {/* Data points */}
+      {dataPoints.map((p,i) => ratings[i]>0 && (
+        <circle key={i} cx={p[0]} cy={p[1]} r={3} fill="#d4a359"/>
+      ))}
+      {/* Labels */}
+      {cats.map((cat,i) => {
+        const [x,y] = labelPoints[i];
+        const anchor = x < cx-5 ? "end" : x > cx+5 ? "start" : "middle";
+        const shortLabel = cat.split(" ")[0];
+        return <text key={i} x={x} y={y} textAnchor={anchor} dominantBaseline="middle"
+          style={{fontSize:"7px",fill:"rgba(240,236,228,.5)",fontFamily:"DM Sans,sans-serif"}}>{shortLabel}</text>;
+      })}
+    </svg>
+  );
+}
+
+({ lang, day, month, year, onDay, onMonth, onYear, onClear }) {
   const months = lang==="RU" ? MONTHS_RU : lang==="ES" ? MONTHS_ES : MONTHS_EN;
   const dayLabel = lang==="RU"?"День":lang==="ES"?"Día":"Day";
   const monthLabel = lang==="RU"?"Месяц":lang==="ES"?"Mes":"Month";
@@ -116,6 +250,13 @@ export default function App() {
   const [screen, setScreen]     = useState("boot");
   const [profile, setProfile]   = useState(null);
   const [tab, setTab]           = useState("home");
+  const [authUser, setAuthUser] = useState(null); // Google auth user
+  const [userId, setUserId]     = useState(null); // Supabase user ID
+  const [wheelRatings, setWheelRatings] = useState({}); // Wheel of Life
+  const [affirmation, setAffirmation] = useState(""); // Daily affirmation
+  const [yesterdaySession, setYesterdaySession] = useState(null); // Yesterday's session
+  const [yesterdayAnswer, setYesterdayAnswer] = useState(null); // How yesterday went
+  const [showYesterday, setShowYesterday] = useState(false);
   const [animKey, setAnimKey]   = useState(0);
 
   // onboarding
@@ -192,29 +333,117 @@ export default function App() {
   const firstName = profile?.name?.split(" ")[0]||"";
   const timeOfDay = () => { const h=new Date().getHours(); return lang==="RU"?(h<12?"утро":h<17?"день":"вечер"):lang==="ES"?(h<12?"mañana":h<17?"tarde":"noche"):(h<12?"morning":h<17?"afternoon":"evening"); };
 
+  // Load Google Identity Services script
   useEffect(()=>{
-    (async()=>{
-      const p=await load("profile"), s=await load("sessions")||{};
-      const savedXp=await load("xp")||0;
-      setSessions(s); setXp(savedXp);
-      if(p){setProfile(p);setLang(p.lang||"EN");goTo("checkin");}
-      else goTo("onboarding");
-    })();
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => initGoogleAuth();
+    document.head.appendChild(script);
   },[]);
+
+  const initGoogleAuth = useCallback(() => {
+    if (!window.google || !GOOGLE_CLIENT_ID) {
+      // Fallback to browser storage if Google not available
+      bootFromStorage();
+      return;
+    }
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: handleGoogleCallback,
+      auto_select: true,
+    });
+    // Try auto-select (returns immediately if no saved session)
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        bootFromStorage();
+      }
+    });
+  }, []);
+
+  const handleGoogleCallback = async (response) => {
+    try {
+      // Decode JWT to get user info
+      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      const dbUser = await dbUpsertUser(payload);
+      if (!dbUser) { bootFromStorage(); return; }
+      setAuthUser(payload);
+      setUserId(dbUser.id);
+      await bootFromSupabase(dbUser.id, payload.name);
+    } catch(e) {
+      bootFromStorage();
+    }
+  };
+
+  const bootFromSupabase = async (uid, googleName) => {
+    const [dbProfile, dbSess, dbXpVal] = await Promise.all([
+      dbGetProfile(uid),
+      dbGetSessions(uid),
+      dbGetXp(uid),
+    ]);
+    setSessions(dbSess||{});
+    setXp(dbXpVal||0);
+    // Check yesterday's session
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    const yDate = yesterday.toISOString().split('T')[0];
+    if (dbSess && dbSess[yDate]) setYesterdaySession(dbSess[yDate]);
+    // Pick daily affirmation
+    const dayIdx = new Date().getDate() % 10;
+    setAffirmation(AFFIRMATIONS[lang]?.[dayIdx] || AFFIRMATIONS.EN[0]);
+    if (dbProfile) {
+      const p = { name: googleName||dbProfile.name||'Friend', dob: dbProfile.dob, lifePath: dbProfile.life_path, values: dbProfile.values||[], valueDepth: dbProfile.value_depth||{} };
+      setProfile(p);
+      setLang(dbProfile.lang||'EN');
+      setWheelRatings(dbProfile.wheel_of_life||{});
+      if (dbSess && dbSess[new Date().toISOString().split('T')[0]] && dbProfile.values?.length) {
+        // Has session today and profile — show yesterday check first
+        if (dbSess[new Date(Date.now()-86400000).toISOString().split('T')[0]]) {
+          setShowYesterday(true);
+        }
+      }
+      goTo("checkin");
+    } else {
+      // New user — set name from Google
+      setProfile({ name: googleName||'Friend', values: [], valueDepth: {} });
+      goTo("onboarding");
+    }
+  };
+
+  const bootFromStorage = async () => {
+    const p=await load("profile"), s=await load("sessions")||{};
+    const savedXp=await load("xp")||0;
+    setSessions(s); setXp(savedXp);
+    const dayIdx = new Date().getDate() % 10;
+    setAffirmation(AFFIRMATIONS[lang]?.[dayIdx] || AFFIRMATIONS.EN[0]);
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
+    const yDate = yesterday.toISOString().split('T')[0];
+    if (s && s[yDate]) setYesterdaySession(s[yDate]);
+    if(p){setProfile(p);setLang(p.lang||"EN");goTo("checkin");}
+    else goTo("onboarding");
+  };
+
+  useEffect(()=>{
+    // Fallback: if script loads but prompt never fires after 3s, boot from storage
+    const timer = setTimeout(()=>{ if(screen==="boot") bootFromStorage(); }, 3000);
+    return ()=>clearTimeout(timer);
+  },[screen]);
 
   const addXp = async (pts) => {
     setXp(prev => {
       const next = prev + pts;
-      save("xp", next);
+      if (userId) dbSaveXp(userId, next);
+      else save("xp", next);
       const milestones = [1000,2000,5000];
       const crossed = milestones.find(m => prev < m && next >= m);
       if (crossed) {
         const msgs = {
-          1000: { en: "🔥 1,000 sparks — your flame is lit.", ru: "🔥 1 000 искр — твоё пламя зажглось." },
-          2000: { en: "✨ 2,000 sparks — you're burning brighter.", ru: "✨ 2 000 искр — ты светишь ярче." },
-          5000: { en: "🌟 5,000 sparks — you are the light.", ru: "🌟 5 000 искр — ты и есть свет." },
+          1000: { en: "🔥 1,000 sparks — your flame is lit.", ru: "🔥 1 000 искр — твоё пламя зажглось.", es: "🔥 1,000 chispas — tu llama está encendida." },
+          2000: { en: "✨ 2,000 sparks — you're burning brighter.", ru: "✨ 2 000 искр — ты светишь ярче.", es: "✨ 2,000 chispas — brillas con más fuerza." },
+          5000: { en: "🌟 5,000 sparks — you are the light.", ru: "🌟 5 000 искр — ты и есть свет.", es: "🌟 5,000 chispas — tú eres la luz." },
         };
-        setXpMilestone(msgs[crossed][lang==="RU"?"ru":"en"]);
+        const key = lang==="RU"?"ru":lang==="ES"?"es":"en";
+        setXpMilestone(msgs[crossed][key]);
         setTimeout(()=>setXpMilestone(null), 4000);
       }
       return next;
@@ -280,7 +509,13 @@ export default function App() {
     const dob = buildDob(dobYear, dobMonth, dobDay);
     const lp=dob?calcLifePath(dob):null;
     const p={name:nameInput.trim()||"Friend",dob:dob||null,lifePath:lp,values:selValues,lang,createdAt:new Date().toISOString()};
-    setProfile(p); await save("profile",p); setShowValChallenge(false); goTo("checkin");
+    setProfile(p);
+    if (userId) {
+      await dbSaveProfile(userId, { dob:dob||null, life_path:lp, values:selValues, value_depth:{}, lang });
+    } else {
+      await save("profile",p);
+    }
+    setShowValChallenge(false); goTo("checkin");
   };
 
   // ── CHECKIN ──
@@ -365,18 +600,41 @@ export default function App() {
   const doSave=async()=>{
     const entry={date:today,challenge:lang==="RU"?challenge?.labelRU:lang==="ES"?challenge?.labelES:challenge?.labelEN,challengeEmoji:challenge?.emoji,plan,reflection,readiness,firstStep:firstStep!==null?stepOpts[firstStep]:null,savedAt:new Date().toISOString()};
     const updated={...sessions,[today]:entry};
-    setSessions(updated);await save("sessions",updated);
+    setSessions(updated);
+    if (userId) {
+      await dbSaveSession(userId, entry);
+    } else {
+      await save("sessions",updated);
+    }
     addXp(300);
     setReflSaved(true);
   };
 
   // Who Am I saves
-  const saveEditedValues=async()=>{const u={...profile,values:editVals};setProfile(u);await save("profile",u);setEditingValues(false);};
+  const saveEditedValues=async()=>{
+    const u={...profile,values:editVals};
+    setProfile(u);
+    if (userId) await dbSaveProfile(userId, { values:editVals });
+    else await save("profile",u);
+    setEditingValues(false);
+  };
   const saveEditedProfile=async()=>{
     const dob = buildDob(editDobYear,editDobMonth,editDobDay) || profile.dob;
     const lp=dob?calcLifePath(dob):profile.lifePath;
     const u={...profile,name:editName||profile.name,dob,lifePath:lp};
-    setProfile(u);await save("profile",u);setEditingProfile(false);
+    setProfile(u);
+    if (userId) await dbSaveProfile(userId, { dob, life_path:lp, name:editName||profile.name });
+    else await save("profile",u);
+    setEditingProfile(false);
+  };
+
+  const saveWheelRatings = async (ratings) => {
+    setWheelRatings(ratings);
+    if (userId) await dbSaveProfile(userId, { wheel_of_life: ratings });
+    else {
+      const u={...profile, wheelOfLife:ratings};
+      setProfile(u); await save("profile",u);
+    }
   };
 
   const fbQ=(d)=>[
@@ -648,6 +906,55 @@ export default function App() {
         {/* CHECKIN */}
         {screen==="checkin"&&(
           <div key={animKey} style={{paddingTop:44}}>
+            {/* Google sign-in prompt if not logged in */}
+            {!authUser && (
+              <div className="up d1" style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"12px 16px",marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <p style={{fontSize:13,color:"rgba(240,236,228,.5)",lineHeight:1.5}}>{L("Sign in to save your progress across devices","Войди чтобы сохранить прогресс на всех устройствах","Inicia sesión para guardar tu progreso en todos los dispositivos")}</p>
+                <button onClick={()=>{if(window.google) window.google.accounts.id.prompt();}} style={{background:"white",color:"#333",border:"none",borderRadius:8,padding:"8px 14px",fontSize:12,fontWeight:500,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",marginLeft:12,flexShrink:0}}>
+                  🔵 {L("Sign in","Войти","Iniciar sesión")}
+                </button>
+              </div>
+            )}
+
+            {/* Daily affirmation */}
+            {affirmation && (
+              <div className="up d1" style={{background:"rgba(212,163,89,.06)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:12,padding:"12px 16px",marginBottom:20}}>
+                <p style={{fontSize:12,color:"#d4a359",textTransform:"uppercase",letterSpacing:".06em",marginBottom:5}}>{L("Your spark for today","Твоя искра на сегодня","Tu chispa de hoy")}</p>
+                <p style={{fontSize:14,lineHeight:1.65,color:"rgba(240,236,228,.78)",fontStyle:"italic"}}>{affirmation}</p>
+              </div>
+            )}
+
+            {/* Yesterday follow-up */}
+            {yesterdaySession && !yesterdayAnswer && (
+              <div className="up d2" style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.18)",borderRadius:12,padding:"14px 16px",marginBottom:20}}>
+                <p style={{fontSize:12,color:"rgba(160,140,220,.7)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:8}}>{L("Yesterday you worked on","Вчера ты работал над","Ayer trabajaste en")} {yesterdaySession.challengeEmoji} {yesterdaySession.challenge}</p>
+                {yesterdaySession.firstStep && <p style={{fontSize:13,color:"rgba(240,236,228,.65)",marginBottom:12,lineHeight:1.55}}>{L("You committed to:","Ты взял обязательство:","Te comprometiste a:")} <em>"{yesterdaySession.firstStep}"</em></p>}
+                <p style={{fontSize:13,fontWeight:500,color:"rgba(240,236,228,.85)",marginBottom:10}}>{L("How did it go?","Как это прошло?","¿Cómo te fue?")}</p>
+                <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                  {[
+                    L("I did it — felt good","Сделал — было здорово","Lo hice — se sintió bien"),
+                    L("I tried but struggled","Пробовал, но было трудно","Lo intenté pero fue difícil"),
+                    L("I didn't get to it","Не успел","No llegué a hacerlo"),
+                    L("It led me somewhere unexpected","Это привело меня куда-то неожиданному","Me llevó a algo inesperado"),
+                  ].map((opt,i)=>(
+                    <button key={i} className="obtn" onClick={()=>setYesterdayAnswer(i)} style={{fontSize:13}}>
+                      <span style={{color:"rgba(240,236,228,.25)",marginRight:8,fontSize:12}}>○</span>{opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {yesterdayAnswer !== null && yesterdaySession && (
+              <div className="up" style={{background:"rgba(212,163,89,.06)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:12,padding:"12px 16px",marginBottom:20}}>
+                <p style={{fontSize:13,color:"rgba(240,236,228,.65)",fontStyle:"italic"}}>
+                  {yesterdayAnswer===0 && L("That's the spark at work. 🔥","Это и есть искра в действии. 🔥","Eso es la chispa en acción. 🔥")}
+                  {yesterdayAnswer===1 && L("Trying is the practice. That counts. ✨","Попытка — это и есть практика. Это считается. ✨","Intentar es la práctica. Eso cuenta. ✨")}
+                  {yesterdayAnswer===2 && L("Today is a new beginning. 🌅","Сегодня — новое начало. 🌅","Hoy es un nuevo comienzo. 🌅")}
+                  {yesterdayAnswer===3 && L("The unexpected path is still a path. 💡","Неожиданный путь — всё равно путь. 💡","El camino inesperado sigue siendo un camino. 💡")}
+                </p>
+              </div>
+            )}
+
             <p className="up d1" style={{fontSize:13,color:"#d4a359",marginBottom:8}}>{L(`Good ${timeOfDay()}, ${firstName}.`,`Добр${timeOfDay()==="утро"?"ое":timeOfDay()==="день"?"ый":"ый"} ${timeOfDay()}, ${firstName}.`,`Buenas ${timeOfDay()}, ${firstName}.`)}</p>
             <h2 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:26,fontWeight:600,lineHeight:1.2,marginBottom:12}}>{L("How are you feeling right now?","Как ты себя чувствуешь прямо сейчас?","¿Cómo te sientes ahora mismo?")}</h2>
             <p className="up d3" style={{fontSize:14,color:"rgba(240,236,228,.42)",lineHeight:1.65,marginBottom:22}}>{L("Take a breath. Notice what's on your mind and in your heart. Is anything bothering you, sitting heavy, or asking for attention? That feeling is your guide.","Сделай вдох. Замечай, что у тебя на уме и в сердце. Есть что-то, что давит или просит внимания? Это чувство — твой компас.","Respira. Nota lo que tienes en la mente y en el corazón. ¿Hay algo que te pese o pida atención? Ese sentimiento es tu guía.")}</p>
@@ -791,7 +1098,17 @@ export default function App() {
             <div className="up d1" style={{textAlign:"center",marginBottom:22}}>
               <p style={{fontSize:11,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:10}}>{new Date().toLocaleDateString(lang==="RU"?"ru-RU":"en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
               <h2 style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,lineHeight:1.1,marginBottom:14}}>{plan.title}</h2>
-              <span className="pill" style={{fontSize:12}}>{L("Archetype","Архетип","Arquetipo")}: <strong style={{color:"#f0ece4",fontWeight:500,marginLeft:4}}>{plan.archetype}</strong></span>
+              {(() => {
+                const parts = plan.archetype?.split(" — ");
+                const arcName = parts?.[0] || plan.archetype;
+                const arcDesc = parts?.[1] || null;
+                return (
+                  <div style={{textAlign:"center"}}>
+                    <span className="pill" style={{fontSize:12}}>{L("Archetype","Архетип","Arquetipo")}: <strong style={{color:"#f0ece4",fontWeight:500,marginLeft:4}}>{arcName}</strong></span>
+                    {arcDesc && <p style={{fontSize:13,color:"rgba(240,236,228,.45)",lineHeight:1.6,marginTop:8,fontStyle:"italic"}}>{arcDesc}</p>}
+                  </div>
+                );
+              })()}
             </div>
             {firstStep!==null&&stepOpts[firstStep]&&(
               <div className="up d2" style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.2)",borderRadius:12,padding:"12px 16px",marginBottom:16}}>
@@ -881,7 +1198,12 @@ export default function App() {
                   </div>
                   {expanded===d&&(
                     <div style={{marginTop:13,borderTop:"0.5px solid rgba(255,255,255,.07)",paddingTop:13}}>
-                      {s.plan?.archetype&&<p style={{fontSize:12,color:"rgba(240,236,228,.35)",marginBottom:10}}>{L("Archetype","Архетип","Arquetipo")}: <span style={{color:"rgba(240,236,228,.65)"}}>{s.plan.archetype}</span></p>}
+                      {s.plan?.archetype&&(() => {
+                        const parts = s.plan.archetype.split(" — ");
+                        const arcName = parts[0];
+                        const arcDesc = parts[1] || null;
+                        return <div style={{marginBottom:10}}><p style={{fontSize:12,color:"rgba(240,236,228,.35)"}}>{L("Archetype","Архетип","Arquetipo")}: <span style={{color:"rgba(240,236,228,.65)"}}>{arcName}</span></p>{arcDesc&&<p style={{fontSize:12,color:"rgba(240,236,228,.4)",fontStyle:"italic",marginTop:3,lineHeight:1.5}}>{arcDesc}</p>}</div>;
+                      })()}
                       {s.plan?.insight&&<div style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:10,padding:"12px 14px",marginBottom:14}}><p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.85)"}}>{`"${s.plan.insight}"`}</p></div>}
                       {s.firstStep&&<div style={{background:"rgba(212,163,89,.07)",borderRadius:8,padding:"9px 12px",marginBottom:14}}><p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>{L("First step committed","Первый шаг","Primer paso")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.82)",lineHeight:1.5}}>{s.firstStep}</p></div>}
                       {s.plan?.practices?.length>0&&(
@@ -975,13 +1297,39 @@ export default function App() {
                 </div>
               )}
             </div>
+            {/* Wheel of Life */}
+            <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
+              <p style={{fontSize:14,fontWeight:500,marginBottom:4}}>{L("Wheel of Life","Колесо жизни","Rueda de la Vida")}</p>
+              <p style={{fontSize:12,color:"rgba(240,236,228,.4)",lineHeight:1.55,marginBottom:16}}>{L("Rate each life area 1–10. This helps guide your coaching focus.","Оцени каждую сферу жизни от 1 до 10. Это помогает направить коучинг.","Evalúa cada área de vida del 1 al 10. Esto guía tu enfoque de coaching.")}</p>
+              <WheelChart ratings={wheelRatings} lang={lang} />
+              <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:10}}>
+                {WHEEL_CATEGORIES[lang]?.map((cat,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:12}}>
+                    <p style={{fontSize:13,color:"rgba(240,236,228,.7)",flex:1,minWidth:0}}>{cat}</p>
+                    <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                      {[1,2,3,4,5,6,7,8,9,10].map(n=>(
+                        <button key={n} onClick={()=>{const r={...wheelRatings,[i]:n};saveWheelRatings(r);}}
+                          style={{width:22,height:22,borderRadius:4,border:"0.5px solid",cursor:"pointer",fontSize:10,fontFamily:"'DM Sans',sans-serif",
+                            background:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.04)",
+                            borderColor:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.1)",
+                            color:wheelRatings[i]>=n?"#0c0c10":"rgba(240,236,228,.4)"}}>
+                          {n}
+                        </button>
+                      ))}
+                      <span style={{fontSize:12,color:"#d4a359",minWidth:16,textAlign:"right"}}>{wheelRatings[i]||"—"}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* Numerology */}
             {profile?.lifePath&&LIFE_PATH_MEANINGS[profile.lifePath]&&(
               <div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.15)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
                 <p style={{fontSize:11,color:"rgba(160,140,220,.5)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:7}}>{L("Numerology","Нумерология","Numerología")} · {L(`Life Path ${profile.lifePath}`,`Жизненный путь ${profile.lifePath}`,`Camino de Vida ${profile.lifePath}`)}</p>
                 <p style={{fontFamily:"Fraunces,serif",fontSize:17,fontWeight:600,marginBottom:7}}>{LIFE_PATH_MEANINGS[profile.lifePath][lang==="RU"?"ru":lang==="ES"?"es":"en"].title}</p>
                 <p style={{fontSize:14,color:"rgba(240,236,228,.6)",lineHeight:1.65,marginBottom:8}}>{LIFE_PATH_MEANINGS[profile.lifePath][lang==="RU"?"ru":lang==="ES"?"es":"en"].desc}</p>
-                <p style={{fontSize:12,color:"rgba(240,236,228,.22)"}}>{L("Full numerology guidance coming soon.","Полное руководство по нумерологии скоро.")}</p>
+                <p style={{fontSize:12,color:"rgba(240,236,228,.22)"}}>{L("Full numerology guidance coming soon.","Полное руководство по нумерологии скоро.","Guía completa de numerología próximamente.")}</p>
               </div>
             )}
           </div>
