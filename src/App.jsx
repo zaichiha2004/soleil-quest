@@ -213,7 +213,7 @@ const VALUES_RESULT_SYSTEM = (lang) => `You are Alex Soleil. A user completed a 
 function WheelChart({ ratings, lang, size=220 }) {
   const cats = WHEEL_CATEGORIES[lang] || WHEEL_CATEGORIES.EN;
   const n = cats.length;
-  const cx = 150, cy = 150, r = 90;
+  const cx = 150, cy = 150, r = 82;
   const points = (scale) => cats.map((_,i) => {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
     return [cx + scale * r * Math.cos(angle), cy + scale * r * Math.sin(angle)];
@@ -293,7 +293,8 @@ export default function App() {
   const [screen, setScreen]     = useState("boot");
   const [profile, setProfile]   = useState(null);
   const [tab, setTab]           = useState("home");
-  const [authUser, setAuthUser] = useState(null); // Google auth user
+  const [authUser, setAuthUser] = useState(null);
+  const [userAvatar, setUserAvatar] = useState(localStorage.getItem('sq_user_avatar')||'');
   const [userId, setUserId]     = useState(null); // Supabase user ID
   const [wheelRatings, setWheelRatings] = useState({});
   const [wheelTooltip, setWheelTooltip] = useState(null); // Wheel of Life
@@ -368,7 +369,7 @@ export default function App() {
   const [vcContext, setVcContext] = useState("onboarding"); // "onboarding" | "whoami"
 
   const goTo = (s) => { setScreen(s); setAnimKey(k=>k+1); };
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("en-CA");
 
   const checkinOpts = lang==="RU" ? CHECKIN_OPTS_RU : lang==="ES" ? CHECKIN_OPTS_ES : CHECKIN_OPTS_EN;
   const valLabel = (v) => lang==="RU" ? (VALUES_RU[v]||v) : lang==="ES" ? (VALUES_ES[v]||v) : v;
@@ -403,7 +404,7 @@ export default function App() {
     const storedAvatar = localStorage.getItem('sq_user_avatar');
     if (storedUserId) {
       setUserId(storedUserId);
-      if (storedAvatar) setAuthUser({ picture: storedAvatar, name: storedName });
+      if (storedAvatar) { setUserAvatar(storedAvatar); setAuthUser({ picture: storedAvatar, name: storedName }); }
       bootFromSupabase(storedUserId, storedName||'Friend');
     } else {
       goTo("login");
@@ -418,6 +419,7 @@ export default function App() {
       localStorage.setItem('sq_user_id', dbUser.id);
       localStorage.setItem('sq_user_name', payload.name);
       localStorage.setItem('sq_user_avatar', payload.picture||'');
+      setUserAvatar(payload.picture||'');
       setAuthUser(payload);
       setUserId(dbUser.id);
       await bootFromSupabase(dbUser.id, payload.name);
@@ -432,11 +434,33 @@ export default function App() {
       dbGetSessions(uid),
       dbGetXp(uid),
     ]);
+
+    // One-time migration: push any localStorage sessions to Supabase
+    const migrated = localStorage.getItem('sq_migrated');
+    if (!migrated) {
+      try {
+        const localSessions = await load("sessions") || {};
+        const localXp = await load("xp") || 0;
+        const dbSessionDates = Object.keys(dbSess||{});
+        const toMigrate = Object.entries(localSessions).filter(([date]) => !dbSessionDates.includes(date));
+        if (toMigrate.length > 0) {
+          await Promise.all(toMigrate.map(([,session]) => dbSaveSession(uid, session)));
+          // Merge migrated sessions into dbSess
+          toMigrate.forEach(([date, session]) => { if(dbSess) dbSess[date] = session; });
+        }
+        // Migrate XP if higher locally
+        if (localXp > (dbXpVal||0)) await dbSaveXp(uid, localXp);
+        localStorage.setItem('sq_migrated', '1');
+      } catch(e) {
+        // Migration failed silently — will retry next boot
+      }
+    }
+
     setSessions(dbSess||{});
     setXp(dbXpVal||0);
     // Check yesterday's session
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
-    const yDate = yesterday.toISOString().split('T')[0];
+    const yDate = yesterday.toLocaleDateString('en-CA');
     if (dbSess && dbSess[yDate]) setYesterdaySession(dbSess[yDate]);
     // Pick daily affirmation
     const dayIdx = new Date().getDate() % 10;
@@ -446,9 +470,9 @@ export default function App() {
       setProfile(p);
       setLang(dbProfile.lang||'EN');
       setWheelRatings(dbProfile.wheel_of_life||{});
-      if (dbSess && dbSess[new Date().toISOString().split('T')[0]] && dbProfile.values?.length) {
+      if (dbSess && dbSess[new Date().toLocaleDateString('en-CA')] && dbProfile.values?.length) {
         // Has session today and profile — show yesterday check first
-        if (dbSess[new Date(Date.now()-86400000).toISOString().split('T')[0]]) {
+        if (dbSess[new Date(Date.now()-86400000).toLocaleDateString('en-CA')]) {
           setShowYesterday(true);
         }
       }
@@ -467,7 +491,7 @@ export default function App() {
     const dayIdx = new Date().getDate() % 10;
     setAffirmation(AFFIRMATIONS[lang]?.[dayIdx] || AFFIRMATIONS.EN[0]);
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
-    const yDate = yesterday.toISOString().split('T')[0];
+    const yDate = yesterday.toLocaleDateString('en-CA');
     if (s && s[yDate]) setYesterdaySession(s[yDate]);
     if(p){setProfile(p);setLang(p.lang||"EN");goTo("checkin");}
     else goTo("onboarding");
@@ -873,7 +897,7 @@ export default function App() {
                 </div>
               )}
             </div>
-            {authUser?.picture && <img src={authUser.picture} alt="" style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(212,163,89,.3)"}}/>}
+            {userAvatar && <img src={userAvatar} alt="" style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(212,163,89,.3)"}} onError={e=>e.target.style.display='none'}/>}
           </div>
         </div>
       )}
