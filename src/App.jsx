@@ -214,7 +214,7 @@ function WheelChart({ ratings, lang }) {
   );
 }
 
-({ lang, day, month, year, onDay, onMonth, onYear, onClear }) {
+function DobDropdown({ lang, day, month, year, onDay, onMonth, onYear, onClear }) {
   const months = lang==="RU" ? MONTHS_RU : lang==="ES" ? MONTHS_ES : MONTHS_EN;
   const dayLabel = lang==="RU"?"День":lang==="ES"?"Día":"Day";
   const monthLabel = lang==="RU"?"Месяц":lang==="ES"?"Mes":"Month";
