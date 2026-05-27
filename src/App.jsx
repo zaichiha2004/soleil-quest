@@ -8,9 +8,42 @@ const supabase = (supabaseUrl.startsWith("https://") && supabaseKey) ? createCli
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const WHEEL_CATEGORIES = {
-  EN: ["Career & Purpose","Health & Energy","Finances","Relationships","Personal Growth","Fun & Joy","Family","Purpose & Meaning"],
-  RU: ["Карьера и призвание","Здоровье и энергия","Финансы","Отношения","Личный рост","Радость и игра","Семья","Смысл и предназначение"],
-  ES: ["Carrera y propósito","Salud y energía","Finanzas","Relaciones","Crecimiento personal","Diversión y alegría","Familia","Sentido y significado"],
+  EN: ["Career & Work","Health & Energy","Finances & Abundance","Relationships & Connection","Personal Growth","Joy & Play","Family & Community","Purpose & Meaning"],
+  RU: ["Карьера и работа","Здоровье и энергия","Финансы и изобилие","Отношения и связи","Личный рост","Радость и игра","Семья и сообщество","Смысл и предназначение"],
+  ES: ["Carrera y trabajo","Salud y energía","Finanzas y abundancia","Relaciones y conexión","Crecimiento personal","Alegría y juego","Familia y comunidad","Propósito y significado"],
+};
+
+const WHEEL_DESCRIPTIONS = {
+  EN: [
+    "How fulfilled and engaged do you feel in your work? Does it use your strengths and challenge you in a good way?",
+    "How is your physical energy, sleep, movement, and relationship with your body?",
+    "How secure and abundant do you feel financially? Does money feel like a source of stress or freedom?",
+    "How deep and nourishing are your connections with friends, colleagues, and romantic partners?",
+    "Are you actively learning, evolving, and becoming more of who you want to be?",
+    "How much genuine fun, laughter, creativity, and play do you have in your life?",
+    "How connected and supported do you feel by your family and the communities you belong to?",
+    "How much do you feel your life is guided by a deeper why — something that makes it meaningful?",
+  ],
+  RU: [
+    "Насколько ты удовлетворён и вовлечён в свою работу? Использует ли она твои сильные стороны?",
+    "Как твоя физическая энергия, сон, движение и отношение к своему телу?",
+    "Насколько ты чувствуешь себя финансово защищённым? Деньги — источник стресса или свободы?",
+    "Насколько глубоки и питательны твои связи с друзьями, коллегами и романтическим партнёром?",
+    "Ты активно учишься, развиваешься и становишься тем, кем хочешь быть?",
+    "Сколько настоящего веселья, смеха, творчества и игры в твоей жизни?",
+    "Насколько ты чувствуешь поддержку семьи и сообществ, к которым принадлежишь?",
+    "Насколько твоя жизнь направляется глубоким «зачем» — чем-то, что делает её значимой?",
+  ],
+  ES: [
+    "¿Qué tan satisfecho y comprometido te sientes en tu trabajo? ¿Usa tus fortalezas?",
+    "¿Cómo está tu energía física, sueño, movimiento y relación con tu cuerpo?",
+    "¿Qué tan seguro y abundante te sientes financieramente? ¿El dinero es fuente de estrés o libertad?",
+    "¿Qué tan profundas y nutritivas son tus conexiones con amigos, colegas y pareja?",
+    "¿Estás aprendiendo activamente, evolucionando y convirtiéndote en quien quieres ser?",
+    "¿Cuánta diversión genuina, risa, creatividad y juego hay en tu vida?",
+    "¿Qué tan conectado y apoyado te sientes por tu familia y las comunidades a las que perteneces?",
+    "¿En qué medida sientes que tu vida está guiada por un para qué más profundo?",
+  ],
 };
 
 const AFFIRMATIONS = {
@@ -174,7 +207,7 @@ const VALUES_CHALLENGE_SYSTEM = (lang, values) => `You are Alex Soleil. Generate
 
 const VALUES_RESULT_SYSTEM = (lang) => `You are Alex Soleil. A user completed a values challenge. Analyze their answers and produce a reflection. Respond ENTIRELY in ${lang==="RU"?"warm colloquial Russian":lang==="ES"?"warm colloquial Latin American Spanish":"English"}. Output strict JSON only: {"revealed":["top 2-3 values that showed up most strongly in their choices"],"reflection":"2-3 sentences: what their choices reveal about their true values under pressure vs on paper. Warm, direct, not clinical.","alignment":"one sentence on whether their chosen values and revealed values align or diverge — and what that means"}`;
 
-function WheelChart({ ratings, lang }) {
+function WheelChart({ ratings, lang, size=220 }) {
   const cats = WHEEL_CATEGORIES[lang] || WHEEL_CATEGORIES.EN;
   const n = cats.length;
   const cx = 120, cy = 120, r = 90;
@@ -191,7 +224,7 @@ function WheelChart({ ratings, lang }) {
   });
   const labelPoints = points(1.22);
   return (
-    <svg viewBox="0 0 240 240" style={{width:"100%",maxWidth:220,display:"block",margin:"0 auto"}}>
+    <svg viewBox="0 0 240 240" style={{width:"100%",maxWidth:size,display:"block",margin:"0 auto"}}>
       {/* Grid rings */}
       {grid.map((s,gi) => (
         <polygon key={gi} points={points(s).map(p=>p.join(",")).join(" ")}
@@ -258,7 +291,8 @@ export default function App() {
   const [tab, setTab]           = useState("home");
   const [authUser, setAuthUser] = useState(null); // Google auth user
   const [userId, setUserId]     = useState(null); // Supabase user ID
-  const [wheelRatings, setWheelRatings] = useState({}); // Wheel of Life
+  const [wheelRatings, setWheelRatings] = useState({});
+  const [wheelTooltip, setWheelTooltip] = useState(null); // Wheel of Life
   const [affirmation, setAffirmation] = useState(""); // Daily affirmation
   const [yesterdaySession, setYesterdaySession] = useState(null); // Yesterday's session
   const [yesterdayAnswer, setYesterdayAnswer] = useState(null); // How yesterday went
@@ -351,29 +385,34 @@ export default function App() {
 
   const initGoogleAuth = useCallback(() => {
     if (!window.google || !GOOGLE_CLIENT_ID) {
-      // Fallback to browser storage if Google not available
       bootFromStorage();
       return;
     }
     window.google.accounts.id.initialize({
       client_id: GOOGLE_CLIENT_ID,
       callback: handleGoogleCallback,
-      auto_select: true,
+      auto_select: false,
     });
-    // Try auto-select (returns immediately if no saved session)
-    window.google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        bootFromStorage();
-      }
-    });
+    // Check stored user ID from previous login
+    const storedUserId = localStorage.getItem('sq_user_id');
+    const storedName = localStorage.getItem('sq_user_name');
+    if (storedUserId) {
+      setUserId(storedUserId);
+      bootFromSupabase(storedUserId, storedName||'Friend');
+    } else {
+      // No previous login — show login screen
+      goTo("login");
+    }
   }, []);
 
   const handleGoogleCallback = async (response) => {
     try {
-      // Decode JWT to get user info
       const payload = JSON.parse(atob(response.credential.split('.')[1]));
       const dbUser = await dbUpsertUser(payload);
       if (!dbUser) { bootFromStorage(); return; }
+      // Store user ID for future visits
+      localStorage.setItem('sq_user_id', dbUser.id);
+      localStorage.setItem('sq_user_name', payload.name);
       setAuthUser(payload);
       setUserId(dbUser.id);
       await bootFromSupabase(dbUser.id, payload.name);
@@ -430,8 +469,7 @@ export default function App() {
   };
 
   useEffect(()=>{
-    // Fallback: if script loads but prompt never fires after 3s, boot from storage
-    const timer = setTimeout(()=>{ if(screen==="boot") bootFromStorage(); }, 3000);
+    const timer = setTimeout(()=>{ if(screen==="boot") goTo("login"); }, 3000);
     return ()=>clearTimeout(timer);
   },[screen]);
 
@@ -673,7 +711,7 @@ export default function App() {
     .tbtn{background:transparent;color:rgba(240,236,228,.32);border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;padding:4px 0;transition:color .15s;}
     .tbtn:hover{color:rgba(240,236,228,.7)}
     .ntab{padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;}
-    .ntab.on{background:rgba(212,163,89,.12);color:#d4a359;}.ntab.off{background:transparent;color:rgba(240,236,228,.28);}.ntab.off:hover{color:rgba(240,236,228,.6);}
+    .ntab.on{background:rgba(212,163,89,.12);color:#d4a359;}.ntab.off{background:transparent;color:rgba(212,163,89,.45);}.ntab.off:hover{color:rgba(212,163,89,.8);}
     .ltab{padding:4px 9px;border-radius:6px;font-size:11px;cursor:pointer;border:0.5px solid;font-family:'DM Sans',sans-serif;transition:all .15s;}
     .ltab.on{background:rgba(212,163,89,.15);border-color:#d4a359;color:#d4a359;font-weight:500;}
     .ltab.off{background:transparent;border-color:rgba(255,255,255,.1);color:rgba(240,236,228,.3);}
@@ -804,9 +842,9 @@ export default function App() {
       )}
 
       {/* NAV */}
-      {screen!=="onboarding"&&screen!=="boot"&&(
+      {screen!=="onboarding"&&screen!=="boot"&&screen!=="login"&&(
         <div style={{position:"sticky",top:0,zIndex:50,padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",gap:6}}>
-          <span style={{fontFamily:"Fraunces,serif",fontSize:13,color:"#d4a359",fontWeight:600,flexShrink:0}}>Alex Soleil</span>
+          <span style={{fontFamily:"Fraunces,serif",fontSize:20,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px"}}>Alex Soleil</span>
           <div style={{display:"flex",gap:2,overflowX:"auto",flexShrink:0}}>
             {[["home",L("Soleil Quest","Soleil Quest")],["whoami",L("Who Am I","Кто Я","Quién Soy")],["practices",L("My Practices","Мои практики","Mis Prácticas")],["howto",L("How It Works","Как это работает","Cómo Funciona")]].map(([k,label])=>(
               <button key={k} className={`ntab ${tab===k?"on":"off"}`} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k);}}>{label}</button>
@@ -838,6 +876,70 @@ export default function App() {
 
         {/* BOOT */}
         {screen==="boot"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><p style={{color:"rgba(240,236,228,.3)",fontSize:14}}>{L("Loading","Загрузка","Cargando")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p></div>}
+
+        {/* LOGIN */}
+        {screen==="login"&&(
+          <div key={animKey} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"80vh",textAlign:"center",paddingTop:40}}>
+            <div className="up d1" style={{marginBottom:16}}>
+              <div style={{display:"flex",justifyContent:"flex-end",marginBottom:32}}>
+                <div style={{position:"relative"}}>
+                  <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 10px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
+                    {lang} <span style={{fontSize:9,opacity:.5}}>▾</span>
+                  </button>
+                  {langOpen&&(
+                    <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:10,overflow:"hidden",zIndex:200,minWidth:60}}>
+                      {["EN","ES","RU"].filter(l=>l!==lang).map(l=>(
+                        <button key={l} onClick={()=>{setLang(l);setLangOpen(false);}} style={{display:"block",width:"100%",background:"transparent",border:"none",padding:"8px 14px",color:"rgba(240,236,228,.7)",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",textAlign:"left"}}
+                          onMouseEnter={e=>e.target.style.background="rgba(255,255,255,.06)"}
+                          onMouseLeave={e=>e.target.style.background="transparent"}>
+                          {l}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <p style={{fontFamily:"Fraunces,serif",fontSize:26,fontWeight:600,color:"#d4a359",marginBottom:8}}>Alex Soleil</p>
+            </div>
+            <h1 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:38,fontWeight:600,lineHeight:1.1,marginBottom:16,letterSpacing:"-1px"}}>
+              {L("Find your ","Найди свою ","Encuentra tu ")}<em style={{color:"#d4a359"}}>{L("inner spark.","искру.","chispa interior.")}</em>
+            </h1>
+            <p className="up d3" style={{fontSize:15,lineHeight:1.75,color:"rgba(240,236,228,.52)",marginBottom:40,maxWidth:380}}>{L("A daily coaching practice that starts from the inside out.","Ежедневная коучинговая практика, которая начинается изнутри.","Una práctica de coaching diaria que empieza desde adentro.")}</p>
+            <div className="up d4" style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14}}>
+              <div ref={el=>{
+                if(el&&window.google&&GOOGLE_CLIENT_ID&&!el.hasChildNodes()){
+                  window.google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:handleGoogleCallback});
+                  window.google.accounts.id.renderButton(el,{theme:"filled_black",size:"large",text:"continue_with",shape:"rectangular",width:280});
+                }
+              }}/>
+              <button className="tbtn" onClick={()=>bootFromStorage()}>
+                {L("Continue without signing in →","Продолжить без входа →","Continuar sin iniciar sesión →")}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* LOGIN */}
+        {screen==="login"&&(
+          <div key={animKey} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"80vh",textAlign:"center",paddingTop:40}}>
+            <div className="up d1" style={{fontSize:48,marginBottom:20}}>✦</div>
+            <h1 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:40,fontWeight:600,lineHeight:1.1,marginBottom:16,letterSpacing:"-1px"}}>
+              {L("Find your ","Найди свою ","Encuentra tu ")}<em style={{color:"#d4a359"}}>{L("inner spark.","искру.","chispa interior.")}</em>
+            </h1>
+            <p className="up d3" style={{fontSize:15,lineHeight:1.75,color:"rgba(240,236,228,.55)",marginBottom:40,maxWidth:400}}>{L("A daily coaching practice that starts from the inside out.","Ежедневная коучинговая практика, которая начинается изнутри.","Una práctica de coaching diaria que empieza desde adentro.")}</p>
+            <div className="up d4" style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
+              <div id="google-signin-btn" ref={el=>{
+                if(el&&window.google&&GOOGLE_CLIENT_ID){
+                  window.google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:handleGoogleCallback});
+                  window.google.accounts.id.renderButton(el,{theme:"filled_black",size:"large",text:"continue_with",shape:"rectangular",width:280});
+                }
+              }}/>
+              <button className="tbtn" style={{marginTop:8}} onClick={()=>bootFromStorage()}>
+                {L("Continue without signing in →","Продолжить без входа →","Continuar sin iniciar sesión →")}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
@@ -903,7 +1005,45 @@ export default function App() {
                   <p style={{fontSize:12,color:"rgba(240,236,228,.28)"}}>{selValues.length} / 5 {L("selected","выбрано","seleccionados")}</p>
                   <button className="gbtn" style={{fontSize:12}} onClick={()=>startValChallenge(selValues,"onboarding")}>{L("Not sure? Test your values →","Не уверен? Проверь ценности →","¿No estás seguro? Pon a prueba tus valores →")}</button>
                 </div>
-                <button className="pbtn" onClick={saveProfile} disabled={selValues.length===0}>{L("Begin my practice →","Начать практику →","Comenzar mi práctica →")}</button>
+                <button className="pbtn" onClick={()=>selValues.length>0&&setOnbStep(2)} disabled={selValues.length===0}>{L("Continue →","Продолжить →","Continuar →")}</button>
+              </div>
+            )}
+            {onbStep===2&&(
+              <div>
+                <button className="tbtn" style={{marginBottom:16}} onClick={()=>setOnbStep(1)}>{L("← Back","← Назад","← Volver")}</button>
+                <p className="up d1" style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:10}}>{L("Wheel of Life","Колесо жизни","Rueda de la Vida")} <span style={{color:"rgba(240,236,228,.3)",fontSize:11,textTransform:"none",letterSpacing:0}}>{L("· optional","· необязательно","· opcional")}</span></p>
+                <h2 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:10}}>{L("How are you doing in each area of life?","Как дела в каждой сфере жизни?","¿Cómo estás en cada área de vida?")}</h2>
+                <p className="up d3" style={{fontSize:14,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:20}}>{L("Rate each area 1–10. This helps personalize your coaching. You can always update this later in Who Am I.","Оцени каждую сферу от 1 до 10. Это помогает персонализировать коучинг. Можно обновить позже.","Evalúa cada área del 1 al 10. Esto personaliza tu coaching. Puedes actualizarlo después.")}</p>
+                <div className="up d4">
+                  <WheelChart ratings={wheelRatings} lang={lang} size={200}/>
+                  <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:10}}>
+                    {WHEEL_CATEGORIES[lang]?.map((cat,i)=>(
+                      <div key={i}>
+                        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+                          <p style={{fontSize:13,color:"rgba(240,236,228,.8)",flex:1}}>{cat}</p>
+                          <button onClick={()=>setWheelTooltip(wheelTooltip===i?null:i)} style={{background:"none",border:"none",color:"rgba(212,163,89,.55)",fontSize:11,cursor:"pointer",padding:0,fontStyle:"normal"}}>ⓘ</button>
+                          <span style={{fontSize:13,color:"#d4a359",minWidth:16,textAlign:"right",fontWeight:500}}>{wheelRatings[i]||"—"}</span>
+                        </div>
+                        {wheelTooltip===i && <p style={{fontSize:12,color:"rgba(240,236,228,.5)",lineHeight:1.55,marginBottom:6,paddingLeft:2}}>{WHEEL_DESCRIPTIONS[lang]?.[i]}</p>}
+                        <div style={{display:"flex",gap:4}}>
+                          {[1,2,3,4,5,6,7,8,9,10].map(n=>(
+                            <button key={n} onClick={()=>{const r={...wheelRatings,[i]:n};setWheelRatings(r);}}
+                              style={{flex:1,height:22,borderRadius:4,border:"0.5px solid",cursor:"pointer",fontSize:10,fontFamily:"'DM Sans',sans-serif",
+                                background:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.04)",
+                                borderColor:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.1)",
+                                color:wheelRatings[i]>=n?"#0c0c10":"rgba(240,236,228,.4)"}}>
+                              {n}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={{display:"flex",gap:10,marginTop:24}}>
+                  <button className="pbtn" onClick={saveProfile}>{L("Begin my practice →","Начать практику →","Comenzar mi práctica →")}</button>
+                  <button className="gbtn" onClick={saveProfile}>{L("Skip for now","Пропустить","Omitir por ahora")}</button>
+                </div>
               </div>
             )}
           </div>
@@ -912,15 +1052,6 @@ export default function App() {
         {/* CHECKIN */}
         {screen==="checkin"&&(
           <div key={animKey} style={{paddingTop:44}}>
-            {/* Google sign-in prompt if not logged in */}
-            {!authUser && (
-              <div className="up d1" style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"12px 16px",marginBottom:20,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <p style={{fontSize:13,color:"rgba(240,236,228,.5)",lineHeight:1.5}}>{L("Sign in to save your progress across devices","Войди чтобы сохранить прогресс на всех устройствах","Inicia sesión para guardar tu progreso en todos los dispositivos")}</p>
-                <button onClick={()=>{if(window.google) window.google.accounts.id.prompt();}} style={{background:"white",color:"#333",border:"none",borderRadius:8,padding:"8px 14px",fontSize:12,fontWeight:500,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",whiteSpace:"nowrap",marginLeft:12,flexShrink:0}}>
-                  🔵 {L("Sign in","Войти","Iniciar sesión")}
-                </button>
-              </div>
-            )}
 
             {/* Daily affirmation */}
             {affirmation && (
@@ -1307,22 +1438,26 @@ export default function App() {
             <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
               <p style={{fontSize:14,fontWeight:500,marginBottom:4}}>{L("Wheel of Life","Колесо жизни","Rueda de la Vida")}</p>
               <p style={{fontSize:12,color:"rgba(240,236,228,.4)",lineHeight:1.55,marginBottom:16}}>{L("Rate each life area 1–10. This helps guide your coaching focus.","Оцени каждую сферу жизни от 1 до 10. Это помогает направить коучинг.","Evalúa cada área de vida del 1 al 10. Esto guía tu enfoque de coaching.")}</p>
-              <WheelChart ratings={wheelRatings} lang={lang} />
+              <WheelChart ratings={wheelRatings} lang={lang} size={280}/>
               <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:10}}>
                 {WHEEL_CATEGORIES[lang]?.map((cat,i)=>(
-                  <div key={i} style={{display:"flex",alignItems:"center",gap:12}}>
-                    <p style={{fontSize:13,color:"rgba(240,236,228,.7)",flex:1,minWidth:0}}>{cat}</p>
-                    <div style={{display:"flex",gap:4,alignItems:"center"}}>
+                  <div key={i}>
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}>
+                      <p style={{fontSize:13,color:"rgba(240,236,228,.8)",flex:1}}>{cat}</p>
+                      <button onClick={()=>setWheelTooltip(wheelTooltip===i?null:i)} style={{background:"none",border:"none",color:"rgba(212,163,89,.55)",fontSize:11,cursor:"pointer",padding:0}}>ⓘ</button>
+                      <span style={{fontSize:13,color:"#d4a359",minWidth:16,textAlign:"right",fontWeight:500}}>{wheelRatings[i]||"—"}</span>
+                    </div>
+                    {wheelTooltip===i && <p style={{fontSize:12,color:"rgba(240,236,228,.5)",lineHeight:1.55,marginBottom:6,paddingLeft:2}}>{WHEEL_DESCRIPTIONS[lang]?.[i]}</p>}
+                    <div style={{display:"flex",gap:4}}>
                       {[1,2,3,4,5,6,7,8,9,10].map(n=>(
                         <button key={n} onClick={()=>{const r={...wheelRatings,[i]:n};saveWheelRatings(r);}}
-                          style={{width:22,height:22,borderRadius:4,border:"0.5px solid",cursor:"pointer",fontSize:10,fontFamily:"'DM Sans',sans-serif",
+                          style={{flex:1,height:22,borderRadius:4,border:"0.5px solid",cursor:"pointer",fontSize:10,fontFamily:"'DM Sans',sans-serif",
                             background:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.04)",
                             borderColor:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.1)",
                             color:wheelRatings[i]>=n?"#0c0c10":"rgba(240,236,228,.4)"}}>
                           {n}
                         </button>
                       ))}
-                      <span style={{fontSize:12,color:"#d4a359",minWidth:16,textAlign:"right"}}>{wheelRatings[i]||"—"}</span>
                     </div>
                   </div>
                 ))}
