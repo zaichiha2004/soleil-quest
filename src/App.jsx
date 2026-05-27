@@ -213,7 +213,7 @@ const VALUES_RESULT_SYSTEM = (lang) => `You are Alex Soleil. A user completed a 
 function WheelChart({ ratings, lang, size=220 }) {
   const cats = WHEEL_CATEGORIES[lang] || WHEEL_CATEGORIES.EN;
   const n = cats.length;
-  const cx = 120, cy = 120, r = 90;
+  const cx = 150, cy = 150, r = 90;
   const points = (scale) => cats.map((_,i) => {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
     return [cx + scale * r * Math.cos(angle), cy + scale * r * Math.sin(angle)];
@@ -225,32 +225,33 @@ function WheelChart({ ratings, lang, size=220 }) {
     const scale = (ratings[i]||0) / 10;
     return [cx + scale * r * Math.cos(angle), cy + scale * r * Math.sin(angle)];
   });
-  const labelPoints = points(1.22);
+  const labelPoints = points(1.28);
   return (
-    <svg viewBox="0 0 240 240" style={{width:"100%",maxWidth:size==="full"?"100%":size,display:"block",margin:"0 auto"}}>
-      {/* Grid rings */}
+    <svg viewBox="0 0 300 300" style={{width:"100%",maxWidth:size==="full"?"100%":size,display:"block",margin:"0 auto"}}>
       {grid.map((s,gi) => (
         <polygon key={gi} points={points(s).map(p=>p.join(",")).join(" ")}
           fill="none" stroke="rgba(255,255,255,.08)" strokeWidth={gi===4?1:0.5}/>
       ))}
-      {/* Spokes */}
       {cats.map((_,i) => {
         const [x,y] = points(1)[i];
         return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="rgba(255,255,255,.08)" strokeWidth={0.5}/>;
       })}
-      {/* Data area */}
       <path d={toPath(dataPoints)} fill="rgba(212,163,89,.2)" stroke="#d4a359" strokeWidth={1.5}/>
-      {/* Data points */}
       {dataPoints.map((p,i) => ratings[i]>0 && (
         <circle key={i} cx={p[0]} cy={p[1]} r={3} fill="#d4a359"/>
       ))}
-      {/* Labels */}
       {cats.map((cat,i) => {
         const [x,y] = labelPoints[i];
         const anchor = x < cx-5 ? "end" : x > cx+5 ? "start" : "middle";
-        const shortLabel = cat.split(" ")[0];
-        return <text key={i} x={x} y={y} textAnchor={anchor} dominantBaseline="middle"
-          style={{fontSize:"7px",fill:"rgba(240,236,228,.5)",fontFamily:"DM Sans,sans-serif"}}>{shortLabel}</text>;
+        const words = cat.split(" ");
+        const line1 = words.slice(0, Math.ceil(words.length/2)).join(" ");
+        const line2 = words.length > 1 ? words.slice(Math.ceil(words.length/2)).join(" ") : null;
+        return (
+          <text key={i} x={x} y={y} textAnchor={anchor} style={{fontSize:"7.5px",fill:"rgba(240,236,228,.55)",fontFamily:"DM Sans,sans-serif"}}>
+            <tspan x={x} dy={line2?"-0.5em":"0"}>{line1}</tspan>
+            {line2 && <tspan x={x} dy="1.1em">{line2}</tspan>}
+          </text>
+        );
       })}
     </svg>
   );
@@ -399,11 +400,12 @@ export default function App() {
     // Check stored user ID from previous login
     const storedUserId = localStorage.getItem('sq_user_id');
     const storedName = localStorage.getItem('sq_user_name');
+    const storedAvatar = localStorage.getItem('sq_user_avatar');
     if (storedUserId) {
       setUserId(storedUserId);
+      if (storedAvatar) setAuthUser({ picture: storedAvatar, name: storedName });
       bootFromSupabase(storedUserId, storedName||'Friend');
     } else {
-      // No previous login — show login screen
       goTo("login");
     }
   }, []);
@@ -413,9 +415,9 @@ export default function App() {
       const payload = JSON.parse(atob(response.credential.split('.')[1]));
       const dbUser = await dbUpsertUser(payload);
       if (!dbUser) { bootFromStorage(); return; }
-      // Store user ID for future visits
       localStorage.setItem('sq_user_id', dbUser.id);
       localStorage.setItem('sq_user_name', payload.name);
+      localStorage.setItem('sq_user_avatar', payload.picture||'');
       setAuthUser(payload);
       setUserId(dbUser.id);
       await bootFromSupabase(dbUser.id, payload.name);
