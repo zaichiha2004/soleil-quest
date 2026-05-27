@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -110,29 +109,36 @@ async function save(key,val){try{await window.storage.set(key,JSON.stringify(val
 
 // ── SUPABASE DB HELPERS ──
 async function dbGetProfile(userId) {
+  if (!supabase) return null;
   const {data} = await supabase.from('profiles').select('*').eq('user_id',userId).single();
   return data;
 }
 async function dbSaveProfile(userId, profile) {
+  if (!supabase) return null;
   const {data} = await supabase.from('profiles').upsert({user_id:userId,...profile,updated_at:new Date().toISOString()}).select().single();
   return data;
 }
 async function dbGetSessions(userId) {
+  if (!supabase) return {};
   const {data} = await supabase.from('sessions').select('*').eq('user_id',userId);
   if (!data) return {};
   return data.reduce((acc,s)=>({...acc,[s.date]:s}),{});
 }
 async function dbSaveSession(userId, session) {
+  if (!supabase) return;
   await supabase.from('sessions').upsert({user_id:userId,...session});
 }
 async function dbGetXp(userId) {
+  if (!supabase) return 0;
   const {data} = await supabase.from('xp').select('total').eq('user_id',userId).single();
   return data?.total || 0;
 }
 async function dbSaveXp(userId, total) {
+  if (!supabase) return;
   await supabase.from('xp').upsert({user_id:userId,total,updated_at:new Date().toISOString()});
 }
 async function dbUpsertUser(googleUser) {
+  if (!supabase) return null;
   const {data} = await supabase.from('users').upsert({
     google_id: googleUser.sub,
     email: googleUser.email,
