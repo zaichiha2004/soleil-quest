@@ -378,60 +378,74 @@ export default function App() {
   const firstName = profile?.name?.split(" ")[0]||"";
   const timeOfDay = () => { const h=new Date().getHours(); return lang==="RU"?(h<12?"утро":h<17?"день":"вечер"):lang==="ES"?(h<12?"mañana":h<17?"tarde":"noche"):(h<12?"morning":h<17?"afternoon":"evening"); };
 
-  // ── GOOGLE OAUTH REDIRECT FLOW ──
+  // ── SUPABASE GOOGLE OAUTH ──
   useEffect(()=>{
-    // Handle OAuth callback — check for access_token in URL hash
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.replace('#',''));
-    const accessToken = params.get('access_token');
-    if (accessToken) {
-      window.history.replaceState({}, '', window.location.pathname);
-      handleGoogleCode(accessToken);
-      return;
-    }
-    // Check stored user
-    const storedUserId = localStorage.getItem('sq_user_id');
-    const storedName = localStorage.getItem('sq_user_name');
-    const storedAvatar = localStorage.getItem('sq_user_avatar');
-    if (storedUserId) {
-      setUserId(storedUserId);
-      if (storedAvatar) { setUserAvatar(storedAvatar); setAuthUser({ picture: storedAvatar, name: storedName }); }
-      bootFromSupabase(storedUserId, storedName||'Friend');
-    } else {
-      goTo("login");
-    }
+    (async()=>{
+      if (!supabase) { bootFromStorage(); return; }
+
+      // Check for existing Supabase session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        await handleSupabaseUser(session.user);
+        return;
+      }
+
+      // Listen for auth state changes (handles redirect callback)
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session?.user) {
+          await handleSupabaseUser(session.user);
+        }
+      });
+
+      // Check stored user as fallback
+      const storedUserId = localStorage.getItem('sq_user_id');
+      const storedName = localStorage.getItem('sq_user_name');
+      const storedAvatar = localStorage.getItem('sq_user_avatar');
+      if (storedUserId) {
+        setUserId(storedUserId);
+        if (storedAvatar) { setUserAvatar(storedAvatar); setAuthUser({ picture: storedAvatar, name: storedName }); }
+        bootFromSupabase(storedUserId, storedName||'Friend');
+      } else {
+        goTo("login");
+      }
+
+      return () => subscription.unsubscribe();
+    })();
   }, []);
 
-  const signInWithGoogle = () => {
-    const redirectUri = encodeURIComponent(window.location.origin);
-    const scope = encodeURIComponent('openid email profile');
-    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}&prompt=select_account`;
-    window.location.href = url;
-  };
-
-  const handleGoogleCode = async (accessToken) => {
+  const handleSupabaseUser = async (user) => {
     try {
-      // Fetch user info using access token
-      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const payload = await res.json();
-      if (!payload.sub) { bootFromStorage(); return; }
-      const dbUser = await dbUpsertUser(payload);
-      if (!dbUser) { bootFromStorage(); return; }
-      localStorage.setItem('sq_user_id', dbUser.id);
-      localStorage.setItem('sq_user_name', payload.name);
-      localStorage.setItem('sq_user_avatar', payload.picture||'');
-      setUserAvatar(payload.picture||'');
-      setAuthUser(payload);
-      setUserId(dbUser.id);
-      await bootFromSupabase(dbUser.id, payload.name);
+      const avatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
+      const name = user.user_metadata?.full_name || user.user_metadata?.name || 'Friend';
+      // Upsert user in our own users table
+      const { data: dbUser } = await supabase.from('users').upsert({
+        google_id: user.id,
+        email: user.email,
+        name,
+        avatar_url: avatar,
+      }, {onConflict:'google_id'}).select().single();
+      const uid = dbUser?.id || user.id;
+      localStorage.setItem('sq_user_id', uid);
+      localStorage.setItem('sq_user_name', name);
+      localStorage.setItem('sq_user_avatar', avatar);
+      setUserAvatar(avatar);
+      setAuthUser({ picture: avatar, name });
+      setUserId(uid);
+      await bootFromSupabase(uid, name);
     } catch(e) {
       bootFromStorage();
     }
   };
 
-  const handleGoogleCallback = handleGoogleCode; // alias for compatibility
+  const signInWithGoogle = async () => {
+    if (!supabase) { bootFromStorage(); return; }
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin }
+    });
+  };
+
+  const handleGoogleCallback = null; // not used with Supabase auth
 
   const bootFromSupabase = async (uid, googleName) => {
     const [dbProfile, dbSess, dbXpVal] = await Promise.all([
