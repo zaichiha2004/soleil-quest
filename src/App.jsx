@@ -1171,7 +1171,7 @@ export default function App() {
         {/* PLAYING */}
         {screen==="playing"&&(
           <div key={animKey} style={{paddingTop:40}}>
-            <button className="tbtn up d1" style={{marginBottom:14}} onClick={()=>goTo("challenges")}>{L("← Back","← Назад","← Volver")}</button>
+            <button className="tbtn up d1" style={{marginBottom:14}} onClick={()=>{if(qCount<=1){goTo("challenges");}else{setConv(c=>c.slice(0,-1));setQCount(q=>q-1);setCurrentQ(conv[conv.length-2]?{question:conv[conv.length-2].q,options:currentQ?.options,phase:conv[conv.length-2].phase}:currentQ);setSel([]);setFreeText("");}}}>{L("← Back","← Назад","← Volver")}</button>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <span style={{fontSize:13,color:"rgba(240,236,228,.34)"}}>{challenge?.emoji} {lang==="RU"?challenge?.labelRU:lang==="ES"?challenge?.labelES:challenge?.labelEN}</span>
               <span style={{fontSize:12,color:"rgba(240,236,228,.34)"}}>{L(`Q${qCount} / 3`,`В${qCount} / 3`)}</span>
@@ -1213,11 +1213,23 @@ export default function App() {
 
         {/* READINESS */}
         {screen==="readiness"&&plan&&(
-          <div key={animKey} style={{paddingTop:40}}>
-            <div className="up d1" style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.18)",borderRadius:12,padding:"15px 17px",marginBottom:22}}>
-              <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:7}}>{L("Your insight","Твоё озарение","Tu revelación")}</p>
-              <p style={{fontSize:15,lineHeight:1.7,fontStyle:"italic",color:"rgba(240,236,228,.86)"}}>{`"${plan.insight}"`}</p>
-            </div>
+          <div className="up d1" style={{textAlign:"center",marginBottom:22}}>
+  {(() => {
+    const parts = plan.archetype?.split(" — ");
+    const arcName = parts?.[0] || plan.archetype;
+    const arcDesc = parts?.[1] || null;
+    return (
+      <div>
+        <span className="pill" style={{fontSize:12,marginBottom:10,display:"inline-flex"}}>{L("Archetype","Архетип","Arquetipo")}: <strong style={{color:"#f0ece4",fontWeight:500,marginLeft:4}}>{arcName}</strong></span>
+        {arcDesc && <p style={{fontSize:14,color:"rgba(240,236,228,.6)",lineHeight:1.6,marginTop:8,fontStyle:"italic",marginBottom:16}}>{arcDesc}</p>}
+      </div>
+    );
+  })()}
+  <div style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.18)",borderRadius:12,padding:"15px 17px"}}>
+    <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:7}}>{L("Your insight","Твоё озарение","Tu revelación")}</p>
+    <p style={{fontSize:15,lineHeight:1.7,fontStyle:"italic",color:"rgba(240,236,228,.86)"}}>{`"${plan.insight}"`}</p>
+  </div>
+</div>
             {!readiness?(
               <div className="up d2">
                 <h2 style={{fontFamily:"Fraunces,serif",fontSize:21,fontWeight:600,marginBottom:8}}>{L("How ready are you to act on this?","Насколько ты готов действовать?","¿Qué tan listo estás para actuar?")}</h2>
