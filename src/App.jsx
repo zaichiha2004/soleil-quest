@@ -1224,7 +1224,8 @@ export default function App() {
 
         {/* READINESS */}
         {screen==="readiness"&&plan&&(
-          <div className="up d1" style={{textAlign:"center",marginBottom:22}}>
+          <div key={animKey} style={{paddingTop:40}}>
+            <div className="up d1" style={{textAlign:"center",marginBottom:22}}>
   {(() => {
     const parts = plan.archetype?.split(" — ");
     const arcName = parts?.[0] || plan.archetype;
@@ -1240,7 +1241,7 @@ export default function App() {
     <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:7}}>{L("Your insight","Твоё озарение","Tu revelación")}</p>
     <p style={{fontSize:15,lineHeight:1.7,fontStyle:"italic",color:"rgba(240,236,228,.86)"}}>{`"${plan.insight}"`}</p>
   </div>
-</div>
+            </div>
             {!readiness?(
               <div className="up d2">
                 <h2 style={{fontFamily:"Fraunces,serif",fontSize:21,fontWeight:600,marginBottom:8}}>{L("How ready are you to act on this?","Насколько ты готов действовать?","¿Qué tan listo estás para actuar?")}</h2>
