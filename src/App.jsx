@@ -1149,6 +1149,7 @@ export default function App() {
         {/* CHALLENGES */}
         {screen==="challenges"&&(
           <div key={animKey} style={{paddingTop:40}}>
+            <p style={{fontSize:11,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:10,textAlign:"center"}}>{new Date().toLocaleDateString(lang==="RU"?"ru-RU":"en-US",{weekday:"long",month:"long",day:"numeric"})}</p>
             <button className="tbtn up d1" style={{marginBottom:14}} onClick={()=>goTo("checkin")}>{L("← Back","← Назад","← Volver")}</button>
             {suggested&&(
               <div className="up d2" style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.2)",borderRadius:12,padding:"12px 15px",marginBottom:18,display:"flex",gap:10,alignItems:"flex-start"}}>
