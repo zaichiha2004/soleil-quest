@@ -213,7 +213,7 @@ const VALUES_RESULT_SYSTEM = (lang) => `You are Alex Soleil. A user completed a 
 function WheelChart({ ratings, lang, size=220 }) {
   const cats = WHEEL_CATEGORIES[lang] || WHEEL_CATEGORIES.EN;
   const n = cats.length;
-  const cx = 150, cy = 150, r = 82;
+  const cx = 165, cy = 150, r = 82;
   const points = (scale) => cats.map((_,i) => {
     const angle = (i / n) * 2 * Math.PI - Math.PI / 2;
     return [cx + scale * r * Math.cos(angle), cy + scale * r * Math.sin(angle)];
@@ -227,7 +227,7 @@ function WheelChart({ ratings, lang, size=220 }) {
   });
   const labelPoints = points(1.28);
   return (
-    <svg viewBox="0 0 300 300" style={{width:"100%",maxWidth:size==="full"?"100%":size,display:"block",margin:"0 auto"}}>
+    <svg viewBox="-20 0 340 300" style={{width:"100%",maxWidth:size==="full"?"100%":size,display:"block",margin:"0 auto"}}>
       {grid.map((s,gi) => (
         <polygon key={gi} points={points(s).map(p=>p.join(",")).join(" ")}
           fill="none" stroke="rgba(255,255,255,.08)" strokeWidth={gi===4?1:0.5}/>
