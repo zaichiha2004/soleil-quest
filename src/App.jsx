@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
@@ -378,27 +378,18 @@ export default function App() {
   const firstName = profile?.name?.split(" ")[0]||"";
   const timeOfDay = () => { const h=new Date().getHours(); return lang==="RU"?(h<12?"утро":h<17?"день":"вечер"):lang==="ES"?(h<12?"mañana":h<17?"tarde":"noche"):(h<12?"morning":h<17?"afternoon":"evening"); };
 
-  // Load Google Identity Services script
+  // ── GOOGLE OAUTH REDIRECT FLOW ──
   useEffect(()=>{
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => initGoogleAuth();
-    document.head.appendChild(script);
-  },[]);
-
-  const initGoogleAuth = useCallback(() => {
-    if (!window.google || !GOOGLE_CLIENT_ID) {
-      bootFromStorage();
+    // Handle OAuth callback — check for access_token in URL hash
+    const hash = window.location.hash;
+    const params = new URLSearchParams(hash.replace('#',''));
+    const accessToken = params.get('access_token');
+    if (accessToken) {
+      window.history.replaceState({}, '', window.location.pathname);
+      handleGoogleCode(accessToken);
       return;
     }
-    window.google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: handleGoogleCallback,
-      auto_select: false,
-    });
-    // Check stored user ID from previous login
+    // Check stored user
     const storedUserId = localStorage.getItem('sq_user_id');
     const storedName = localStorage.getItem('sq_user_name');
     const storedAvatar = localStorage.getItem('sq_user_avatar');
@@ -411,9 +402,21 @@ export default function App() {
     }
   }, []);
 
-  const handleGoogleCallback = async (response) => {
+  const signInWithGoogle = () => {
+    const redirectUri = encodeURIComponent(window.location.origin);
+    const scope = encodeURIComponent('openid email profile');
+    const url = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}&prompt=select_account`;
+    window.location.href = url;
+  };
+
+  const handleGoogleCode = async (accessToken) => {
     try {
-      const payload = JSON.parse(atob(response.credential.split('.')[1]));
+      // Fetch user info using access token
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const payload = await res.json();
+      if (!payload.sub) { bootFromStorage(); return; }
       const dbUser = await dbUpsertUser(payload);
       if (!dbUser) { bootFromStorage(); return; }
       localStorage.setItem('sq_user_id', dbUser.id);
@@ -427,6 +430,8 @@ export default function App() {
       bootFromStorage();
     }
   };
+
+  const handleGoogleCallback = handleGoogleCode; // alias for compatibility
 
   const bootFromSupabase = async (uid, googleName) => {
     const [dbProfile, dbSess, dbXpVal] = await Promise.all([
@@ -934,12 +939,10 @@ export default function App() {
             </h1>
             <p className="up d3" style={{fontSize:15,lineHeight:1.75,color:"rgba(240,236,228,.52)",marginBottom:44,maxWidth:360}}>{L("A daily coaching practice that starts from the inside out.","Ежедневная коучинговая практика, которая начинается изнутри.","Una práctica de coaching diaria que empieza desde adentro.")}</p>
             <div className="up d4" style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14}}>
-              <div ref={el=>{
-                if(el&&window.google&&GOOGLE_CLIENT_ID&&!el.hasChildNodes()){
-                  window.google.accounts.id.initialize({client_id:GOOGLE_CLIENT_ID,callback:handleGoogleCallback});
-                  window.google.accounts.id.renderButton(el,{theme:"filled_black",size:"large",text:"continue_with",shape:"rectangular",width:280});
-                }
-              }}/>
+              <button onClick={signInWithGoogle} style={{background:"white",color:"#333",border:"none",borderRadius:8,padding:"12px 24px",fontSize:14,fontWeight:500,cursor:"pointer",fontFamily:"'DM Sans',sans-serif",display:"flex",alignItems:"center",gap:10,width:280,justifyContent:"center"}}>
+                <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+                Continue with Google
+              </button>
               <button className="tbtn" onClick={()=>bootFromStorage()}>
                 {L("Continue without signing in →","Продолжить без входа →","Continuar sin iniciar sesión →")}
               </button>
