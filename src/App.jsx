@@ -624,6 +624,17 @@ export default function App() {
   };
 
   // ── QUEST ──
+  const handleBackInQuest = () => {
+  if(qCount<=1){ goTo("challenges"); }
+  else{
+    const prevConv=conv.slice(0,-1);
+    setConv(prevConv);
+    setQCount(q=>q-1);
+    setSel([]);
+    setFreeText("");
+    setCurrentQ({question:prevConv[prevConv.length-1].q,options:currentQ?.options,phase:prevConv[prevConv.length-1].phase});
+  }
+};
   const startGame=async(c)=>{
     setChallenge(c);setConv([]);setQCount(0);setPlan(null);
     setSel([]);setCurrentQ(null);setReadiness(null);
@@ -1171,7 +1182,7 @@ export default function App() {
         {/* PLAYING */}
         {screen==="playing"&&(
           <div key={animKey} style={{paddingTop:40}}>
-            <button className="tbtn up d1" style={{marginBottom:14}} onClick={()=>{if(qCount<=1){goTo("challenges");}else{setConv(c=>c.slice(0,-1));setQCount(q=>q-1);setCurrentQ(conv[conv.length-2]?{question:conv[conv.length-2].q,options:currentQ?.options,phase:conv[conv.length-2].phase}:currentQ);setSel([]);setFreeText("");}}}>{L("← Back","← Назад","← Volver")}</button>
+            <button className="tbtn up d1" style={{marginBottom:14}} onClick={handleBackInQuest}>{L("← Back","← Назад","← Volver")}</button>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
               <span style={{fontSize:13,color:"rgba(240,236,228,.34)"}}>{challenge?.emoji} {lang==="RU"?challenge?.labelRU:lang==="ES"?challenge?.labelES:challenge?.labelEN}</span>
               <span style={{fontSize:12,color:"rgba(240,236,228,.34)"}}>{L(`Q${qCount} / 3`,`В${qCount} / 3`)}</span>
