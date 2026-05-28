@@ -513,6 +513,7 @@ export default function App() {
     const yDate = yesterday.toLocaleDateString('en-CA');
     if (s && s[yDate]) setYesterdaySession(s[yDate]);
     if(p){setProfile(p);setLang(p.lang||"EN");goTo("checkin");}
+    else if(supabase) goTo("login");     
     else goTo("onboarding");
   };
 
