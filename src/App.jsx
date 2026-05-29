@@ -702,6 +702,7 @@ export default function App() {
   };
 
   const doSave=async()=>{
+    console.log("doSave userId:", userId);
     const entry={date:today,challenge:lang==="RU"?challenge?.labelRU:lang==="ES"?challenge?.labelES:challenge?.labelEN,challengeEmoji:challenge?.emoji,plan,reflection,readiness,firstStep:firstStep!==null?stepOpts[firstStep]:null,savedAt:new Date().toISOString()};
     const updated={...sessions,[today]:entry};
     setSessions(updated);
