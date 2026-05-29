@@ -162,7 +162,7 @@ async function dbGetSessions(userId) {
 }
 async function dbSaveSession(userId, session) {
   if (!supabase) return;
-  await supabase.from('sessions').upsert({user_id:userId,...session});
+  await supabase.from('sessions').upsert({user_id:userId,...session},{onConflict:'user_id,date'});
 }
 async function dbGetXp(userId) {
   if (!supabase) return 0;
