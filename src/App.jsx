@@ -171,7 +171,7 @@ async function dbGetXp(userId) {
 }
 async function dbSaveXp(userId, total) {
   if (!supabase) return;
-  await supabase.from('xp').upsert({user_id:userId,total,updated_at:new Date().toISOString()});
+  await supabase.from('xp').upsert({user_id:userId,total,updated_at:new Date().toISOString()},{onConflict:'user_id'});
 }
 async function dbUpsertUser(googleUser) {
   if (!supabase) return null;
