@@ -151,7 +151,7 @@ async function dbGetProfile(userId) {
 }
 async function dbSaveProfile(userId, profile) {
   if (!supabase) return null;
-  const {data} = await supabase.from('profiles').upsert({user_id:userId,...profile,updated_at:new Date().toISOString()}).select().single();
+  const {data} = await supabase.from('profiles').upsert({user_id:userId,...profile,updated_at:new Date().toISOString()},{onConflict:'user_id'}).select().single();
   return data;
 }
 async function dbGetSessions(userId) {
