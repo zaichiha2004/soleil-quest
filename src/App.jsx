@@ -1334,7 +1334,7 @@ export default function App() {
   <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:8,width:"100%"}}>
     <p style={{fontSize:13,color:"rgba(240,236,228,.45)",lineHeight:1.6}}>{L("What would you like to do next?","Что дальше?","¿Qué quieres hacer ahora?")}</p>
     <button className="gbtn" onClick={()=>{setTab("practices");goTo("practices");}}>{L("📋 Review my practices","📋 Посмотреть практики","📋 Revisar mis prácticas")}</button>
-    <a href="https://cal.com/your-link" target="_blank" rel="noopener noreferrer" style={{display:"block",background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.3)",borderRadius:10,padding:"9px 16px",fontSize:13,color:"#d4a359",textDecoration:"none",textAlign:"center"}}>✨ {L("Book a free 30-min discovery session","Записаться на бесплатную сессию","Reservar sesión de descubrimiento gratuita")}</a>
+    <a href="https://cal.com/alexandera-zaharris-soleil/30min" target="_blank" rel="noopener noreferrer" style={{display:"block",background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.3)",borderRadius:10,padding:"9px 16px",fontSize:13,color:"#d4a359",textDecoration:"none",textAlign:"center"}}>✨ {L("Book a free 30-min discovery session","Записаться на бесплатную сессию","Reservar sesión de descubrimiento gratuita")}</a>
     <p style={{fontSize:14,color:"rgba(240,236,228,.5)",fontStyle:"italic",textAlign:"center",marginTop:4}}>{L("See you tomorrow 🌅","До завтра 🌅","Hasta mañana 🌅")}</p>
   </div>
 )}
