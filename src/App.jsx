@@ -1099,7 +1099,7 @@ export default function App() {
             )}
 
             {/* Yesterday follow-up */}
-            {yesterdaySession && !yesterdayAnswer && (
+            {showYesterday && yesterdaySession && !yesterdayAnswer && (
               <div className="up d2" style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.18)",borderRadius:12,padding:"14px 16px",marginBottom:20}}>
                 <p style={{fontSize:12,color:"rgba(160,140,220,.7)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:8}}>{L("Yesterday you worked on","Вчера ты работал над","Ayer trabajaste en")} {yesterdaySession.challengeEmoji} {yesterdaySession.challenge}</p>
                 {yesterdaySession.firstStep && <p style={{fontSize:13,color:"rgba(240,236,228,.65)",marginBottom:12,lineHeight:1.55}}>{L("You committed to:","Ты взял обязательство:","Te comprometiste a:")} <em>"{yesterdaySession.firstStep}"</em></p>}
