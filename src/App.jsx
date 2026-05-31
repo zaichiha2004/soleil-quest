@@ -491,9 +491,10 @@ export default function App() {
       setWheelRatings(dbProfile.wheel_of_life||{});
       if (dbSess && dbSess[new Date().toLocaleDateString('en-CA')] && dbProfile.values?.length) {
         // Has session today and profile — show yesterday check first
-        if (dbSess[new Date(Date.now()-86400000).toLocaleDateString('en-CA')]) {
-          setShowYesterday(true);
-        }
+        const alreadyAnsweredToday = localStorage.getItem('sq_yesterday_answered') === today;
+      if (dbSess[new Date(Date.now()-86400000).toLocaleDateString('en-CA')] && !alreadyAnsweredToday) {
+        setShowYesterday(true);
+      }
       }
       goTo("checkin");
     } else {
@@ -1109,7 +1110,7 @@ export default function App() {
                     L("I didn't get to it","Не успел","No llegué a hacerlo"),
                     L("It led me somewhere unexpected","Это привело меня куда-то неожиданному","Me llevó a algo inesperado"),
                   ].map((opt,i)=>(
-                    <button key={i} className="obtn" onClick={()=>setYesterdayAnswer(i)} style={{fontSize:13}}>
+                    <button key={i} className="obtn" onClick={()=>{setYesterdayAnswer(i);localStorage.setItem('sq_yesterday_answered',today);}} style={{fontSize:13}}>
                       <span style={{color:"rgba(240,236,228,.25)",marginRight:8,fontSize:12}}>○</span>{opt}
                     </button>
                   ))}
