@@ -404,6 +404,8 @@ export default function App() {
       if (storedUserId) {
         setUserId(storedUserId);
         if (storedAvatar) { setUserAvatar(storedAvatar); setAuthUser({ picture: storedAvatar, name: storedName }); }
+        console.log("booting from localStorage userId:", storedUserId);
+bootFromSupabase(storedUserId, storedName||'Friend');
         bootFromSupabase(storedUserId, storedName||'Friend');
       } else {
         goTo("login");
