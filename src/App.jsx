@@ -386,7 +386,6 @@ export default function App() {
       // Check for existing Supabase session
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        console.log("handleSupabaseUser called", session.user.id);
         await handleSupabaseUser(session.user);
         return;
       }
@@ -494,9 +493,8 @@ export default function App() {
       setWheelRatings(dbProfile.wheel_of_life||{});
       if (dbProfile.values?.length) {
         // Has session today and profile — show yesterday check first
-        const alreadyAnsweredToday = localStorage.getItem('sq_yesterday_answered') === new Date().toLocaleDateString("en-CA"); console.log("yesterday check:", alreadyAnsweredToday, localStorage.getItem('sq_yesterday_answered'), new Date().toLocaleDateString("en-CA"));
+        const alreadyAnsweredToday = localStorage.getItem('sq_yesterday_answered') === new Date().toLocaleDateString("en-CA");
       if (dbSess[new Date(Date.now()-86400000).toLocaleDateString('en-CA')] && !alreadyAnsweredToday) {
-        console.log("setting showYesterday true - should not happen");
         setShowYesterday(true);
       }
       }
