@@ -387,7 +387,6 @@ export default function App() {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         console.log("handleSupabaseUser called", session.user.id);
-await handleSupabaseUser(session.user);
         await handleSupabaseUser(session.user);
         return;
       }
@@ -408,7 +407,6 @@ await handleSupabaseUser(session.user);
         setUserId(storedUserId);
         if (storedAvatar) { setUserAvatar(storedAvatar); setAuthUser({ picture: storedAvatar, name: storedName }); }
         console.log("booting from localStorage userId:", storedUserId);
-bootFromSupabase(storedUserId, storedName||'Friend');
         bootFromSupabase(storedUserId, storedName||'Friend');
       } else {
         goTo("login");
@@ -494,7 +492,7 @@ bootFromSupabase(storedUserId, storedName||'Friend');
       setProfile(p);
       setLang(dbProfile.lang||'EN');
       setWheelRatings(dbProfile.wheel_of_life||{});
-      if (dbSess && dbSess[new Date().toLocaleDateString('en-CA')] && dbProfile.values?.length) {
+      if (dbProfile.values?.length) {
         // Has session today and profile — show yesterday check first
         const alreadyAnsweredToday = localStorage.getItem('sq_yesterday_answered') === new Date().toLocaleDateString("en-CA"); console.log("yesterday check:", alreadyAnsweredToday, localStorage.getItem('sq_yesterday_answered'), new Date().toLocaleDateString("en-CA"));
       if (dbSess[new Date(Date.now()-86400000).toLocaleDateString('en-CA')] && !alreadyAnsweredToday) {
