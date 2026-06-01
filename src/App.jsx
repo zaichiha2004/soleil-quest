@@ -303,6 +303,8 @@ export default function App() {
   const [yesterdayAnswer, setYesterdayAnswer] = useState(null); // How yesterday went
   const [showYesterday, setShowYesterday] = useState(false);
   const [animKey, setAnimKey]   = useState(0);
+  const [editingReflection, setEditingReflection] = useState(null);
+  const [editReflectionText, setEditReflectionText] = useState("");
 
   // onboarding
   const [onbStep, setOnbStep]   = useState(0);
@@ -1420,7 +1422,7 @@ export default function App() {
                         </div>
                       )}
                       {s.plan?.challenge&&<div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.15)",borderRadius:12,padding:"13px 15px",marginBottom:14}}><p style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(160,140,220,.5)",marginBottom:7}}>{L("A question to sit with","Вопрос для размышления","Una pregunta para reflexionar")}</p><p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.76)"}}>{`"${s.plan.challenge}"`}</p></div>}
-                      {s.reflection&&<div style={{marginBottom:4}}><p style={{fontSize:11,color:"rgba(240,236,228,.24)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:6}}>{L("Reflection","Рефлексия","Reflexión")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.65)",lineHeight:1.65}}>{s.reflection}</p></div>}
+                      {<div style={{marginBottom:4}}>   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>     <p style={{fontSize:11,color:"rgba(240,236,228,.24)",textTransform:"uppercase",letterSpacing:".06em"}}>{L("Reflection","Рефлексия","Reflexión")}</p>     <button className="tbtn" style={{fontSize:11}} onClick={e=>{e.stopPropagation();setEditingReflection(editingReflection===d?null:d);setEditReflectionText(s.reflection||"");}}>{editingReflection===d?L("Cancel","Отмена","Cancelar"):L("Edit","Изменить","Editar")}</button>   </div>   {editingReflection===d?(     <div>       <textarea rows={4} value={editReflectionText} onChange={e=>setEditReflectionText(e.target.value)} placeholder={L("Write your reflection...","Запиши мысли...","Escribe tu reflexión...")}/>       <button className="pbtn" style={{fontSize:13,padding:"8px 16px",marginTop:8}} onClick={async(e)=>{e.stopPropagation();const updated={...sessions,[d]:{...s,reflection:editReflectionText}};setSessions(updated);if(userId)await dbSaveSession(userId,{...s,reflection:editReflectionText});setEditingReflection(null);}}>         {L("Save reflection ✓","Сохранить ✓","Guardar ✓")}       </button>     </div>   ):(     <p style={{fontSize:13,color:"rgba(240,236,228,.65)",lineHeight:1.65}}>{s.reflection||<span style={{color:"rgba(240,236,228,.25)",fontStyle:"italic"}}>{L("No reflection yet — tap Edit to add one.","Нет рефлексии — нажми Изменить.","Sin reflexión — toca Editar.")}</span>}</p>   )} </div>}
                     </div>
                   )}
                 </div>
