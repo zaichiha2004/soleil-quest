@@ -401,7 +401,6 @@ await handleSupabaseUser(session.user);
 
       // Check stored user as fallback
       if (session?.user) return; // already handled above
-const storedUserId = localStorage.getItem('sq_user_id');
       const storedUserId = localStorage.getItem('sq_user_id');
       const storedName = localStorage.getItem('sq_user_name');
       const storedAvatar = localStorage.getItem('sq_user_avatar');
