@@ -1329,7 +1329,7 @@ export default function App() {
               <p style={{fontSize:13,color:"rgba(240,236,228,.36)",lineHeight:1.6,marginBottom:11}}><em>{L("Prompts if helpful: What landed for you today? What are you carrying forward? What surprised you?","Подсказки: Что тебя затронуло? Что ты уносишь с собой? Что удивило?","Si te ayuda: ¿Qué te llegó hoy? ¿Qué te llevas? ¿Qué te sorprendió?")}</em></p>
               <textarea rows={4} placeholder={L("Write your reflection here...","Запиши свои мысли здесь...","Escribe tu reflexión aquí...")} value={reflection} onChange={e=>setReflection(e.target.value)}/>
               <div style={{display:"flex",gap:9,marginTop:12,flexWrap:"wrap"}}>
-                <button className="pbtn" onClick={doSave} disabled={reflSaved}>{reflSaved?L("Saved ✓","Сохранено ✓","Guardado ✓"):L("Save & complete →","Сохранить и завершить →","Guardar y completar →")}</button>
+                <button className="pbtn" onClick={doSave}>{reflSaved?L("Update reflection ✓","Обновить рефлексию ✓","Actualizar reflexión ✓"):L("Save & complete →","Сохранить и завершить →","Guardar y completar →")}</button>
                 {reflSaved&&(
   <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:8,width:"100%"}}>
     <p style={{fontSize:13,color:"rgba(240,236,228,.45)",lineHeight:1.6}}>{L("What would you like to do next?","Что дальше?","¿Qué quieres hacer ahora?")}</p>
