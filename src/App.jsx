@@ -428,7 +428,7 @@ bootFromSupabase(storedUserId, storedName||'Friend');
         name,
         avatar_url: avatar,
       }, {onConflict:'google_id'}).select().single();
-      const uid = dbUser?.id || user.id;
+      const uid = user.id;
       localStorage.setItem('sq_user_id', uid);
       localStorage.setItem('sq_user_name', name);
       localStorage.setItem('sq_user_avatar', avatar);
