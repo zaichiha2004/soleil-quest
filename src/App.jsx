@@ -386,6 +386,8 @@ export default function App() {
       // Check for existing Supabase session
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
+        console.log("handleSupabaseUser called", session.user.id);
+await handleSupabaseUser(session.user);
         await handleSupabaseUser(session.user);
         return;
       }
