@@ -329,6 +329,7 @@ export default function App() {
   // quest
   const [challenge, setChallenge] = useState(null);
   const [conv, setConv]         = useState([]);
+  const [questionHistory, setQuestionHistory] = useState([]);
   const [currentQ, setCurrentQ] = useState(null);
   const [qCount, setQCount]     = useState(0);
   const [sel, setSel]           = useState([]);
@@ -640,11 +641,12 @@ export default function App() {
     setQCount(q=>q-1);
     setSel([]);
     setFreeText("");
-    setCurrentQ({question:prevConv[prevConv.length-1].q,options:prevConv[prevConv.length-1].options,phase:prevConv[prevConv.length-1].phase});
+    setCurrentQ(questionHistory[prevConv.length]||currentQ);
+    setQuestionHistory(h=>h.slice(0,-1));
   }
 };
   const startGame=async(c)=>{
-    setChallenge(c);setConv([]);setQCount(0);setPlan(null);
+    setChallenge(c);setConv([]);setQCount(0);setPlan(null);setQuestionHistory([]);
     setSel([]);setCurrentQ(null);setReadiness(null);
     setFirstStep(null);setStepOpts([]);setReflection("");setReflSaved(false);
     goTo("playing");setLoading(true);
@@ -687,7 +689,7 @@ export default function App() {
       const clean=(data.content?.[0]?.text||"").replace(/```json|```/g,"").trim();
       const parsed=JSON.parse(clean);
       if(parsed.type==="plan"){setPlan(parsed);goTo("readiness");}
-      else{setCurrentQ(parsed);setQCount(depth+1);}
+      else{setCurrentQ(parsed);setQuestionHistory(h=>[...h,parsed]);setQCount(depth+1);}
     }catch{
       if(isFinal){setPlan(fbPlan());goTo("readiness");}
       else{setCurrentQ(fbQ(depth));setQCount(depth+1);}
