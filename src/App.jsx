@@ -1114,7 +1114,7 @@ export default function App() {
                     L("I didn't get to it","Не успел","No llegué a hacerlo"),
                     L("It led me somewhere unexpected","Это привело меня куда-то неожиданному","Me llevó a algo inesperado"),
                   ].map((opt,i)=>(
-                    <button key={i} className="obtn" onClick={()=>{setYesterdayAnswer(i);const uid=userId||localStorage.getItem('sq_user_id');if(uid)dbSaveProfile(uid,{yesterday_answered:today});else localStorage.setItem('sq_yesterday_answered',today);}} style={{fontSize:13}}>
+                    <button key={i} className="obtn" onClick={()=>{setYesterdayAnswer(i);setShowYesterday(false);const uid=userId||localStorage.getItem('sq_user_id');if(uid)dbSaveProfile(uid,{yesterday_answered:today});else localStorage.setItem('sq_yesterday_answered',today);}} style={{fontSize:13}}>
                       <span style={{color:"rgba(240,236,228,.25)",marginRight:8,fontSize:12}}>○</span>{opt}
                     </button>
                   ))}
