@@ -639,7 +639,8 @@ export default function App() {
     const prevConv=conv.slice(0,-1);
     setConv(prevConv);
     setQCount(q=>q-1);
-    const prevAnswers=prevConv[prevConv.length-1]?.a; const prevOpts=questionHistory[prevConv.length]?.options||[]; const restoredSel=prevOpts.reduce((acc,opt,i)=>prevAnswers?.includes(opt)?[...acc,i]:acc,[]); setSel(restoredSel);
+    setSel(prevConv[prevConv.length-1]?.selIdx||[]);
+    setFreeText(prevConv[prevConv.length-1]?.freeText||"");
     setFreeText("");
     setCurrentQ(questionHistory[prevConv.length]||currentQ);
     setQuestionHistory(h=>h.slice(0,-1));
@@ -669,7 +670,7 @@ export default function App() {
       ? allAnswers.join(" AND ALSO: ")
       : allAnswers[0];
     const isMulti=allAnswers.length>=2;
-    const newConv=[...conv,{q:currentQ.question,a:aText,phase:currentQ.phase,multi:isMulti,options:currentQ.options}];
+    const newConv=[...conv,{q:currentQ.question,a:aText,phase:currentQ.phase,multi:isMulti,options:currentQ.options,selIdx:sel,freeText:freeText.trim()}];
     setConv(newConv);setSel([]);setFreeText("");setLoading(true);
     const isLast=newConv.length>=3;
     const history=newConv.map(c=>`[${c.phase}] Q: ${c.q}\nA: ${c.a}${c.multi?" [multiple answers]":""}`).join("\n\n");
