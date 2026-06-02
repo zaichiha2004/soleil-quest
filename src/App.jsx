@@ -495,7 +495,7 @@ export default function App() {
       setWheelRatings(dbProfile.wheel_of_life||{});
       if (dbProfile.values?.length) {
         // Has session today and profile — show yesterday check first
-        const alreadyAnsweredToday = localStorage.getItem('sq_yesterday_answered') === new Date().toLocaleDateString("en-CA");
+        const alreadyAnsweredToday = dbProfile?.yesterday_answered === new Date().toLocaleDateString("en-CA");
       if (dbSess[new Date(Date.now()-86400000).toLocaleDateString('en-CA')] && !alreadyAnsweredToday) {
         setShowYesterday(true);
       }
