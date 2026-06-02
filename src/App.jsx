@@ -640,7 +640,7 @@ export default function App() {
     setQCount(q=>q-1);
     setSel([]);
     setFreeText("");
-    setCurrentQ({question:prevConv[prevConv.length-1].q,options:currentQ?.options,phase:prevConv[prevConv.length-1].phase});
+    setCurrentQ({question:prevConv[prevConv.length-1].q,options:prevConv[prevConv.length-1].options,phase:prevConv[prevConv.length-1].phase});
   }
 };
   const startGame=async(c)=>{
@@ -667,7 +667,7 @@ export default function App() {
       ? allAnswers.join(" AND ALSO: ")
       : allAnswers[0];
     const isMulti=allAnswers.length>=2;
-    const newConv=[...conv,{q:currentQ.question,a:aText,phase:currentQ.phase,multi:isMulti}];
+    const newConv=[...conv,{q:currentQ.question,a:aText,phase:currentQ.phase,multi:isMulti,options:currentQ.options}];
     setConv(newConv);setSel([]);setFreeText("");setLoading(true);
     const isLast=newConv.length>=3;
     const history=newConv.map(c=>`[${c.phase}] Q: ${c.q}\nA: ${c.a}${c.multi?" [multiple answers]":""}`).join("\n\n");
@@ -1213,13 +1213,13 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                <div style={{position:"relative",marginBottom:20}}>
+                <div style={{position:"relative",marginBottom:20}}>   {freeText.trim()&&<span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:"#d4a359",fontSize:12,pointerEvents:"none"}}>✓</span>}
                   <input
                     type="text"
                     value={freeText}
                     onChange={e=>setFreeText(e.target.value)}
                     placeholder={L("Something else on your mind...","Что-то ещё на уме...","¿Algo más en tu mente?")}
-                    style={{background:freeText.trim()?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",border:freeText.trim()?"0.5px solid #d4a359":"0.5px solid rgba(255,255,255,.08)",borderRadius:11,padding:"12px 14px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",width:"100%",transition:"all .18s"}}
+                    style={{background:freeText.trim()?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",border:freeText.trim()?"0.5px solid #d4a359":"0.5px solid rgba(255,255,255,.08)",borderRadius:11,padding:freeText.trim()?"12px 14px 12px 32px":"12px 14px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",width:"100%",transition:"all .18s"}}
                     onFocus={e=>e.target.style.borderColor="rgba(212,163,89,.5)"}
                     onBlur={e=>{e.target.style.borderColor=freeText.trim()?"#d4a359":"rgba(255,255,255,.08)";}}
                   />
