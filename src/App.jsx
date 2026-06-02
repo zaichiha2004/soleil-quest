@@ -1219,9 +1219,9 @@ export default function App() {
                     value={freeText}
                     onChange={e=>setFreeText(e.target.value)}
                     placeholder={L("Something else on your mind...","Что-то ещё на уме...","¿Algo más en tu mente?")}
-                    style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:11,padding:"12px 14px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",width:"100%",transition:"border-color .18s"}}
-                    onFocus={e=>e.target.style.borderColor="rgba(212,163,89,.35)"}
-                    onBlur={e=>e.target.style.borderColor="rgba(255,255,255,.08)"}
+                    style={{background:freeText.trim()?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",border:freeText.trim()?"0.5px solid #d4a359":"0.5px solid rgba(255,255,255,.08)",borderRadius:11,padding:"12px 14px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,outline:"none",width:"100%",transition:"all .18s"}}
+                    onFocus={e=>e.target.style.borderColor="rgba(212,163,89,.5)"}
+                    onBlur={e=>{e.target.style.borderColor=freeText.trim()?"#d4a359":"rgba(255,255,255,.08)";}}
                   />
                 </div>
                 <button className="pbtn" onClick={handleContinue} disabled={(sel.length===0&&!freeText.trim())||loading}>{L("Continue →","Продолжить →","Continuar →")}</button>
