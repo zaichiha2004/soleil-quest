@@ -637,10 +637,11 @@ export default function App() {
   if(qCount<=1){ goTo("challenges"); }
   else{
     const prevConv=conv.slice(0,-1);
+    const currentEntry=conv[conv.length-1];
     setConv(prevConv);
     setQCount(q=>q-1);
-    setSel(prevConv[prevConv.length-1]?.selIdx||[]);
-    setFreeText(prevConv[prevConv.length-1]?.freeText||"");
+    setSel(currentEntry?.selIdx||[]);
+    setFreeText(currentEntry?.freeText||"");
     setFreeText("");
     setCurrentQ(questionHistory[prevConv.length]||currentQ);
     setQuestionHistory(h=>h.slice(0,-1));
