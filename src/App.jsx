@@ -639,7 +639,7 @@ export default function App() {
     const prevConv=conv.slice(0,-1);
     setConv(prevConv);
     setQCount(q=>q-1);
-    setSel([]);
+    const prevAnswers=prevConv[prevConv.length-1]?.a; const prevOpts=questionHistory[prevConv.length]?.options||[]; const restoredSel=prevOpts.reduce((acc,opt,i)=>prevAnswers?.includes(opt)?[...acc,i]:acc,[]); setSel(restoredSel);
     setFreeText("");
     setCurrentQ(questionHistory[prevConv.length]||currentQ);
     setQuestionHistory(h=>h.slice(0,-1));
