@@ -782,7 +782,7 @@ export default function App() {
     .gbtn:hover{color:#f0ece4;border-color:rgba(255,255,255,.22)}
     .tbtn{background:transparent;color:rgba(240,236,228,.32);border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;padding:4px 0;transition:color .15s;}
     .tbtn:hover{color:rgba(240,236,228,.7)}
-    .ntab{padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;}
+    .ntab{padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;font-weight:400;}
     .ntab.on{background:rgba(212,163,89,.12);color:#d4a359;}.ntab.off{background:transparent;color:rgba(212,163,89,.45);}.ntab.off:hover{color:rgba(212,163,89,.8);}
     .ltab{padding:4px 9px;border-radius:6px;font-size:11px;cursor:pointer;border:0.5px solid;font-family:'DM Sans',sans-serif;transition:all .15s;}
     .ltab.on{background:rgba(212,163,89,.15);border-color:#d4a359;color:#d4a359;font-weight:500;}
@@ -919,7 +919,7 @@ export default function App() {
           <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px"}}>Alex Soleil</span>
           <div style={{display:"flex",gap:1,flexShrink:0}}>
             {[["howto",L("How It Works","Как работает","Cómo funciona")],["home","✦ Soleil Quest ✦"],["practices",L("Practices","Практики","Prácticas")],["whoami",L("My Vault","Мой Архив","Mi Bóveda")],["talk","Talk to Alex"]].map(([k,label])=>(
-  <button key={k} className={`ntab ${tab===k?"on":"off"}`} style={k==="home"?{border:"0.5px solid rgba(212,163,89,.4)",color:tab==="home"?"#d4a359":"rgba(212,163,89,.7)"}:{}} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k==="talk"?"talk":k);}}>{label}</button>
+  <button key={k} className={`ntab ${tab===k?"on":"off"}`} style={k==="home"?{border:"0.5px solid rgba(212,163,89,.4)",color:tab==="home"?"#d4a359":"rgba(212,163,89,.7),fontWeight:700"}:{}} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k==="talk"?"talk":k);}}>{label}</button>
             ))}
           </div>
           <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
