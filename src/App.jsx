@@ -677,9 +677,10 @@ const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} ${wheelContext
     const isLast=newConv.length>=3;
     const history=newConv.map(c=>`[${c.phase}] Q: ${c.q}\nA: ${c.a}${c.multi?" [multiple answers]":""}`).join("\n\n");
     const vals=profile?.values?.length?`Values on file: ${profile.values.join(", ")}. Flag if response compromises a stated value.`:"";
+    const wheelContext = Object.keys(wheelRatings).length ? `Wheel of Life: ${WHEEL_CATEGORIES.EN.map((cat,i)=>wheelRatings[i]?`${cat}: ${wheelRatings[i]}`:"").filter(Boolean).join(", ")}.` : "";
     const multi=isMulti?"Multiple answers — complement or contradict?":"";
     const prompt=isLast
-      ?`${vals}\nChallenge: "${challenge.labelEN}"\nConversation:\n${history}\nGenerate Alex Soleil coaching plan. Name the real pattern. Fire/light archetype.`
+      ?`${vals} ${wheelContext}\nChallenge: "${challenge.labelEN}"\nConversation:\n${history}\nGenerate Alex Soleil coaching plan. Name the real pattern. Fire/light archetype.`
       :`${vals}\nChallenge: "${challenge.labelEN}"\nConversation:\n${history}\n${multi}\nQ${newConv.length+1} of 3. ${newConv.length===1?"Deepen — reference Q1. Find pattern.":"Identity level — who are they being."} Max 15 words.`;
     await callAI([{role:"user",content:prompt}],isLast,newConv.length);
   };
