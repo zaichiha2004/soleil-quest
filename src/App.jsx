@@ -1441,7 +1441,7 @@ export default function App() {
         {/* WHO AM I */}
         {screen==="whoami"&&(
           <div key={animKey} style={{paddingTop:40}}>
-            <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:22}}>{L("Who Am I","Кто Я","Quién Soy")}</h2>
+            <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:8}}>{L("My Vault","Мой Архив","Mi Bóveda")}</h2> <p style={{fontSize:14,color:"rgba(240,236,228,.45)",lineHeight:1.7,marginBottom:22}}>{L("Your living self-knowledge space. The more you add here, the more your coaching practice knows you — and the deeper it can go.","Твоё живое пространство самопознания. Чем больше ты здесь добавляешь, тем глубже твоя практика.","Tu espacio de autoconocimiento vivo. Cuanto más añades, más profunda se vuelve tu práctica.")}</p>
             {/* Profile */}
             <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
               {!editingProfile?(
