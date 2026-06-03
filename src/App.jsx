@@ -1270,7 +1270,7 @@ export default function App() {
                   <span className="ratingbtn on" style={{cursor:"default"}}>{readiness}</span>
                   <p style={{fontSize:13,color:"rgba(240,236,228,.45)"}}>{readiness>=7?L("You're ready. Let's make it real.","Ты готов. Давай сделаем это реальным.","Estás listo. Hagámoslo real."):readiness>=4?L("Something in you wants to move.","Что-то внутри хочет двигаться.","Algo en ti quiere moverse."):L("That's honest. One small thing is enough.","Это честно. Одного маленького шага достаточно.","Eso es honesto. Una pequeña cosa es suficiente.")}</p>
                 </div>
-                <h2 style={{fontFamily:"Fraunces,serif",fontSize:20,fontWeight:600,marginBottom:8}}>{L("What's the first step you're willing to take?","Какой первый шаг ты готов сделать?","¿Cuál es el primer paso que estás dispuesto a dar?")}</h2>
+                <h2 style={{fontFamily:"Fraunces,serif",fontSize:20,fontWeight:600,marginBottom:8}}>{L("What's the first step you're willing to take?","Какой первый шаг ты готов(а) сделать?","¿Cuál es el primer paso que estás dispuesto(a) a dar?")}</h2>
                 <p style={{fontSize:12,color:"rgba(240,236,228,.25)",marginBottom:16}}>{L("Select up to 2","Выбери до 2","Selecciona hasta 2")}</p>
                 <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:22}}>
                   {stepOpts.map((opt,i)=>(
