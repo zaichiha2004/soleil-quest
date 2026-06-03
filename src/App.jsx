@@ -918,8 +918,8 @@ export default function App() {
         <div style={{position:"sticky",top:0,zIndex:50,padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",gap:8}}>
           <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px"}}>Alex Soleil</span>
           <div style={{display:"flex",gap:1,flexShrink:0}}>
-            {[["home","Quest"],["whoami",L("Who Am I","Кто Я","Quién Soy")],["practices",L("Practices","Практики","Prácticas")],["howto",L("How It Works","Как работает","Cómo funciona")]].map(([k,label])=>(
-              <button key={k} className={`ntab ${tab===k?"on":"off"}`} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k);}}>{label}</button>
+            {[["howto",L("How It Works","Как работает","Cómo funciona")],["home","Quest"],["practices",L("Practices","Практики","Prácticas")],["whoami",L("My Vault","Мой Архив","Mi Bóveda")],["talk","Talk to Alex"]].map(([k,label])=>(
+              <button key={k} className={`ntab ${tab===k?"on":"off"}`} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k==="talk"?"talk":k);}}>{label}</button>
             ))}
           </div>
           <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
@@ -1544,6 +1544,16 @@ export default function App() {
           </div>
         )}
 
+        {/* TALK TO ALEX */}
+        {screen==="talk"&&(
+        <div key={animKey} style={{paddingTop:40}}>
+          <p style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:12}}>{L("Work with Alex","Работать с Алекс","Trabaja con Alex")}</p>
+          <h2 style={{fontFamily:"Fraunces,serif",fontSize:24,fontWeight:600,lineHeight:1.2,marginBottom:14}}>{L("Ready to go deeper?","Готов идти глубже?","¿Listo para ir más profundo?")}</h2>
+          <p style={{color:"rgba(240,236,228,.48)",fontSize:14,marginBottom:24,lineHeight:1.7}}>{L("If something in your practice is calling for more than a daily quest — a real conversation, a thinking partner, someone in your corner — I'd love to connect.","Если что-то в твоей практике требует большего — настоящего разговора, партнёра по мышлению — я рада пообщаться.","Si algo en tu práctica pide más que un quest diario — una conversación real, un compañero de pensamiento — me encantaría conectar.")}</p>
+          <a href="https://cal.com/alexandera-zaharris-soleil/30min" target="_blank" rel="noopener noreferrer" style={{display:"block",background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.3)",borderRadius:12,padding:"16px 20px",fontSize:14,color:"#d4a359",textDecoration:"none",textAlign:"center",marginBottom:12,fontFamily:"'DM Sans',sans-serif"}}>✨ {L("Book a free 30-min discovery call","Записаться на бесплатную сессию","Reservar sesión de descubrimiento gratuita")}</a>
+          </div>
+        )}
+        
         {/* HOW IT WORKS */}
         {screen==="howto"&&(
           <div key={animKey} style={{paddingTop:40}}>
