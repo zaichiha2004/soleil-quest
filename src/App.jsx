@@ -654,7 +654,8 @@ export default function App() {
     goTo("playing");setLoading(true);
     const ctx=checkinSel.map(i=>checkinOpts[i]).join("; ");
     const vals=profile?.values?.length?`Core values: ${profile.values.join(", ")}.`:"";
-    const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
+const wheelContext = Object.keys(wheelRatings).length ? `Wheel of Life ratings (1-10): ${WHEEL_CATEGORIES.EN.map((cat,i)=>wheelRatings[i]?`${cat}: ${wheelRatings[i]}`:"").filter(Boolean).join(", ")}. Areas rated below 5 may be worth exploring.` : "";
+const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} ${wheelContext} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
     await callAI([{role:"user",content:prompt}],false,0);
   };
 
