@@ -312,7 +312,6 @@ export default function App() {
   // onboarding
   const [onbStep, setOnbStep]   = useState(0);
   const [nameInput, setNameInput] = useState("");
-  const [dobInput, setDobInput] = useState("");
   const [dobDay, setDobDay]     = useState("");
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear]   = useState("");
@@ -361,7 +360,6 @@ export default function App() {
   const [editVals, setEditVals] = useState([]);
   const [editingProfile, setEditingProfile] = useState(false);
   const [editName, setEditName] = useState("");
-  const [editDob, setEditDob]   = useState("");
   const [editDobDay, setEditDobDay]     = useState("");
   const [editDobMonth, setEditDobMonth] = useState("");
   const [editDobYear, setEditDobYear]   = useState("");
@@ -452,8 +450,6 @@ export default function App() {
       options: { redirectTo: window.location.origin }
     });
   };
-
-  const handleGoogleCallback = null; // not used with Supabase auth
 
   const bootFromSupabase = async (uid, googleName) => {
     const [dbProfile, dbSess, dbXpVal] = await Promise.all([
@@ -642,7 +638,6 @@ export default function App() {
     setQCount(q=>q-1);
     setSel(currentEntry?.selIdx||[]);
     setFreeText(currentEntry?.freeText||"");
-    setFreeText("");
     setCurrentQ(questionHistory[prevConv.length]||currentQ);
     setQuestionHistory(h=>h.slice(0,-1));
   }
@@ -654,8 +649,7 @@ export default function App() {
     goTo("playing");setLoading(true);
     const ctx=checkinSel.map(i=>checkinOpts[i]).join("; ");
     const vals=profile?.values?.length?`Core values: ${profile.values.join(", ")}.`:"";
-const wheelContext = Object.keys(wheelRatings).length ? `Wheel of Life ratings (1-10): ${WHEEL_CATEGORIES.EN.map((cat,i)=>wheelRatings[i]?`${cat}: ${wheelRatings[i]}`:"").filter(Boolean).join(", ")}. Areas rated below 5 may be worth exploring.` : "";
-const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} ${wheelContext} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
+    const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
     await callAI([{role:"user",content:prompt}],false,0);
   };
 
@@ -677,10 +671,9 @@ const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} ${wheelContext
     const isLast=newConv.length>=3;
     const history=newConv.map(c=>`[${c.phase}] Q: ${c.q}\nA: ${c.a}${c.multi?" [multiple answers]":""}`).join("\n\n");
     const vals=profile?.values?.length?`Values on file: ${profile.values.join(", ")}. Flag if response compromises a stated value.`:"";
-    const wheelContext = Object.keys(wheelRatings).length ? `Wheel of Life: ${WHEEL_CATEGORIES.EN.map((cat,i)=>wheelRatings[i]?`${cat}: ${wheelRatings[i]}`:"").filter(Boolean).join(", ")}.` : "";
     const multi=isMulti?"Multiple answers — complement or contradict?":"";
     const prompt=isLast
-      ?`${vals} ${wheelContext}\nChallenge: "${challenge.labelEN}"\nConversation:\n${history}\nGenerate Alex Soleil coaching plan. Name the real pattern. Fire/light archetype.`
+      ?`${vals}\nChallenge: "${challenge.labelEN}"\nConversation:\n${history}\nGenerate Alex Soleil coaching plan. Name the real pattern. Fire/light archetype.`
       :`${vals}\nChallenge: "${challenge.labelEN}"\nConversation:\n${history}\n${multi}\nQ${newConv.length+1} of 3. ${newConv.length===1?"Deepen — reference Q1. Find pattern.":"Identity level — who are they being."} Max 15 words.`;
     await callAI([{role:"user",content:prompt}],isLast,newConv.length);
   };
