@@ -918,8 +918,8 @@ export default function App() {
         <div style={{position:"sticky",top:0,zIndex:50,padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",gap:8}}>
           <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px"}}>Alex Soleil</span>
           <div style={{display:"flex",gap:1,flexShrink:0}}>
-            {[["howto",L("How It Works","Как работает","Cómo funciona")],["home","Quest"],["practices",L("Practices","Практики","Prácticas")],["whoami",L("My Vault","Мой Архив","Mi Bóveda")],["talk","Talk to Alex"]].map(([k,label])=>(
-              <button key={k} className={`ntab ${tab===k?"on":"off"}`} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k==="talk"?"talk":k);}}>{label}</button>
+            {[["howto",L("How It Works","Как работает","Cómo funciona")],["home",L("Soleil Quest","Soleil Quest","Soleil Quest")],["practices",L("Practices","Практики","Prácticas")],["whoami",L("My Vault","Мой Архив","Mi Bóveda")],["talk","Talk to Alex"]].map(([k,label])=>(
+  <button key={k} className={`ntab ${tab===k?"on":"off"}`} style={k==="home"?{border:"0.5px solid rgba(212,163,89,.4)",color:tab==="home"?"#d4a359":"rgba(212,163,89,.7)"}:{}} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k==="talk"?"talk":k);}}>{label}</button>
             ))}
           </div>
           <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
