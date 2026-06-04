@@ -1534,118 +1534,183 @@ export default function App() {
 
         {/* WHO AM I */}
         {screen==="whoami"&&(
-          <div key={animKey} style={{paddingTop:40}}>
-            <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:8}}>{L("My Vault","Мой Архив","Mi Bóveda")}</h2> <p style={{fontSize:14,color:"rgba(240,236,228,.45)",lineHeight:1.7,marginBottom:22}}>{L("Your living self-knowledge space. The more you add here, the more your coaching practice knows you — and the deeper it can go.","Твоё живое пространство самопознания. Чем больше ты здесь добавляешь, тем глубже твоя практика.","Tu espacio de autoconocimiento vivo. Cuanto más añades, más profunda se vuelve tu práctica.")}</p>
-            {/* Profile */}
-            <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
-              {!editingProfile?(
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
-                  <div><p style={{fontSize:15,fontWeight:500,marginBottom:4}}>{profile?.name}</p>{profile?.dob&&<p style={{fontSize:13,color:"rgba(240,236,228,.38)"}}>{profile.dob}</p>}</div>
-                  <button className="tbtn" onClick={()=>{
-                    setEditName(profile?.name||"");
-                    const parts = profile?.dob ? profile.dob.split("-") : ["","",""];
-                    setEditDobYear(parts[0]||""); setEditDobMonth(parts[1]?String(parseInt(parts[1])):""); setEditDobDay(parts[2]?String(parseInt(parts[2])):"");
-                    setEditingProfile(true);
-                  }}>{L("Edit","Изменить","Editar")}</button>
-                </div>
-              ):(
-                <div>
-                  <input type="text" value={editName} onChange={e=>setEditName(e.target.value)} style={{marginBottom:9}} placeholder={L("Your name","Твоё имя","Tu nombre")}/>
-                  <div style={{marginBottom:13}}>
-                    <DobDropdown
-                      lang={lang} day={editDobDay} month={editDobMonth} year={editDobYear}
-                      onDay={setEditDobDay} onMonth={setEditDobMonth} onYear={setEditDobYear}
-                      onClear={()=>{setEditDobDay("");setEditDobMonth("");setEditDobYear("");}}
-                    />
-                  </div>
-                  <div style={{display:"flex",gap:7}}><button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={saveEditedProfile}>{L("Save","Сохранить","Guardar")}</button><button className="gbtn" style={{fontSize:13}} onClick={()=>setEditingProfile(false)}>{L("Cancel","Отмена","Cancelar")}</button></div>
-                </div>
-              )}
-            </div>
-            {/* Values */}
-            <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-                <p style={{fontSize:14,fontWeight:500}}>{L("My values","Мои ценности","Mis valores")}</p>
-                <div style={{display:"flex",gap:7}}>
-                  <button className="gbtn" style={{fontSize:12}} onClick={()=>startValChallenge(profile?.values||[],"whoami")}>{L("Test my values","Проверить ценности","Probar mis valores")}</button>
-                  {!editingValues?<button className="tbtn" onClick={()=>{setEditVals([...(profile?.values||[])]);setEditingValues(true);}}>{L("Edit","Изменить","Editar")}</button>:<button className="tbtn" onClick={saveEditedValues}>{L("Save","Сохранить","Guardar")}</button>}
-                </div>
-              </div>
-              {!editingValues?(
-                <div style={{display:"flex",flexWrap:"wrap",gap:7}}>
-                  {profile?.values?.map(v=>(
-                    <button key={v} onClick={()=>setTooltipVal(tooltipVal===v?null:v)}
-                      style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.25)",borderRadius:20,padding:"5px 12px",fontSize:13,color:"#d4a359",cursor:"pointer",transition:"all .15s",fontFamily:"'DM Sans',sans-serif",display:"flex",alignItems:"center",gap:5}}>
-                      {valLabel(v)}<span style={{fontSize:11,opacity:.55}}>ⓘ</span>
-                    </button>
-                  ))}
-                </div>
-              ):(
-                <div>
-                  <p style={{fontSize:12,color:"rgba(240,236,228,.32)",marginBottom:10}}>{selValues.length||editVals.length} / 5</p>
-                  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
-                    {VALUES_LIST.map(v=>(
-                      <div key={v} className={`vcard ${editVals.includes(v)?"sel":""}`} onClick={()=>setEditVals(p=>p.includes(v)?p.filter(x=>x!==v):p.length<5?[...p,v]:p)}>
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                          <span style={{fontSize:12,fontWeight:500,color:editVals.includes(v)?"#d4a359":"#f0ece4"}}>{valLabel(v)}</span>
-                          <button style={{background:"none",border:"none",color:"rgba(212,163,89,.5)",fontSize:11,cursor:"pointer",padding:0,lineHeight:1}} onClick={e=>{e.stopPropagation();setTooltipVal(v);}}>ⓘ</button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* Wheel of Life */}
-            <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"15px 17px",marginBottom:14}}>
-              <p style={{fontSize:14,fontWeight:500,marginBottom:4}}>{L("Wheel of Life","Колесо жизни","Rueda de la Vida")}</p>
-              <p style={{fontSize:12,color:"rgba(240,236,228,.4)",lineHeight:1.55,marginBottom:16}}>{L("Rate each life area 1–10. This helps guide your coaching focus.","Оцени каждую сферу жизни от 1 до 10. Это помогает направить коучинг.","Evalúa cada área de vida del 1 al 10. Esto guía tu enfoque de coaching.")}</p>
-              <WheelChart ratings={wheelRatings} lang={lang} size="full"/>
-              <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:10}}>
-                {WHEEL_CATEGORIES[lang]?.map((cat,i)=>(
-                  <div key={i}>
-                    <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
-                      <p style={{fontSize:13,color:"rgba(240,236,228,.8)"}}>{cat}</p>
-                      <button onClick={()=>setWheelTooltip(wheelTooltip===i?null:i)} style={{background:"none",border:"none",color:"rgba(212,163,89,.55)",fontSize:11,cursor:"pointer",padding:0,flexShrink:0}}>ⓘ</button>
-                      <span style={{fontSize:13,color:"#d4a359",marginLeft:"auto",fontWeight:500}}>{wheelRatings[i]||"—"}</span>
-                    </div>
-                    {wheelTooltip===i && <p style={{fontSize:12,color:"rgba(240,236,228,.5)",lineHeight:1.55,marginBottom:6,paddingLeft:2}}>{WHEEL_DESCRIPTIONS[lang]?.[i]}</p>}
-                    <div style={{display:"flex",gap:4}}>
-                      {[1,2,3,4,5,6,7,8,9,10].map(n=>(
-                        <button key={n} onClick={()=>{const r={...wheelRatings,[i]:n};saveWheelRatings(r);}}
-                          style={{flex:1,height:22,borderRadius:4,border:"0.5px solid",cursor:"pointer",fontSize:10,fontFamily:"'DM Sans',sans-serif",
-                            background:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.04)",
-                            borderColor:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.1)",
-                            color:wheelRatings[i]>=n?"#0c0c10":"rgba(240,236,228,.4)"}}>
-                          {n}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+  <div key={animKey} style={{paddingTop:40}}>
+    <p style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:4}}>{L("My Vault","Мой Архив","Mi Bóveda")}</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:6}}>{L("Your self-knowledge space","Твоё пространство самопознания","Tu espacio de autoconocimiento")}</h2>
+    <p style={{fontSize:13,color:"rgba(240,236,228,.4)",lineHeight:1.6,marginBottom:20}}>{L("The more you add here, the deeper your practice can go.","Чем больше ты здесь добавляешь, тем глубже твоя практика.","Cuanto más añades aquí, más profunda se vuelve tu práctica.")}</p>
 
-            {/* Numerology */}
-            {profile?.arcana&&ARCANA_MEANINGS[profile.arcana]&&(
-  <div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.2)",borderRadius:12,padding:"16px 18px",marginBottom:14}}>
-    <p style={{fontSize:11,color:"rgba(160,140,220,.5)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:4}}>{L("Numerology","Нумерология","Numerología")} · {L(`Arcana ${profile.arcana}`+` · `+ARCANA_MEANINGS[profile.arcana].name.en,`Аркан ${profile.arcana}`+` · `+ARCANA_MEANINGS[profile.arcana].name.ru,`Arcano ${profile.arcana}`+` · `+ARCANA_MEANINGS[profile.arcana].name.es)}</p>
-    <p style={{fontFamily:"Fraunces,serif",fontSize:20,fontWeight:600,color:"#d4a359",marginBottom:16}}>{ARCANA_MEANINGS[profile.arcana].name[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
-    <div style={{marginBottom:12}}>
+    {/* Profile */}
+    <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:13,padding:"14px 16px",marginBottom:8}}>
+      {!editingProfile?(
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div><p style={{fontSize:15,fontWeight:500,marginBottom:3}}>{profile?.name}</p>{profile?.dob&&<p style={{fontSize:12,color:"rgba(240,236,228,.38)"}}>{profile.dob}</p>}</div>
+          <button className="tbtn" onClick={()=>{setEditName(profile?.name||"");const parts=profile?.dob?profile.dob.split("-"):["","",""];setEditDobYear(parts[0]||"");setEditDobMonth(parts[1]?String(parseInt(parts[1])):"");setEditDobDay(parts[2]?String(parseInt(parts[2])):"");setEditingProfile(true);}}>{L("Edit","Изменить","Editar")}</button>
+        </div>
+      ):(
+        <div>
+          <input type="text" value={editName} onChange={e=>setEditName(e.target.value)} style={{marginBottom:9}} placeholder={L("Your name","Твоё имя","Tu nombre")}/>
+          <div style={{marginBottom:13}}><DobDropdown lang={lang} day={editDobDay} month={editDobMonth} year={editDobYear} onDay={setEditDobDay} onMonth={setEditDobMonth} onYear={setEditDobYear} onClear={()=>{setEditDobDay("");setEditDobMonth("");setEditDobYear("");}}/></div>
+          <div style={{display:"flex",gap:7}}><button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={saveEditedProfile}>{L("Save","Сохранить","Guardar")}</button><button className="gbtn" style={{fontSize:13}} onClick={()=>setEditingProfile(false)}>{L("Cancel","Отмена","Cancelar")}</button></div>
+        </div>
+      )}
+    </div>
+
+    {/* Numerology tile */}
+    {profile?.arcana&&ARCANA_MEANINGS[profile.arcana]&&(
+      <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:13,padding:15,marginBottom:8,cursor:"pointer",transition:"all .2s"}}
+        onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(100,200,150,.3)"}
+        onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.08)"}
+        onClick={()=>goTo("vault-numerology")}>
+        <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <div style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,color:"rgba(160,140,220,.7)",minWidth:36}}>{profile.arcana}</div>
+          <div style={{flex:1}}>
+            <p style={{fontSize:13,fontWeight:500,color:"rgba(100,200,150,.8)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3}}>{L("Numerology","Нумерология","Numerología")}</p>
+            <p style={{fontFamily:"Fraunces,serif",fontSize:13,fontWeight:600,color:"#d4a359",marginBottom:4}}>{ARCANA_MEANINGS[profile.arcana].name[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
+            <p style={{fontSize:12,color:"rgba(240,236,228,.36)",lineHeight:1.45}}>{ARCANA_MEANINGS[profile.arcana].plus[lang==="RU"?"ru":lang==="ES"?"es":"en"].split('.')[0]}.</p>
+          </div>
+          <span style={{fontSize:11,color:"rgba(240,236,228,.3)",alignSelf:"flex-end",paddingBottom:2}}>Explore →</span>
+        </div>
+      </div>
+    )}
+
+    {/* Values + Wheel grid */}
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+
+      {/* Values tile */}
+      <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:13,padding:15,cursor:"pointer",transition:"all .2s",display:"flex",flexDirection:"column",minHeight:150}}
+        onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(100,200,150,.3)"}
+        onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.08)"}
+        onClick={()=>goTo("vault-values")}>
+        <div style={{flex:1}}>
+          <p style={{fontSize:20,marginBottom:8}}>✦</p>
+          <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"rgba(100,200,150,.8)",marginBottom:5}}>{L("Values","Ценности","Valores")}</p>
+          <p style={{fontSize:12,color:"rgba(240,236,228,.36)",lineHeight:1.45,marginBottom:10}}>{L("What guides you when everything else falls away.","Что ведёт тебя, когда всё остальное исчезает.","Lo que te guía cuando todo lo demás desaparece.")}</p>
+          <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
+            {profile?.values?.slice(0,2).map(v=><span key={v} style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.2)",borderRadius:20,padding:"3px 8px",fontSize:11,color:"#d4a359"}}>{valLabel(v)}</span>)}
+            {(profile?.values?.length||0)>2&&<span style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.07)",borderRadius:20,padding:"3px 8px",fontSize:11,color:"rgba(240,236,228,.3)"}}>+{(profile?.values?.length||0)-2}</span>}
+          </div>
+        </div>
+        <p style={{fontSize:11,color:"rgba(240,236,228,.3)",marginTop:10}}>Explore →</p>
+      </div>
+
+      {/* Wheel tile */}
+      <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:13,padding:15,cursor:"pointer",transition:"all .2s",display:"flex",flexDirection:"column",minHeight:150}}
+        onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(100,200,150,.3)"}
+        onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.08)"}
+        onClick={()=>goTo("vault-wheel")}>
+        <div style={{flex:1}}>
+          <p style={{fontSize:20,marginBottom:8}}>◎</p>
+          <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"rgba(100,200,150,.8)",marginBottom:5}}>{L("Wheel of Life","Колесо жизни","Rueda de la Vida")}</p>
+          <p style={{fontSize:12,color:"rgba(240,236,228,.36)",lineHeight:1.45,marginBottom:10}}>{L("Where you are — and where you want to go.","Где ты сейчас — и куда хочешь прийти.","Dónde estás — y hacia dónde quieres ir.")}</p>
+          <div style={{display:"flex",flexDirection:"column",gap:4}}>
+            {WHEEL_CATEGORIES[lang].slice(0,4).map((cat,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
+                <span style={{fontSize:10,color:"rgba(240,236,228,.35)",width:68,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{cat.split(" & ")[0]}</span>
+                <div style={{flex:1,height:3,background:"rgba(255,255,255,.06)",borderRadius:2,overflow:"hidden"}}>
+                  <div style={{height:"100%",background:"#d4a359",borderRadius:2,width:`${((wheelRatings[i]||0)/10)*100}%`}}/>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p style={{fontSize:11,color:"rgba(240,236,228,.3)",marginTop:10}}>Explore →</p>
+      </div>
+    </div>
+  </div>
+)}
+
+            {/* VAULT NUMEROLOGY */}
+{screen==="vault-numerology"&&profile?.arcana&&ARCANA_MEANINGS[profile.arcana]&&(
+  <div key={animKey} style={{paddingTop:40}}>
+    <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("whoami")}>← {L("My Vault","Мой Архив","Mi Bóveda")}</button>
+    <p style={{fontSize:11,color:"rgba(160,140,220,.5)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:4}}>{L("Numerology","Нумерология","Numerología")} · {L(`Arcana ${profile.arcana}`,`Аркан ${profile.arcana}`,`Arcano ${profile.arcana}`)}</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:24,fontWeight:600,color:"#d4a359",marginBottom:20}}>{ARCANA_MEANINGS[profile.arcana].name[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</h2>
+    <div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.2)",borderRadius:12,padding:"16px 18px",marginBottom:10}}>
       <p style={{fontSize:11,fontWeight:600,letterSpacing:".07em",textTransform:"uppercase",color:"rgba(100,200,150,.65)",marginBottom:7,display:"flex",alignItems:"center",gap:7}}><span style={{width:5,height:5,borderRadius:"50%",background:"rgba(100,200,150,.6)",display:"inline-block",flexShrink:0}}/>Your light</p>
-      <p style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,fontStyle:"italic",paddingLeft:12,borderLeft:"1.5px solid rgba(100,200,150,.2)"}}>{ARCANA_MEANINGS[profile.arcana].plus[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
+      <p style={{fontSize:14,color:"rgba(240,236,228,.75)",lineHeight:1.7,fontStyle:"italic",paddingLeft:12,borderLeft:"1.5px solid rgba(100,200,150,.2)"}}>{ARCANA_MEANINGS[profile.arcana].plus[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
     </div>
-    <div style={{borderTop:"0.5px solid rgba(255,255,255,.07)",paddingTop:12}}>
+    <div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.2)",borderRadius:12,padding:"16px 18px",marginBottom:10}}>
       <p style={{fontSize:11,fontWeight:600,letterSpacing:".07em",textTransform:"uppercase",color:"rgba(220,110,100,.6)",marginBottom:7,display:"flex",alignItems:"center",gap:7}}><span style={{width:5,height:5,borderRadius:"50%",background:"rgba(220,110,100,.5)",display:"inline-block",flexShrink:0}}/>Your shadow</p>
-      <p style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,fontStyle:"italic",paddingLeft:12,borderLeft:"1.5px solid rgba(220,110,100,.15)"}}>{ARCANA_MEANINGS[profile.arcana].minus[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
+      <p style={{fontSize:14,color:"rgba(240,236,228,.75)",lineHeight:1.7,fontStyle:"italic",paddingLeft:12,borderLeft:"1.5px solid rgba(220,110,100,.15)"}}>{ARCANA_MEANINGS[profile.arcana].minus[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
     </div>
-    <div style={{marginTop:14,background:"rgba(212,163,89,.06)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:10,padding:"10px 14px",fontSize:12,color:"rgba(240,236,228,.42)",lineHeight:1.6}}>
+    <div style={{background:"rgba(212,163,89,.06)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:10,padding:"10px 14px",fontSize:12,color:"rgba(240,236,228,.42)",lineHeight:1.6}}>
       <span style={{color:"#d4a359",fontWeight:500}}>{L("How it's calculated: ","Как рассчитывается: ","Cómo se calcula: ")}</span>{L("Your arcana is your day of birth. Born on the 15th → Arcana 15. Born on the 25th → 2+5 = 7 → Arcana 7.","Ваш аркан — это день рождения. Рождён 15-го → Аркан 15. Рождён 25-го → 2+5 = 7 → Аркан 7.","Tu arcano es tu día de nacimiento. Nacido el 15 → Arcano 15. Nacido el 25 → 2+5 = 7 → Arcano 7.")}
     </div>
   </div>
 )}
+
+{/* VAULT VALUES */}
+{screen==="vault-values"&&(
+  <div key={animKey} style={{paddingTop:40}}>
+    <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("whoami")}>← {L("My Vault","Мой Архив","Mi Bóveda")}</button>
+    <p style={{fontSize:12,color:"rgba(100,200,150,.7)",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>{L("Values","Ценности","Valores")}</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:20}}>{L("What guides you when everything else falls away.","Что ведёт тебя, когда всё остальное исчезает.","Lo que te guía cuando todo lo demás desaparece.")}</h2>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+      <p style={{fontSize:13,color:"rgba(240,236,228,.45)"}}>{profile?.values?.length||0} {L("values selected","ценностей выбрано","valores seleccionados")}</p>
+      <div style={{display:"flex",gap:7}}>
+        <button className="gbtn" style={{fontSize:12}} onClick={()=>startValChallenge(profile?.values||[],"whoami")}>{L("Test my values","Проверить","Probar")}</button>
+        {!editingValues?<button className="tbtn" onClick={()=>{setEditVals([...(profile?.values||[])]);setEditingValues(true);}}>{L("Edit","Изменить","Editar")}</button>:<button className="tbtn" onClick={saveEditedValues}>{L("Save","Сохранить","Guardar")}</button>}
+      </div>
+    </div>
+    {!editingValues?(
+      <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:20}}>
+        {profile?.values?.map(v=>(
+          <button key={v} onClick={()=>setTooltipVal(tooltipVal===v?null:v)} style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.25)",borderRadius:20,padding:"5px 12px",fontSize:13,color:"#d4a359",cursor:"pointer",transition:"all .15s",fontFamily:"'DM Sans',sans-serif",display:"flex",alignItems:"center",gap:5}}>
+            {valLabel(v)}<span style={{fontSize:11,opacity:.55}}>ⓘ</span>
+          </button>
+        ))}
+      </div>
+    ):(
+      <div style={{marginBottom:20}}>
+        <p style={{fontSize:12,color:"rgba(240,236,228,.32)",marginBottom:10}}>{editVals.length} / 5</p>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:6}}>
+          {VALUES_LIST.map(v=>(
+            <div key={v} className={`vcard ${editVals.includes(v)?"sel":""}`} onClick={()=>setEditVals(p=>p.includes(v)?p.filter(x=>x!==v):p.length<5?[...p,v]:p)}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <span style={{fontSize:12,fontWeight:500,color:editVals.includes(v)?"#d4a359":"#f0ece4"}}>{valLabel(v)}</span>
+                <button style={{background:"none",border:"none",color:"rgba(212,163,89,.5)",fontSize:11,cursor:"pointer",padding:0,lineHeight:1}} onClick={e=>{e.stopPropagation();setTooltipVal(v);}}>ⓘ</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
+{/* VAULT WHEEL */}
+{screen==="vault-wheel"&&(
+  <div key={animKey} style={{paddingTop:40}}>
+    <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("whoami")}>← {L("My Vault","Мой Архив","Mi Bóveda")}</button>
+    <p style={{fontSize:12,color:"rgba(100,200,150,.7)",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>{L("Wheel of Life","Колесо жизни","Rueda de la Vida")}</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:6}}>{L("Where you are — and where you want to go.","Где ты сейчас — и куда хочешь прийти.","Dónde estás — y hacia dónde quieres ir.")}</h2>
+    <p style={{fontSize:13,color:"rgba(240,236,228,.4)",lineHeight:1.6,marginBottom:20}}>{L("Rate each area 1–10. Your coaching practice reads this to go deeper.","Оцени каждую сферу от 1 до 10. Практика читает это, чтобы идти глубже.","Evalúa cada área del 1 al 10. Tu práctica lee esto para ir más profundo.")}</p>
+    <WheelChart ratings={wheelRatings} lang={lang} size="full"/>
+    <div style={{marginTop:16,display:"flex",flexDirection:"column",gap:10}}>
+      {WHEEL_CATEGORIES[lang]?.map((cat,i)=>(
+        <div key={i}>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+            <p style={{fontSize:13,color:"rgba(240,236,228,.8)"}}>{cat}</p>
+            <button onClick={()=>setWheelTooltip(wheelTooltip===i?null:i)} style={{background:"none",border:"none",color:"rgba(212,163,89,.55)",fontSize:11,cursor:"pointer",padding:0,flexShrink:0}}>ⓘ</button>
+            <span style={{fontSize:13,color:"#d4a359",marginLeft:"auto",fontWeight:500}}>{wheelRatings[i]||"—"}</span>
           </div>
-        )}
+          {wheelTooltip===i&&<p style={{fontSize:12,color:"rgba(240,236,228,.5)",lineHeight:1.55,marginBottom:6,paddingLeft:2}}>{WHEEL_DESCRIPTIONS[lang]?.[i]}</p>}
+          <div style={{display:"flex",gap:4}}>
+            {[1,2,3,4,5,6,7,8,9,10].map(n=>(
+              <button key={n} onClick={()=>{const r={...wheelRatings,[i]:n};saveWheelRatings(r);}}
+                style={{flex:1,height:22,borderRadius:4,border:"0.5px solid",cursor:"pointer",fontSize:10,fontFamily:"'DM Sans',sans-serif",
+                  background:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.04)",
+                  borderColor:wheelRatings[i]>=n?"#d4a359":"rgba(255,255,255,.1)",
+                  color:wheelRatings[i]>=n?"#0c0c10":"rgba(240,236,228,.4)"}}>
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 
         {/* TALK TO ALEX */}
         {screen==="talk"&&(
