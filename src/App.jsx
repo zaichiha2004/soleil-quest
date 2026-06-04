@@ -1565,10 +1565,10 @@ export default function App() {
           <div style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,color:"rgba(160,140,220,.7)",minWidth:36}}>{profile.arcana}</div>
           <div style={{flex:1}}>
             <p style={{fontSize:13,fontWeight:500,color:"rgba(100,200,150,.8)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3}}>{L("Numerology","Нумерология","Numerología")}</p>
-            <p style={{fontFamily:"Fraunces,serif",fontSize:13,fontWeight:600,color:"#d4a359",marginBottom:4}}>{ARCANA_MEANINGS[profile.arcana].name[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
+            <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"#d4a359",marginBottom:4}}>{ARCANA_MEANINGS[profile.arcana].name[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
             <p style={{fontSize:12,color:"rgba(240,236,228,.36)",lineHeight:1.45}}>{ARCANA_MEANINGS[profile.arcana].plus[lang==="RU"?"ru":lang==="ES"?"es":"en"].split('.')[0]}.</p>
           </div>
-          <span style={{fontSize:11,color:"rgba(240,236,228,.3)",alignSelf:"flex-end",paddingBottom:2}}>Explore →</span>
+          <span style={{fontSize:11,color:"rgba(240,236,228,.55)",alignSelf:"flex-end",paddingBottom:2}}>Explore →</span>
         </div>
       </div>
     )}
@@ -1590,7 +1590,7 @@ export default function App() {
             {(profile?.values?.length||0)>2&&<span style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.07)",borderRadius:20,padding:"3px 8px",fontSize:11,color:"rgba(240,236,228,.3)"}}>+{(profile?.values?.length||0)-2}</span>}
           </div>
         </div>
-        <p style={{fontSize:11,color:"rgba(240,236,228,.3)",marginTop:10}}>Explore →</p>
+        <p style={{fontSize:11,color:"rgba(240,236,228,.55)",marginTop:10}}>Explore →</p>
       </div>
 
       {/* Wheel tile */}
@@ -1613,7 +1613,7 @@ export default function App() {
             ))}
           </div>
         </div>
-        <p style={{fontSize:11,color:"rgba(240,236,228,.3)",marginTop:10}}>Explore →</p>
+        <p style={{fontSize:11,color:"rgba(240,236,228,.55)",marginTop:10}}>Explore →</p>
       </div>
     </div>
   </div>
