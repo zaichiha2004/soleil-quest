@@ -1564,7 +1564,6 @@ export default function App() {
         <div style={{display:"flex",alignItems:"center",gap:16}}>
           <div style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,color:"rgba(160,140,220,.7)",minWidth:36}}>{profile.arcana}</div>
           <div style={{flex:1}}>
-            <p style={{fontSize:20,marginBottom:8}}>✦</p>
             <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"rgba(100,200,150,.8)",marginBottom:5}}>{L("Numerology","Нумерология","Numerología")}</p>
             <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"#d4a359",marginBottom:4}}>{ARCANA_MEANINGS[profile.arcana].name[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
             <p style={{fontSize:12,color:"rgba(240,236,228,.36)",lineHeight:1.45}}>{ARCANA_MEANINGS[profile.arcana].plus[lang==="RU"?"ru":lang==="ES"?"es":"en"].split('.')[0]}.</p>
@@ -1583,7 +1582,6 @@ export default function App() {
         onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.08)"}
         onClick={()=>goTo("vault-values")}>
         <div style={{flex:1}}>
-          <p style={{fontSize:20,marginBottom:8}}>✦</p>
           <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"rgba(100,200,150,.8)",marginBottom:5}}>{L("Values","Ценности","Valores")}</p>
           <p style={{fontSize:12,color:"rgba(240,236,228,.36)",lineHeight:1.45,marginBottom:10}}>{L("What guides you when everything else falls away.","Что ведёт тебя, когда всё остальное исчезает.","Lo que te guía cuando todo lo demás desaparece.")}</p>
           <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
@@ -1600,7 +1598,6 @@ export default function App() {
         onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(255,255,255,.08)"}
         onClick={()=>goTo("vault-wheel")}>
         <div style={{flex:1}}>
-          <p style={{fontSize:20,marginBottom:8}}>◎</p>
           <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"rgba(100,200,150,.8)",marginBottom:5}}>{L("Wheel of Life","Колесо жизни","Rueda de la Vida")}</p>
           <p style={{fontSize:12,color:"rgba(240,236,228,.36)",lineHeight:1.45,marginBottom:10}}>{L("Where you are — and where you want to go.","Где ты сейчас — и куда хочешь прийти.","Dónde estás — y hacia dónde quieres ir.")}</p>
           <div style={{display:"flex",flexDirection:"column",gap:4}}>
