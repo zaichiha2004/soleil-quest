@@ -1564,7 +1564,8 @@ export default function App() {
         <div style={{display:"flex",alignItems:"center",gap:16}}>
           <div style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,color:"rgba(160,140,220,.7)",minWidth:36}}>{profile.arcana}</div>
           <div style={{flex:1}}>
-            <p style={{fontSize:13,fontWeight:500,color:"rgba(100,200,150,.8)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3}}>{L("Numerology","Нумерология","Numerología")}</p>
+            <p style={{fontSize:20,marginBottom:8}}>✦</p>
+            <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"rgba(100,200,150,.8)",marginBottom:5}}>{L("Numerology","Нумерология","Numerología")}</p>
             <p style={{fontFamily:"Fraunces,serif",fontSize:14,fontWeight:600,color:"#d4a359",marginBottom:4}}>{ARCANA_MEANINGS[profile.arcana].name[lang==="RU"?"ru":lang==="ES"?"es":"en"]}</p>
             <p style={{fontSize:12,color:"rgba(240,236,228,.36)",lineHeight:1.45}}>{ARCANA_MEANINGS[profile.arcana].plus[lang==="RU"?"ru":lang==="ES"?"es":"en"].split('.')[0]}.</p>
           </div>
