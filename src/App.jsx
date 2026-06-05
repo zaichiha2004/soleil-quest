@@ -916,6 +916,14 @@ export default function App() {
     .vscol{padding:12px 14px;}.vscol.us{border-left:0.5px solid rgba(255,255,255,.08);background:rgba(212,163,89,.05);}
     .vc-opt{width:100%;background:rgba(255,255,255,.04);border:0.5px solid rgba(255,255,255,.08);border-radius:10px;padding:11px 14px;color:#f0ece4;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;text-align:left;transition:all .18s;line-height:1.5;margin-bottom:7px;}
     .vc-opt:hover{background:rgba(212,163,89,.08);border-color:rgba(212,163,89,.3);}
+    .desktop-nav{display:flex;gap:1px;}
+.mobile-nav{display:none;}
+.mobile-bottom-nav{display:none;}
+@media(max-width:600px){
+  .desktop-nav{display:none;}
+  .mobile-nav{display:flex;}
+  .mobile-bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(12,12,16,.97);border-top:0.5px solid rgba(255,255,255,.08);padding:8px 0 18px;z-index:50;}
+}
   `;
 
   // ── VALUES CHALLENGE MODAL ──
@@ -1014,38 +1022,63 @@ export default function App() {
 
       {/* NAV */}
       {screen!=="onboarding"&&screen!=="boot"&&screen!=="login"&&(
-        <div style={{position:"sticky",top:0,zIndex:50,padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",gap:8}}>
-          <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px"}}>Alex Soleil</span>
-          <div style={{display:"flex",gap:1,flexShrink:0}}>
-            {[["howto",L("How It Works","Как работает","Cómo funciona")],["home","✦ Soleil Quest ✦"],["practices",L("Practices","Практики","Prácticas")],["whoami",L("My Vault","Мой Архив","Mi Bóveda")],["talk","Talk to Alex"]].map(([k,label])=>(
-  <button key={k} className={`ntab ${tab===k?"on":"off"}`} style={k==="home"?{color:tab==="home"?"#d4a359":"rgba(212,163,89,.7)",fontWeight:700,fontSize:12,letterSpacing:"0.05em"}:{}} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k==="talk"?"talk":k);}}>{label}</button>
-            ))}
-          </div>
-          <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
-            {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:20,padding:"2px 7px",fontSize:11,color:"#d4a359",whiteSpace:"nowrap"}}>⚡{xp.toLocaleString()}</span>}
-            <div style={{position:"relative"}}>
-              <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
-                {lang} <span style={{fontSize:8,opacity:.5}}>▾</span>
-              </button>
-              {langOpen&&(
-                <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:10,overflow:"hidden",zIndex:200,minWidth:60}}>
-                  {["EN","ES","RU"].filter(l=>l!==lang).map(l=>(
-                    <button key={l} onClick={()=>{setLang(l);setLangOpen(false);}} style={{display:"block",width:"100%",background:"transparent",border:"none",padding:"8px 14px",color:"rgba(240,236,228,.7)",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",textAlign:"left"}}
-                      onMouseEnter={e=>e.target.style.background="rgba(255,255,255,.06)"}
-                      onMouseLeave={e=>e.target.style.background="transparent"}>
-                      {l}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            {userAvatar && <img src={userAvatar} alt="" style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(212,163,89,.3)"}} onError={e=>e.target.style.display='none'}/>}
-          </div>
+  <>
+    {/* TOP NAV */}
+    <div style={{position:"sticky",top:0,zIndex:50,padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",gap:8}}>
+      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px"}}>Alex Soleil</span>
+      <div style={{display:"flex",gap:1,flexShrink:0}}>
+        {/* Desktop: show all tabs */}
+        <div className="desktop-nav">
+          {[["howto",L("How It Works","Как работает","Cómo funciona")],["home","✦ Soleil Quest ✦"],["practices",L("Practices","Практики","Prácticas")],["whoami",L("My Vault","Мой Архив","Mi Bóveda")],["talk","Talk to Alex"]].map(([k,label])=>(
+            <button key={k} className={`ntab ${tab===k?"on":"off"}`} style={k==="home"?{color:tab==="home"?"rgba(160,140,220,.9)":"rgba(160,140,220,.5)",fontWeight:700,fontSize:12,letterSpacing:"0.05em"}:{}} onClick={()=>{setTab(k);goTo(k==="home"?"checkin":k==="talk"?"talk":k);}}>{label}</button>
+          ))}
         </div>
-      )}
+        {/* Mobile: show only Soleil Quest */}
+        <div className="mobile-nav">
+          <button className={`ntab ${tab==="home"?"on":"off"}`} style={{color:tab==="home"?"rgba(160,140,220,.9)":"rgba(160,140,220,.5)",fontWeight:700,fontSize:12,letterSpacing:"0.05em"}} onClick={()=>{setTab("home");goTo("checkin");}}>✦ Soleil Quest ✦</button>
+        </div>
+      </div>
+      <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
+        {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:20,padding:"2px 7px",fontSize:11,color:"#d4a359",whiteSpace:"nowrap"}}>⚡{xp.toLocaleString()}</span>}
+        <div style={{position:"relative"}}>
+          <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+            {lang} <span style={{fontSize:8,opacity:.5}}>▾</span>
+          </button>
+          {langOpen&&(
+            <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:10,overflow:"hidden",zIndex:200,minWidth:60}}>
+              {["EN","ES","RU"].filter(l=>l!==lang).map(l=>(
+                <button key={l} onClick={()=>{setLang(l);setLangOpen(false);}} style={{display:"block",width:"100%",background:"transparent",border:"none",padding:"8px 14px",color:"rgba(240,236,228,.7)",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",textAlign:"left"}}
+                  onMouseEnter={e=>e.target.style.background="rgba(255,255,255,.06)"}
+                  onMouseLeave={e=>e.target.style.background="transparent"}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {userAvatar && <img src={userAvatar} alt="" style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(212,163,89,.3)"}} onError={e=>e.target.style.display='none'}/>}
+      </div>
+    </div>
 
+    {/* MOBILE BOTTOM NAV */}
+    <div className="mobile-bottom-nav">
+      {[
+        ["howto","○",L("How It Works","Как работает","Cómo funciona")],
+        ["practices","◎",L("Practices","Практики","Prácticas")],
+        ["whoami","◈",L("My Vault","Мой Архив","Mi Bóveda")],
+        ["talk","✉","Talk to Alex"],
+      ].map(([k,icon,label])=>(
+        <button key={k} onClick={()=>{setTab(k);goTo(k==="talk"?"talk":k);}}
+          style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3,background:"transparent",border:"none",cursor:"pointer",padding:"4px 2px"}}>
+          <span style={{fontSize:16,color:tab===k?"#d4a359":"rgba(212,163,89,.35)"}}>{icon}</span>
+          <span style={{fontSize:9,color:tab===k?"#d4a359":"rgba(212,163,89,.35)",fontFamily:"'DM Sans',sans-serif",letterSpacing:".02em",fontWeight:tab===k?500:400}}>{label}</span>
+          {tab===k&&<span style={{width:3,height:3,borderRadius:"50%",background:"#d4a359",display:"block"}}/>}
+        </button>
+      ))}
+    </div>
+  </>
+)}
       <div style={{maxWidth:600,margin:"0 auto",padding:"0 18px 80px",position:"relative",zIndex:1}}>
-
         {/* BOOT */}
         {screen==="boot"&&<div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100vh"}}><p style={{color:"rgba(240,236,228,.3)",fontSize:14}}>{L("Loading","Загрузка","Cargando")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p></div>}
 
@@ -1808,6 +1841,7 @@ export default function App() {
           </div>
         )}
 
+      </div>
       </div>
     </div>
   );
