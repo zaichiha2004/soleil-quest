@@ -405,6 +405,7 @@ export default function App() {
   const [yesterdayAnswer, setYesterdayAnswer] = useState(null); // How yesterday went
   const [yesterdayFollowUp, setYesterdayFollowUp] = useState(null);
   const [yesterdayFollowUpText, setYesterdayFollowUpText] = useState("");
+  const yesterdayFollowUpRef = React.useRef(null);
   const [showYesterday, setShowYesterday] = useState(false);
   const [animKey, setAnimKey]   = useState(0);
   const [editingReflection, setEditingReflection] = useState(null);
@@ -751,7 +752,7 @@ export default function App() {
     const ctx=checkinSel.map(i=>checkinOpts[i]).join("; ");
     const vals=profile?.values?.length?`Core values: ${profile.values.join(", ")}.`:"";
     const sameChallenge = yesterdaySession?.challenge === (lang==="RU"?c.labelRU:lang==="ES"?c.labelES:c.labelEN);
-    const followUpCtx = (yesterdayFollowUp && yesterdayFollowUp!=="skipped" && sameChallenge) ? `Yesterday's follow-up on "${yesterdaySession?.challenge}": ${yesterdayFollowUp}.` : "";
+    const followUpCtx = (yesterdayFollowUpRef.current && yesterdayFollowUpRef.current!=="skipped" && sameChallenge) ? `Yesterday's follow-up on "${yesterdaySession?.challenge}": ${yesterdayFollowUpRef.current}.` : "";
     console.log("followUpCtx:", followUpCtx, "sameChallenge:", sameChallenge, "yesterdayFollowUp:", yesterdayFollowUp, "yesterdayChallenge:", yesterdaySession?.challenge, "todayChallenge:", lang==="RU"?c.labelRU:lang==="ES"?c.labelES:c.labelEN);
     const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} ${followUpCtx} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
     await callAI([{role:"user",content:prompt}],false,0);
@@ -1249,7 +1250,7 @@ export default function App() {
             L("It felt harder than expected","Оказалось сложнее, чем ожидал(а)","Fue más difícil de lo esperado"),
             L("Something else came up","Возникло что-то другое","Surgió otra cosa"),
           ].map((opt,i)=>(
-            <button key={i} className="obtn" style={{fontSize:13}} onClick={()=>setYesterdayFollowUp(opt)}>
+            <button key={i} className="obtn" style={{fontSize:13}} onClick={()=>{setYesterdayFollowUp(opt);yesterdayFollowUpRef.current=opt;}}>
               <span style={{color:"rgba(240,236,228,.25)",marginRight:8,fontSize:12}}>○</span>{opt}
             </button>
           ))}
@@ -1258,7 +1259,7 @@ export default function App() {
           placeholder={L("Add your own...","Своё...","Lo tuyo...")}
           style={{marginBottom:8}}/>
         <div style={{display:"flex",gap:8}}>
-          {yesterdayFollowUpText.trim()&&<button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={()=>setYesterdayFollowUp(yesterdayFollowUpText.trim())}>{L("Done","Готово","Listo")}</button>}
+          {yesterdayFollowUpText.trim()&&<button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={()=>{setYesterdayFollowUp(yesterdayFollowUpText.trim());yesterdayFollowUpRef.current=yesterdayFollowUpText.trim();}}>{L("Done","Готово","Listo")}</button>}
           <button className="tbtn" onClick={()=>setYesterdayFollowUp("skipped")}>{L("Skip →","Пропустить →","Omitir →")}</button>
         </div>
       </div>
@@ -1272,7 +1273,7 @@ export default function App() {
           style={{marginBottom:8}}/>
         <div style={{display:"flex",gap:8}}>
           {yesterdayFollowUpText.trim()&&<button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={()=>setYesterdayFollowUp(yesterdayFollowUpText.trim())}>{L("Done","Готово","Listo")}</button>}
-          <button className="tbtn" onClick={()=>setYesterdayFollowUp("skipped")}>{L("Skip →","Пропустить →","Omitir →")}</button>
+          <button className="tbtn" onClick={()=>{setYesterdayFollowUp("skipped");yesterdayFollowUpRef.current="skipped";}}>{L("Skip →","Пропустить →","Omitir →")}</button>
         </div>
       </div>
     )}
