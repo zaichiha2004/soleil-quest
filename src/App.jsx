@@ -882,7 +882,7 @@ export default function App() {
     .tbtn{background:transparent;color:rgba(240,236,228,.32);border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;padding:4px 0;transition:color .15s;}
     .tbtn:hover{color:rgba(240,236,228,.7)}
     .ntab{padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;font-weight:400;}
-    .ntab.on{background:rgba(212,163,89,.12);color:#d4a359;}.ntab.off{background:transparent;color:rgba(212,163,89,.45);}.ntab.off:hover{color:rgba(212,163,89,.8);}
+    .ntab.on{background:rgba(212,163,89,.12);color:#d4a359;font-weight:400;}.ntab.off{background:transparent;color:rgba(212,163,89,.45);font-weight:400;}.ntab.off:hover{color:rgba(212,163,89,.8);}
     .ltab{padding:4px 9px;border-radius:6px;font-size:11px;cursor:pointer;border:0.5px solid;font-family:'DM Sans',sans-serif;transition:all .15s;}
     .ltab.on{background:rgba(212,163,89,.15);border-color:#d4a359;color:#d4a359;font-weight:500;}
     .ltab.off{background:transparent;border-color:rgba(255,255,255,.1);color:rgba(240,236,228,.3);}
