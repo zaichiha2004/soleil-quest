@@ -752,6 +752,7 @@ export default function App() {
     const vals=profile?.values?.length?`Core values: ${profile.values.join(", ")}.`:"";
     const sameChallenge = yesterdaySession?.challenge === (lang==="RU"?c.labelRU:lang==="ES"?c.labelES:c.labelEN);
     const followUpCtx = (yesterdayFollowUp && yesterdayFollowUp!=="skipped" && sameChallenge) ? `Yesterday's follow-up on "${yesterdaySession?.challenge}": ${yesterdayFollowUp}.` : "";
+    console.log("followUpCtx:", followUpCtx, "sameChallenge:", sameChallenge, "yesterdayFollowUp:", yesterdayFollowUp, "yesterdayChallenge:", yesterdaySession?.challenge, "todayChallenge:", lang==="RU"?c.labelRU:lang==="ES"?c.labelES:c.labelEN);
     const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} ${followUpCtx} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
     await callAI([{role:"user",content:prompt}],false,0);
   };
@@ -1549,7 +1550,7 @@ export default function App() {
                         return <div style={{marginBottom:10}}><p style={{fontSize:12,color:"rgba(240,236,228,.35)"}}>{L("Archetype","Архетип","Arquetipo")}: <span style={{color:"rgba(240,236,228,.65)"}}>{arcName}</span></p>{arcDesc&&<p style={{fontSize:12,color:"rgba(240,236,228,.4)",fontStyle:"italic",marginTop:3,lineHeight:1.5}}>{arcDesc}</p>}</div>;
                       })()}
                       {s.plan?.insight&&<div style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:10,padding:"12px 14px",marginBottom:14}}><p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.85)"}}>{`"${s.plan.insight}"`}</p></div>}
-                      {s.firstStep&&<div style={{background:"rgba(212,163,89,.07)",borderRadius:8,padding:"9px 12px",marginBottom:14}}><p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>{L("First step committed","Первый шаг","Primer paso")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.82)",lineHeight:1.5}}>{s.firstStep}</p></div>}
+                      {s.first_step&&<div style={{background:"rgba(212,163,89,.07)",borderRadius:8,padding:"9px 12px",marginBottom:14}}><p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>{L("First step committed","Первый шаг","Primer paso")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.82)",lineHeight:1.5}}>{s.first_step}</p></div>}
                       {s.plan?.practices?.length>0&&(
                         <div style={{marginBottom:14}}>
                           <p style={{fontSize:11,color:"rgba(240,236,228,.26)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:10}}>{L("Practices","Практики","Prácticas")}</p>
