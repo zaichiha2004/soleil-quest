@@ -753,7 +753,7 @@ export default function App() {
     const vals=profile?.values?.length?`Core values: ${profile.values.join(", ")}.`:"";
     const sameChallenge = yesterdaySession?.challenge === (lang==="RU"?c.labelRU:lang==="ES"?c.labelES:c.labelEN);
     const followUpCtx = (yesterdayFollowUpRef.current && yesterdayFollowUpRef.current!=="skipped" && sameChallenge) ? `Yesterday's follow-up on "${yesterdaySession?.challenge}": ${yesterdayFollowUpRef.current}.` : "";
-    console.log("followUpCtx:", followUpCtx, "sameChallenge:", sameChallenge, "yesterdayFollowUp:", yesterdayFollowUp, "yesterdayChallenge:", yesterdaySession?.challenge, "todayChallenge:", lang==="RU"?c.labelRU:lang==="ES"?c.labelES:c.labelEN);
+    console.log("followUpCtx:", followUpCtx, "sameChallenge:", sameChallenge, "ref:", yesterdayFollowUpRef.current, "yesterdayChallenge:", yesterdaySession?.challenge, "todayChallenge:", lang==="RU"?c.labelRU:lang==="ES"?c.labelES:c.labelEN);
     const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} ${followUpCtx} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
     await callAI([{role:"user",content:prompt}],false,0);
   };
