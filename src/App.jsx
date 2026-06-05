@@ -403,6 +403,8 @@ export default function App() {
   const [affirmation, setAffirmation] = useState(""); // Daily affirmation
   const [yesterdaySession, setYesterdaySession] = useState(null); // Yesterday's session
   const [yesterdayAnswer, setYesterdayAnswer] = useState(null); // How yesterday went
+  const [yesterdayFollowUp, setYesterdayFollowUp] = useState(null);
+  const [yesterdayFollowUpText, setYesterdayFollowUpText] = useState("");
   const [showYesterday, setShowYesterday] = useState(false);
   const [animKey, setAnimKey]   = useState(0);
   const [editingReflection, setEditingReflection] = useState(null);
@@ -748,7 +750,9 @@ export default function App() {
     goTo("playing");setLoading(true);
     const ctx=checkinSel.map(i=>checkinOpts[i]).join("; ");
     const vals=profile?.values?.length?`Core values: ${profile.values.join(", ")}.`:"";
-    const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
+    const sameChallenge = yesterdaySession?.challenge === (lang==="RU"?c.labelRU:lang==="ES"?c.labelES:c.labelEN);
+    const followUpCtx = (yesterdayFollowUp && yesterdayFollowUp!=="skipped" && sameChallenge) ? `Yesterday's follow-up on "${yesterdaySession?.challenge}": ${yesterdayFollowUp}.` : "";
+    const prompt=`User: ${profile?.name}. Check-in: "${ctx}". ${vals} ${followUpCtx} Challenge: "${c.labelEN}" — ${c.descEN}. Ask Q1. Max 15 words. Warm and direct. ${c.id==="good"?"Focus on what's working and what to deepen.":c.id==="challenge"?"Challenge a belief or assumption. Be provocative.":""}`;
     await callAI([{role:"user",content:prompt}],false,0);
   };
 
@@ -1223,15 +1227,56 @@ export default function App() {
               </div>
             )}
             {yesterdayAnswer !== null && yesterdaySession && (
-              <div className="up" style={{background:"rgba(212,163,89,.06)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:12,padding:"12px 16px",marginBottom:20}}>
-                <p style={{fontSize:13,color:"rgba(240,236,228,.65)",fontStyle:"italic"}}>
-                  {yesterdayAnswer===0 && L("That's the spark at work. 🔥","Это и есть искра в действии. 🔥","Eso es la chispa en acción. 🔥")}
-                  {yesterdayAnswer===1 && L("Trying is the practice. That counts. ✨","Попытка — это и есть практика. Это считается. ✨","Intentar es la práctica. Eso cuenta. ✨")}
-                  {yesterdayAnswer===2 && L("Today is a new beginning. 🌅","Сегодня — новое начало. 🌅","Hoy es un nuevo comienzo. 🌅")}
-                  {yesterdayAnswer===3 && L("The unexpected path is still a path. 💡","Неожиданный путь — всё равно путь. 💡","El camino inesperado sigue siendo un camino. 💡")}
-                </p>
-              </div>
-            )}
+  <div className="up" style={{marginBottom:20}}>
+    <div style={{background:"rgba(212,163,89,.06)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:12,padding:"12px 16px",marginBottom:yesterdayAnswer===1||yesterdayAnswer===2||yesterdayAnswer===3?10:0}}>
+      <p style={{fontSize:13,color:"rgba(240,236,228,.65)",fontStyle:"italic"}}>
+        {yesterdayAnswer===0 && L("That's the spark at work. 🔥","Это и есть искра в действии. 🔥","Eso es la chispa en acción. 🔥")}
+        {yesterdayAnswer===1 && L("Trying is the practice. That counts. ✨","Попытка — это и есть практика. Это считается. ✨","Intentar es la práctica. Eso cuenta. ✨")}
+        {yesterdayAnswer===2 && L("Today is a new beginning. 🌅","Сегодня — новое начало. 🌅","Hoy es un nuevo comienzo. 🌅")}
+        {yesterdayAnswer===3 && L("The unexpected path is still a path. 💡","Неожиданный путь — всё равно путь. 💡","El camino inesperado sigue siendo un camino. 💡")}
+      </p>
+    </div>
+    {(yesterdayAnswer===1||yesterdayAnswer===2)&&yesterdayFollowUp===null&&(
+      <div style={{background:"rgba(100,200,150,.05)",borderRadius:12,padding:"14px 16px"}}>
+        <p style={{fontSize:11,color:"rgba(100,200,150,.6)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:6}}>{yesterdaySession.challenge}</p>
+        {yesterdaySession.first_step&&<p style={{fontSize:12,color:"rgba(240,236,228,.45)",marginBottom:12,lineHeight:1.55,fontStyle:"italic"}}>"{yesterdaySession.first_step}"</p>}
+        <p style={{fontSize:14,fontWeight:500,color:"#f0ece4",marginBottom:12,lineHeight:1.4,fontFamily:"Fraunces,serif"}}>{L("What got in the way?","Что помешало?","¿Qué se interpuso?")}</p>
+        <div style={{display:"flex",flexDirection:"column",gap:7,marginBottom:10}}>
+          {[
+            L("I forgot about it during the day","Забыл(а) об этом в течение дня","Lo olvidé durante el día"),
+            L("I noticed the moment but didn't follow through","Заметил(а) момент, но не довёл(а) до конца","Noté el momento pero no lo seguí"),
+            L("It felt harder than expected","Оказалось сложнее, чем ожидал(а)","Fue más difícil de lo esperado"),
+            L("Something else came up","Возникло что-то другое","Surgió otra cosa"),
+          ].map((opt,i)=>(
+            <button key={i} className="obtn" style={{fontSize:13}} onClick={()=>setYesterdayFollowUp(opt)}>
+              <span style={{color:"rgba(240,236,228,.25)",marginRight:8,fontSize:12}}>○</span>{opt}
+            </button>
+          ))}
+        </div>
+        <input type="text" value={yesterdayFollowUpText} onChange={e=>setYesterdayFollowUpText(e.target.value)}
+          placeholder={L("Add your own...","Своё...","Lo tuyo...")}
+          style={{marginBottom:8}}/>
+        <div style={{display:"flex",gap:8}}>
+          {yesterdayFollowUpText.trim()&&<button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={()=>setYesterdayFollowUp(yesterdayFollowUpText.trim())}>{L("Done","Готово","Listo")}</button>}
+          <button className="tbtn" onClick={()=>setYesterdayFollowUp("skipped")}>{L("Skip →","Пропустить →","Omitir →")}</button>
+        </div>
+      </div>
+    )}
+    {yesterdayAnswer===3&&yesterdayFollowUp===null&&(
+      <div style={{background:"rgba(100,200,150,.05)",borderRadius:12,padding:"14px 16px"}}>
+        <p style={{fontSize:11,color:"rgba(100,200,150,.6)",textTransform:"uppercase",letterSpacing:".08em",marginBottom:10}}>{yesterdaySession.challenge}</p>
+        <p style={{fontSize:14,fontWeight:500,color:"#f0ece4",marginBottom:12,lineHeight:1.4,fontFamily:"Fraunces,serif"}}>{L("Feel free to share, if you'd like.","Поделись, если хочешь.","Comparte, si quieres.")}</p>
+        <input type="text" value={yesterdayFollowUpText} onChange={e=>setYesterdayFollowUpText(e.target.value)}
+          placeholder={L("What happened...","Что произошло...","Lo que pasó...")}
+          style={{marginBottom:8}}/>
+        <div style={{display:"flex",gap:8}}>
+          {yesterdayFollowUpText.trim()&&<button className="pbtn" style={{fontSize:13,padding:"8px 16px"}} onClick={()=>setYesterdayFollowUp(yesterdayFollowUpText.trim())}>{L("Done","Готово","Listo")}</button>}
+          <button className="tbtn" onClick={()=>setYesterdayFollowUp("skipped")}>{L("Skip →","Пропустить →","Omitir →")}</button>
+        </div>
+      </div>
+    )}
+  </div>
+)}
 
             <p className="up d1" style={{fontSize:13,color:"#d4a359",marginBottom:8}}>{L(`Good ${timeOfDay()}, ${firstName}.`,`Добр${timeOfDay()==="утро"?"ое":timeOfDay()==="день"?"ый":"ый"} ${timeOfDay()}, ${firstName}.`,`Buenas ${timeOfDay()}, ${firstName}.`)}</p>
             <h2 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:26,fontWeight:600,lineHeight:1.2,marginBottom:12}}>{L("How are you feeling right now?","Как ты себя чувствуешь прямо сейчас?","¿Cómo te sientes ahora mismo?")}</h2>
