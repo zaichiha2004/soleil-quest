@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
@@ -405,7 +405,7 @@ export default function App() {
   const [yesterdayAnswer, setYesterdayAnswer] = useState(null); // How yesterday went
   const [yesterdayFollowUp, setYesterdayFollowUp] = useState(null);
   const [yesterdayFollowUpText, setYesterdayFollowUpText] = useState("");
-  const yesterdayFollowUpRef = React.useRef(null);
+  const yesterdayFollowUpRef = useRef(null);
   const [showYesterday, setShowYesterday] = useState(false);
   const [animKey, setAnimKey]   = useState(0);
   const [editingReflection, setEditingReflection] = useState(null);
