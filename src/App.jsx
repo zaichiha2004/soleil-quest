@@ -560,6 +560,7 @@ const handleSignOut = async () => {
   if (supabase) await supabase.auth.signOut();
   localStorage.clear();
   sessionStorage.removeItem('sq_guest');
+  try { await window.storage.delete('profile'); await window.storage.delete('sessions'); await window.storage.delete('xp'); } catch{}
   setUserAvatar('');
   setUserId(null);
   setAuthUser(null);
