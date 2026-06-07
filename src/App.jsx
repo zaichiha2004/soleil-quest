@@ -536,6 +536,7 @@ export default function App() {
       localStorage.setItem('sq_user_id', uid);
       localStorage.setItem('sq_user_name', name);
       localStorage.setItem('sq_user_avatar', avatar);
+      localStorage.setItem('sq_user_email', user.email);
       setUserAvatar(avatar);
       setAuthUser({ picture: avatar, name });
       setUserId(uid);
@@ -1067,21 +1068,35 @@ const handleSignOut = async () => {
           )}
         </div>
         {userAvatar && (
-  <div style={{position:"relative",display:"inline-block"}} 
-    onMouseEnter={e=>e.currentTarget.querySelector('.signout-menu').style.display='block'}
-    onMouseLeave={e=>e.currentTarget.querySelector('.signout-menu').style.display='none'}>
-    <img src={userAvatar} alt="" style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(212,163,89,.3)",cursor:"pointer",display:"block"}} onError={e=>e.target.style.display='none'}/>
-    <div className="signout-menu" style={{display:"none",position:"absolute",right:0,top:32,background:"white",border:"1px solid #eee",borderRadius:8,padding:"6px 0",minWidth:120,boxShadow:"0 4px 12px rgba(0,0,0,0.1)",zIndex:999}}>
-      <div onClick={handleSignOut} style={{padding:"8px 16px",fontSize:13,color:"#666",cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}
-        onMouseEnter={e=>e.target.style.color='#333'}
-        onMouseLeave={e=>e.target.style.color='#666'}>
-        Sign out
-      </div>
-    </div>
+  <div style={{position:"relative",display:"inline-block"}}>
+    <img 
+      src={userAvatar} 
+      alt="" 
+      style={{width:26,height:26,borderRadius:"50%",border:"1.5px solid rgba(212,163,89,.3)",cursor:"pointer",display:"block"}} 
+      onError={e=>e.target.style.display='none'}
+      onClick={()=>setShowSignOut(prev=>!prev)}
+    />
+    {showSignOut && (
+      <>
+        <div onClick={()=>setShowSignOut(false)} style={{position:"fixed",inset:0,zIndex:998}}/>
+        <div style={{position:"absolute",right:0,top:34,zIndex:999,background:"#22203a",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,overflow:"hidden",boxShadow:"0 8px 28px rgba(0,0,0,0.5)",minWidth:196}}>
+          <div style={{padding:"13px 15px 11px",borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
+            <div style={{fontSize:13,fontWeight:500,color:"rgba(255,255,255,0.85)",marginBottom:3,fontFamily:"'DM Sans',sans-serif"}}>{localStorage.getItem('sq_user_name')||'Friend'}</div>
+            <div style={{fontSize:11,color:"rgba(255,255,255,0.3)",fontFamily:"'DM Sans',sans-serif"}}>{localStorage.getItem('sq_user_email')||''}</div>
+          </div>
+          <div 
+            onClick={handleSignOut}
+            style={{display:"flex",alignItems:"center",gap:9,padding:"11px 15px",fontSize:13,color:"rgba(255,255,255,0.6)",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",transition:"background 0.15s"}}
+            onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.06)"}
+            onMouseLeave={e=>e.currentTarget.style.background="transparent"}
+          >
+            ↪ Sign out
+          </div>
+        </div>
+      </>
+    )}
   </div>
 )}
-      </div>
-    </div>
 
     {/* MOBILE BOTTOM NAV */}
     <div className="mobile-bottom-nav">
