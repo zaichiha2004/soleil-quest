@@ -1047,7 +1047,7 @@ const handleSignOut = async () => {
   <>
     {/* TOP NAV */}
     <div style={{position:"sticky",top:0,zIndex:50,padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",gap:8}}>
-      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px"}}>Alex Soleil</span>
+      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px",cursor:"pointer"}} onClick={()=>goTo("login")}>Alex Soleil</span>
       <div style={{display:"flex",gap:1,flexShrink:0}}>
         {/* Desktop: show all tabs */}
         <div className="desktop-nav">
