@@ -109,10 +109,10 @@ const CHALLENGES = [
   { id:"challenge",     emoji:"💡", labelEN:"Challenge Me",           labelRU:"Брось мне вызов",    labelES:"Desafíame",                descEN:"Stress-test a belief, idea, or assumption",descRU:"Проверь идею или убеждение на прочность",descES:"Pon a prueba una creencia o idea",        suggest:"challenge" },
 ];
 
-const CHECKIN_OPTS_EN = ["Something is weighing on me and I can't shake it","I feel scattered — no clear direction today","I'm going through the motions but something feels off","I feel okay but want to go deeper into something","I'm at a turning point and need clarity"];
-const CHECKIN_OPTS_RU = ["Что-то давит, и я не могу от этого отделаться","Чувствую рассеянность — нет ясного направления","Иду по инерции, но что-то не так","В целом нормально, но хочу копнуть глубже","Я на развилке и ищу ясности"];
-const CHECKIN_OPTS_ES = ["Algo me pesa y no me lo puedo quitar de encima","Me siento disperso — sin dirección clara hoy","Estoy en piloto automático pero algo no está bien","Estoy bien pero quiero profundizar en algo","Estoy en un punto de inflexión y necesito claridad"];
-const CHECKIN_SUGGEST = ["burnout","lost","burnout","good","transition"];
+const CHECKIN_OPTS_EN = ["Excited, building momentum","Full of energy and ready to use it","Aligned and wondering what's next","Feeling good, but want to dig deeper","Something's weighing on me","I feel stuck and can't move forward","Feeling scattered, no clear direction","At a turning point, need clarity"];
+const CHECKIN_OPTS_RU = ["Воодушевлён, набираю обороты","Полон энергии и готов её использовать","Всё на своём месте, что дальше?","Чувствую себя хорошо, но хочу копнуть глубже","Что-то давит на меня","Чувствую себя застрявшим, не могу двигаться","Рассеянность, нет ясного направления","На развилке, нужна ясность"];
+const CHECKIN_OPTS_ES = ["Emocionado, construyendo impulso","Lleno de energía y listo para usarla","Todo alineado, ¿qué sigue?","Me siento bien, pero quiero profundizar","Algo me está pesando","Me siento atascado y no puedo avanzar","Me siento disperso, sin dirección clara","En un punto de inflexión, necesito claridad"];
+const CHECKIN_SUGGEST = ["good","challenge","leadership","good","burnout","confidence","burnout","transition"];
 
 const ARCANA_MEANINGS = {
   1: {
