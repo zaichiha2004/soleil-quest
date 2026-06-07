@@ -1078,7 +1078,7 @@ const handleSignOut = async () => {
     />
     {showSignOut && (
       <>
-        <div onClick={()=>setShowSignOut(false)} style={{position:"fixed",inset:0,zIndex:998}}/>
+        <div onClick={()=>setShowSignOut(false)} style={{position:"absolute",top:"-100vh",left:"-100vw",width:"200vw",height:"200vh",zIndex:998}}/>
         <div style={{position:"absolute",right:0,top:34,zIndex:999,background:"#22203a",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,overflow:"hidden",boxShadow:"0 8px 28px rgba(0,0,0,0.5)",minWidth:196}}>
           <div style={{padding:"13px 15px 11px",borderBottom:"1px solid rgba(255,255,255,0.07)"}}>
             <div style={{fontSize:13,fontWeight:500,color:"rgba(255,255,255,0.85)",marginBottom:3,fontFamily:"'DM Sans',sans-serif"}}>{localStorage.getItem('sq_user_name')||'Friend'}</div>
