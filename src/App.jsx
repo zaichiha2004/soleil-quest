@@ -835,6 +835,17 @@ const handleSignOut = async () => {
       }
       return;
     }
+  const entry={date:today,challenge:lang==="RU"?challenge?.labelRU:lang==="ES"?challenge?.labelES:challenge?.labelEN,challenge_emoji:challenge?.emoji,plan,reflection,readiness,first_step:firstStep!==null?stepOpts[firstStep]:null,saved_at:new Date().toISOString()};
+  const updated={...sessions,[today]:entry};
+    setSessions(updated);
+    if (userId) {
+      await dbSaveSession(userId, entry);
+    } else {
+      await save("sessions",updated);
+    }
+    addXp(300);
+    setReflSaved(true);
+  };
 
   // Who Am I saves
   const saveEditedValues=async()=>{
