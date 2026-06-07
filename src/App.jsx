@@ -556,15 +556,19 @@ export default function App() {
   };
 
 const handleSignOut = async () => {
-    if (supabase) await supabase.auth.signOut();
-    localStorage.removeItem('sq_user_id');
-    localStorage.removeItem('sq_user_name');
-    localStorage.removeItem('sq_user_avatar');
-    setUserAvatar('');
-    setUserId(null);
-    setAuthUser(null);
-    goTo("login");
-  };
+  if (supabase) await supabase.auth.signOut();
+  localStorage.clear();
+  setUserAvatar('');
+  setUserId(null);
+  setAuthUser(null);
+  setProfile(null);
+  setSessions({});
+  setXp(0);
+  setWheelRatings({});
+  setYesterdaySession(null);
+  setYesterdayAnswer(null);
+  goTo("login");
+};
   
   const bootFromSupabase = async (uid, googleName) => {
     const [dbProfile, dbSess, dbXpVal] = await Promise.all([
@@ -825,17 +829,12 @@ const handleSignOut = async () => {
   };
 
   const doSave=async()=>{
-    const entry={date:today,challenge:lang==="RU"?challenge?.labelRU:lang==="ES"?challenge?.labelES:challenge?.labelEN,challenge_emoji:challenge?.emoji,plan,reflection,readiness,first_step:firstStep!==null?stepOpts[firstStep]:null,saved_at:new Date().toISOString()};
-    const updated={...sessions,[today]:entry};
-    setSessions(updated);
-    if (userId) {
-      await dbSaveSession(userId, entry);
-    } else {
-      await save("sessions",updated);
+    if(!userId){
+      if(window.confirm(L("Sign in to save your practice — it takes 5 seconds.","Войди чтобы сохранить практику — это займёт 5 секунд.","Inicia sesión para guardar tu práctica — toma 5 segundos."))) {
+        signInWithGoogle();
+      }
+      return;
     }
-    addXp(300);
-    setReflSaved(true);
-  };
 
   // Who Am I saves
   const saveEditedValues=async()=>{
