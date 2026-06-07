@@ -1094,10 +1094,9 @@ const handleSignOut = async () => {
           </div>
         </div>
       </>
+        )}
+      </div>
     )}
-  </div>
-)}
-
     {/* MOBILE BOTTOM NAV */}
     <div className="mobile-bottom-nav">
       {[
