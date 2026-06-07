@@ -456,6 +456,7 @@ export default function App() {
   const [xp, setXp]                 = useState(0);
   const [xpMilestone, setXpMilestone] = useState(null);
   const [langOpen, setLangOpen] = useState(false);
+  const [showSignOut, setShowSignOut] = useState(false);
 
   // who am i
   const [editingValues, setEditingValues] = useState(false);
