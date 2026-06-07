@@ -1070,7 +1070,7 @@ const handleSignOut = async () => {
           ))}
         </div>
         {/* Mobile: show only Soleil Quest */}
-        <div className="mobile-nav">
+        <div className="mobile-nav" style={{display:"flex",alignItems:"center",gap:8}}>   <span style={{fontFamily:"Fraunces,serif",fontSize:16,color:"#d4a359",fontWeight:600,cursor:"pointer",letterSpacing:"-.3px"}} onClick={()=>goTo("login")}>Alex Soleil</span>
           <button className={`ntab ${tab==="home"?"on":"off"}`} style={{color:tab==="home"?"rgba(160,140,220,.9)":"rgba(160,140,220,.5)",fontWeight:700,fontSize:12,letterSpacing:"0.05em"}} onClick={()=>{setTab("home");goTo("checkin");}}>✦ Soleil Quest ✦</button>
         </div>
       </div>
