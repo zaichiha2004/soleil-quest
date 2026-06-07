@@ -1097,7 +1097,9 @@ const handleSignOut = async () => {
         )}
       </div>
     )}
-    {/* MOBILE BOTTOM NAV */}
+  </div>
+</div>  
+{/* MOBILE BOTTOM NAV */}
     <div className="mobile-bottom-nav">
       {[
         ["howto","○",L("How It Works","Как работает","Cómo funciona")],
