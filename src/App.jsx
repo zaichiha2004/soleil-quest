@@ -735,7 +735,7 @@ const handleSignOut = async () => {
   };
 
   // ── CHECKIN ──
-  const toggleCheckin=(i)=>setCheckinSel(prev=>prev.includes(i)?prev.filter(x=>x!==i):prev.length<2?[...prev,i]:prev);
+  const toggleCheckin=(i)=>setCheckinSel(prev=>prev.includes(i)?[]:[i]);
 
   const proceedCheckin=()=>{
     const ids=checkinSel.map(i=>CHECKIN_SUGGEST[i]);
@@ -1365,21 +1365,29 @@ const handleSignOut = async () => {
             <p className="up d1" style={{fontSize:13,color:"#d4a359",marginBottom:8}}>{L(`Good ${timeOfDay()}, ${firstName}.`,`Добр${timeOfDay()==="утро"?"ое":timeOfDay()==="день"?"ый":"ый"} ${timeOfDay()}, ${firstName}.`,`Buenas ${timeOfDay()}, ${firstName}.`)}</p>
             <h2 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:26,fontWeight:600,lineHeight:1.2,marginBottom:12}}>{L("How are you feeling right now?","Как ты себя чувствуешь прямо сейчас?","¿Cómo te sientes ahora mismo?")}</h2>
             <p className="up d3" style={{fontSize:14,color:"rgba(240,236,228,.42)",lineHeight:1.65,marginBottom:22}}>{L("Take a breath. Notice what's on your mind and in your heart. Is anything bothering you, sitting heavy, or asking for attention? That feeling is your guide.","Сделай вдох. Замечай, что у тебя на уме и в сердце. Есть что-то, что давит или просит внимания? Это чувство — твой компас.","Respira. Nota lo que tienes en la mente y en el corazón. ¿Hay algo que te pese o pida atención? Ese sentimiento es tu guía.")}</p>
-            <div className="up d4" style={{display:"flex",flexDirection:"column",gap:7,marginBottom:22}}>
-              {checkinOpts.map((opt,i)=>(
-                <button key={i} className={`obtn ${checkinSel.includes(i)?"sel":""}`} onClick={()=>toggleCheckin(i)}>
-                  <span style={{color:checkinSel.includes(i)?"#d4a359":"rgba(240,236,228,.2)",marginRight:8,fontSize:12}}>{checkinSel.includes(i)?"✓":"○"}</span>{opt}
-                </button>
-              ))}
-            </div>
-            {checkinSel.length>0&&(
-              <div className="up" style={{display:"flex",alignItems:"center",gap:12}}>
-                <button className="pbtn" onClick={proceedCheckin}>{L("Choose my focus →","Выбрать фокус →","Elegir mi enfoque →")}</button>
-                {checkinSel.length<2&&<p style={{fontSize:12,color:"rgba(240,236,228,.2)"}}>{L("or pick one more","или выбери ещё один","o elige uno más")}</p>}
-              </div>
-            )}
-          </div>
-        )}
+            <div className="up d4" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:22}}>
+  <div style={{display:"flex",flexDirection:"column",gap:6}}>
+    {checkinOpts.slice(0,4).map((opt,i)=>(
+      <button key={i} className={`obtn ${checkinSel.includes(i)?"sel":""}`} onClick={()=>toggleCheckin(i)}>
+        <span style={{color:checkinSel.includes(i)?"#d4a359":"rgba(240,236,228,.2)",marginRight:8,fontSize:12}}>{checkinSel.includes(i)?"✓":"○"}</span>{opt}
+      </button>
+    ))}
+  </div>
+  <div style={{display:"flex",flexDirection:"column",gap:6}}>
+    {checkinOpts.slice(4).map((opt,i)=>(
+      <button key={i+4} className={`obtn ${checkinSel.includes(i+4)?"sel":""}`} onClick={()=>toggleCheckin(i+4)}>
+        <span style={{color:checkinSel.includes(i+4)?"#d4a359":"rgba(240,236,228,.2)",marginRight:8,fontSize:12}}>{checkinSel.includes(i+4)?"✓":"○"}</span>{opt}
+      </button>
+    ))}
+  </div>
+</div>
+{checkinSel.length>0&&(
+  <div className="up" style={{display:"flex",alignItems:"center",gap:12}}>
+    <button className="pbtn" onClick={proceedCheckin}>{L("Choose my focus →","Выбрать фокус →","Elegir mi enfoque →")}</button>
+  </div>
+)}
+        </div>
+      )}
 
         {/* CHALLENGES */}
         {screen==="challenges"&&(
