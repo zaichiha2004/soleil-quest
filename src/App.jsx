@@ -407,6 +407,7 @@ export default function App() {
   const [yesterdayFollowUpText, setYesterdayFollowUpText] = useState("");
   const yesterdayFollowUpRef = useRef(null);
   const [showYesterday, setShowYesterday] = useState(false);
+  const [showSignInPrompt, setShowSignInPrompt] = useState(false);
   const [animKey, setAnimKey]   = useState(0);
   const [editingReflection, setEditingReflection] = useState(null);
   const [editReflectionText, setEditReflectionText] = useState("");
@@ -830,11 +831,9 @@ const handleSignOut = async () => {
 
   const doSave=async()=>{
     if(!userId){
-      if(window.confirm(L("Sign in to save your practice — it takes 5 seconds.","Войди чтобы сохранить практику — это займёт 5 секунд.","Inicia sesión para guardar tu práctica — toma 5 segundos."))) {
-        signInWithGoogle();
-      }
-      return;
-    }
+  setShowSignInPrompt(true);
+  return;
+}
   const entry={date:today,challenge:lang==="RU"?challenge?.labelRU:lang==="ES"?challenge?.labelES:challenge?.labelEN,challenge_emoji:challenge?.emoji,plan,reflection,readiness,first_step:firstStep!==null?stepOpts[firstStep]:null,saved_at:new Date().toISOString()};
   const updated={...sessions,[today]:entry};
     setSessions(updated);
@@ -1034,6 +1033,18 @@ const handleSignOut = async () => {
 
       {showValChallenge && <ValuesChallenge/>}
       {showOverwrite && <OverwriteModal/>}
+      {showSignInPrompt && (
+  <div className="modal-bg">
+    <div className="modal">
+      <p style={{fontFamily:"Fraunces,serif",fontSize:17,fontWeight:600,marginBottom:10,lineHeight:1.3}}>{L("Sign in to save your practice","Войди чтобы сохранить практику","Inicia sesión para guardar tu práctica")}</p>
+      <p style={{fontSize:14,color:"rgba(240,236,228,.55)",lineHeight:1.6,marginBottom:20}}>{L("It takes 5 seconds — and your progress will be saved.","Это займёт 5 секунд — и твой прогресс будет сохранён.","Toma 5 segundos — y tu progreso quedará guardado.")}</p>
+      <div style={{display:"flex",gap:9,flexWrap:"wrap"}}>
+        <button className="pbtn" style={{fontSize:13,padding:"9px 18px"}} onClick={()=>{setShowSignInPrompt(false);signInWithGoogle();}}>{L("Sign in with Google","Войти через Google","Iniciar sesión con Google")}</button>
+        <button className="gbtn" style={{fontSize:13}} onClick={()=>setShowSignInPrompt(false)}>{L("Not now","Не сейчас","Ahora no")}</button>
+      </div>
+    </div>
+  </div>
+)}
       <TooltipModal/>
 
       {xpMilestone && (
