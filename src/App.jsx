@@ -1228,8 +1228,6 @@ const handleSignOut = async () => {
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
             {onbStep===0&&(
               <div>
                 <p className="up d1" style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:14}}>{L("Welcome","Добро пожаловать","Bienvenida")}</p>
