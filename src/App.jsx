@@ -1191,8 +1191,10 @@ try { await window.storage.delete('xp'); } catch{}
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
   <div key={animKey} style={{paddingTop:48}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,cursor:"pointer"}} onClick={()=>goTo("login")}>Alex Soleil</span>
+    <div style={{position:"fixed",top:0,left:0,right:0,zIndex:50,padding:"10px 18px",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)"}}>
+      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,cursor:"pointer",letterSpacing:"-.3px"}} onClick={()=>goTo("login")}>Alex Soleil</span>
+    </div>
+    <div style={{display:"flex",gap:4,justifyContent:"flex-end",marginBottom:18}}>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 10px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
                   {lang} <span style={{fontSize:9,opacity:.5}}>▾</span>
