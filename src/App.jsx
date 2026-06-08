@@ -632,9 +632,12 @@ const handleSignOut = async () => {
 
   const bootFromStorage = async () => {
     setWheelRatings({});
-    try { await window.storage.delete('profile'); } catch{}
-try { await window.storage.delete('sessions'); } catch{}
-try { await window.storage.delete('xp'); } catch{}
+    const isGuest = sessionStorage.getItem('sq_guest');
+    if (isGuest) {
+      try { await window.storage.delete('profile'); } catch{}
+      try { await window.storage.delete('sessions'); } catch{}
+      try { await window.storage.delete('xp'); } catch{}
+    }
     const p=await load("profile"), s=await load("sessions")||{};
     const savedXp=await load("xp")||0;
     setSessions(s); setXp(savedXp);
