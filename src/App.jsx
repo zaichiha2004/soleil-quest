@@ -631,6 +631,7 @@ const handleSignOut = async () => {
   };
 
   const bootFromStorage = async () => {
+    setWheelRatings({});
     const p=await load("profile"), s=await load("sessions")||{};
     const savedXp=await load("xp")||0;
     setSessions(s); setXp(savedXp);
@@ -1061,7 +1062,7 @@ const handleSignOut = async () => {
   <>
     {/* TOP NAV */}
     <div style={{position:"sticky",top:0,zIndex:50,padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",gap:8}}>
-      <span className="desktop-nav" style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px",cursor:"pointer"}} onClick={()=>goTo("login")}>Alex Soleil</span>
+      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,flexShrink:0,letterSpacing:"-.3px",cursor:"pointer"}} onClick={()=>goTo("login")}>Alex Soleil</span>
       <div style={{display:"flex",gap:1,flexShrink:0}}>
         {/* Desktop: show all tabs */}
         <div className="desktop-nav">
@@ -1070,7 +1071,7 @@ const handleSignOut = async () => {
           ))}
         </div>
         {/* Mobile: show only Soleil Quest */}
-        <div className="mobile-nav" style={{display:"flex",alignItems:"center",gap:8}}>   <span style={{fontFamily:"Fraunces,serif",fontSize:16,color:"#d4a359",fontWeight:600,cursor:"pointer",letterSpacing:"-.3px"}} onClick={()=>goTo("login")}>Alex Soleil</span>
+        <div className="mobile-nav">
           <button className={`ntab ${tab==="home"?"on":"off"}`} style={{color:tab==="home"?"rgba(160,140,220,.9)":"rgba(160,140,220,.5)",fontWeight:700,fontSize:12,letterSpacing:"0.05em"}} onClick={()=>{setTab("home");goTo("checkin");}}>✦ Soleil Quest ✦</button>
         </div>
       </div>
@@ -1148,8 +1149,9 @@ const handleSignOut = async () => {
 
         {/* LOGIN */}
         {screen==="login"&&(
-          <div key={animKey} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"90vh",textAlign:"center",padding:"40px 0"}}>
-            <div style={{display:"flex",justifyContent:"flex-end",width:"100%",marginBottom:40}}>
+  <div key={animKey} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"90vh",textAlign:"center",padding:"40px 0"}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",width:"100%",marginBottom:40}}>
+      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,cursor:"pointer"}} onClick={()=>goTo("login")}>Alex Soleil</span>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 10px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
                   {lang} <span style={{fontSize:9,opacity:.5}}>▾</span>
@@ -1186,8 +1188,9 @@ const handleSignOut = async () => {
 
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
-          <div key={animKey} style={{paddingTop:48}}>
-            <div style={{display:"flex",gap:4,justifyContent:"flex-end",marginBottom:18}}>
+  <div key={animKey} style={{paddingTop:48}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
+      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,cursor:"pointer"}} onClick={()=>goTo("login")}>Alex Soleil</span>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 10px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
                   {lang} <span style={{fontSize:9,opacity:.5}}>▾</span>
