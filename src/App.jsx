@@ -1194,10 +1194,25 @@ const handleSignOut = async () => {
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
   <div key={animKey} style={{paddingTop:48}}>
-    <div style={{position:"fixed",top:0,left:0,right:0,zIndex:50,padding:"10px 18px",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)"}}>
-      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,cursor:"pointer",letterSpacing:"-.3px"}} onClick={()=>goTo("login")}>Alex Soleil</span>
-    </div>
-    <div style={{display:"flex",gap:4,justifyContent:"flex-end",marginBottom:18}}>
+    <div style={{position:"fixed",top:0,left:0,right:0,zIndex:50,padding:"10px 18px",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+  <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,cursor:"pointer",letterSpacing:"-.3px"}} onClick={()=>goTo("login")}>Alex Soleil</span>
+  <div style={{position:"relative"}}>
+    <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
+      {lang} <span style={{fontSize:8,opacity:.5}}>▾</span>
+    </button>
+    {langOpen&&(
+      <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:10,overflow:"hidden",zIndex:200,minWidth:60}}>
+        {["EN","ES","RU"].filter(l=>l!==lang).map(l=>(
+          <button key={l} onClick={()=>{setLang(l);setLangOpen(false);}} style={{display:"block",width:"100%",background:"transparent",border:"none",padding:"8px 14px",color:"rgba(240,236,228,.7)",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",textAlign:"left"}}
+            onMouseEnter={e=>e.target.style.background="rgba(255,255,255,.06)"}
+            onMouseLeave={e=>e.target.style.background="transparent"}>
+            {l}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 10px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
                   {lang} <span style={{fontSize:9,opacity:.5}}>▾</span>
