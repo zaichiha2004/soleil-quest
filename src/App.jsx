@@ -1213,21 +1213,6 @@ const handleSignOut = async () => {
     )}
   </div>
 </div>
-              <div style={{position:"relative"}}>
-                <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 10px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
-                  {lang} <span style={{fontSize:9,opacity:.5}}>▾</span>
-                </button>
-                {langOpen&&(
-                  <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:10,overflow:"hidden",zIndex:200,minWidth:60}}>
-                    {["EN","ES","RU"].filter(l=>l!==lang).map(l=>(
-                      <button key={l} onClick={()=>{setLang(l);setLangOpen(false);}} style={{display:"block",width:"100%",background:"transparent",border:"none",padding:"8px 14px",color:"rgba(240,236,228,.7)",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",textAlign:"left"}}
-                        onMouseEnter={e=>e.target.style.background="rgba(255,255,255,.06)"}
-                        onMouseLeave={e=>e.target.style.background="transparent"}>
-                        {l}
-                      </button>
-                    ))}
-                  </div>
-                )}
             {onbStep===0&&(
               <div>
                 <p className="up d1" style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:14}}>{L("Welcome","Добро пожаловать","Bienvenida")}</p>
