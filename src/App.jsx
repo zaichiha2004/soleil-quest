@@ -632,6 +632,9 @@ const handleSignOut = async () => {
 
   const bootFromStorage = async () => {
     setWheelRatings({});
+    await window.storage.delete('profile');
+await window.storage.delete('sessions');
+await window.storage.delete('xp');
     const p=await load("profile"), s=await load("sessions")||{};
     const savedXp=await load("xp")||0;
     setSessions(s); setXp(savedXp);
@@ -1150,8 +1153,7 @@ const handleSignOut = async () => {
         {/* LOGIN */}
         {screen==="login"&&(
   <div key={animKey} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"90vh",textAlign:"center",padding:"40px 0"}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",width:"100%",marginBottom:40}}>
-      <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,cursor:"pointer"}} onClick={()=>goTo("login")}>Alex Soleil</span>
+    <div style={{display:"flex",justifyContent:"flex-end",width:"100%",marginBottom:40}}>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 10px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
                   {lang} <span style={{fontSize:9,opacity:.5}}>▾</span>
@@ -1255,11 +1257,8 @@ const handleSignOut = async () => {
               </div>
             )}
             {onbStep===2&&(
-  <div>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-      <button className="tbtn" onClick={()=>setOnbStep(1)}>{L("← Back","← Назад","← Volver")}</button>
-      <span style={{fontFamily:"Fraunces,serif",fontSize:16,color:"#d4a359",fontWeight:600,cursor:"pointer"}} onClick={()=>goTo("login")}>Alex Soleil</span>
-    </div>
+              <div>
+                <button className="tbtn" style={{marginBottom:16}} onClick={()=>setOnbStep(1)}>{L("← Back","← Назад","← Volver")}</button>
                 <p className="up d1" style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:10}}>{L("Wheel of Life","Колесо жизни","Rueda de la Vida")} <span style={{color:"rgba(240,236,228,.3)",fontSize:11,textTransform:"none",letterSpacing:0}}>{L("· optional","· необязательно","· opcional")}</span></p>
                 <h2 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:10}}>{L("How are you doing in each area of life?","Как дела в каждой сфере жизни?","¿Cómo estás en cada área de vida?")}</h2>
                 <p className="up d3" style={{fontSize:14,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:20}}>{L("Rate each area 1–10. This helps personalize your coaching. You can always update this later in Who Am I.","Оцени каждую сферу от 1 до 10. Это помогает персонализировать коучинг. Можно обновить позже.","Evalúa cada área del 1 al 10. Esto personaliza tu coaching. Puedes actualizarlo después.")}</p>
