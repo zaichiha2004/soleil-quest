@@ -464,6 +464,7 @@ const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
 const [feedbackLoading, setFeedbackLoading] = useState(false);
 const [adminFeedback, setAdminFeedback] = useState([]);
 const [adminLoading, setAdminLoading] = useState(false);
+  const [expandedFeedback, setExpandedFeedback] = useState(null);
 
   // who am i
   const [editingValues, setEditingValues] = useState(false);
@@ -1088,14 +1089,21 @@ const loadAdminFeedback = async () => {
           ) : adminFeedback.length===0 ? (
             <p style={{fontSize:13,color:"rgba(240,236,228,.3)",textAlign:"center",padding:"20px 0"}}>No responses yet.</p>
           ) : adminFeedback.map((f,i)=>(
-            <div key={i} style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"14px 16px",marginBottom:10}}>
-              <p style={{fontSize:11,color:"rgba(240,236,228,.28)",marginBottom:12}}>{new Date(f.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</p>
-              {[['What hit you',f.q1],['Where you got stuck',f.q2],['Come back tomorrow?',f.q3],['What was missing',f.q4],['One word',f.q5],['When you thought about using it and not',f.q6],['Anything else',f.q7]].filter(([,v])=>v).map(([label,val],j)=>(
-                <div key={j} style={{marginBottom:9}}>
-                  <p style={{fontSize:10,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3}}>{label}</p>
-                  {label==='One word' ? <span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.2)",borderRadius:20,padding:"3px 10px",fontSize:13,color:"#d4a359"}}>{val}</span> : <p style={{fontSize:13,color:"rgba(240,236,228,.78)",lineHeight:1.55}}>{val}</p>}
+            <div key={i} style={{background:"rgba(255,255,255,.04)",border:`0.5px solid ${expandedFeedback===i?"rgba(212,163,89,.25)":"rgba(255,255,255,.08)"}`,borderRadius:12,padding:"12px 16px",marginBottom:8,cursor:"pointer"}} onClick={()=>setExpandedFeedback(expandedFeedback===i?null:i)}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <p style={{fontSize:13,color:"rgba(240,236,228,.65)"}}>{new Date(f.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</p>
+                <span style={{fontSize:12,color:"rgba(240,236,228,.28)",transition:"transform .2s",display:"inline-block",transform:expandedFeedback===i?"rotate(90deg)":"none"}}>›</span>
+              </div>
+              {expandedFeedback===i&&(
+                <div style={{marginTop:12,borderTop:"0.5px solid rgba(255,255,255,.07)",paddingTop:12,display:"flex",flexDirection:"column",gap:10}}>
+                  {[['What hit you',f.q1],['Where you got stuck',f.q2],['Come back tomorrow?',f.q3],['What was missing',f.q4],['One word',f.q5],['When you thought about using it and not',f.q6],['Anything else',f.q7]].filter(([,v])=>v).map(([label,val],j)=>(
+                    <div key={j}>
+                      <p style={{fontSize:10,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3}}>{label}</p>
+                      {label==='One word' ? <span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.2)",borderRadius:20,padding:"3px 10px",fontSize:13,color:"#d4a359"}}>{val}</span> : <p style={{fontSize:13,color:"rgba(240,236,228,.78)",lineHeight:1.55}}>{val}</p>}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           ))}
         </div>
