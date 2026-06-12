@@ -1073,7 +1073,7 @@ const loadAdminFeedback = async () => {
           <p style={{fontSize:14,color:"rgba(240,236,228,.5)",lineHeight:1.6,marginBottom:20}}>Brutal honesty is exactly what this needs.</p>
           <button className="gbtn" onClick={()=>setShowFeedback(false)}>Close</button>
         </div>
-      ) : userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e' ? (
+      ) : userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e' && authUser ? (
         <div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
             <div>
@@ -1181,11 +1181,11 @@ const loadAdminFeedback = async () => {
         </div>
       </div>
       <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
-        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"transparent",border:"none",color:"rgba(240,236,228,.35)",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",padding:"2px 4px",whiteSpace:"nowrap"}}>feedback</button>
+        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4,lineHeight:1}}>💬 <span>Feedback</span></button>
         {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:20,padding:"2px 7px",fontSize:11,color:"#d4a359",whiteSpace:"nowrap"}}>⚡{xp.toLocaleString()}</span>}
         <div style={{position:"relative"}}>
-          <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
-            {lang} <span style={{fontSize:8,opacity:.5}}>▾</span>
+          <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4,lineHeight:1}}>
+  {lang} <span style={{fontSize:8,opacity:.5,lineHeight:1}}>▾</span>
           </button>
           {langOpen&&(
             <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:10,overflow:"hidden",zIndex:200,minWidth:60}}>
