@@ -1065,7 +1065,7 @@ const loadAdminFeedback = async () => {
       {showOverwrite && <OverwriteModal/>}
       {showFeedback && (
   <div className="modal-bg" onClick={()=>setShowFeedback(false)}>
-    <div className="modal" style={{maxWidth:feedbackSubmitted?260:500,maxHeight:"85vh",overflowY:"auto",background:feedbackSubmitted?"rgba(100,80,200,.15)":undefined,border:feedbackSubmitted?"0.5px solid rgba(100,80,200,.3)":undefined,padding:feedbackSubmitted?"8px 22px":undefined}} onClick={e=>e.stopPropagation()}>
+    <div className="modal" style={{maxWidth:feedbackSubmitted?260:500,maxHeight:"85vh",overflowY:"auto",background:feedbackSubmitted?"rgba(100,80,200,.35)":undefined,border:feedbackSubmitted?"0.5px solid rgba(100,80,200,.5)":undefined,padding:feedbackSubmitted?"8px 22px":undefined}} onClick={e=>e.stopPropagation()}>
       {feedbackSubmitted ? (
   <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12,padding:"8px 4px"}}>
     <p style={{fontFamily:"Fraunces,serif",fontSize:15,fontWeight:600}}>Thank you!</p>
