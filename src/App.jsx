@@ -458,6 +458,12 @@ export default function App() {
   const [xpMilestone, setXpMilestone] = useState(null);
   const [langOpen, setLangOpen] = useState(false);
   const [showSignOut, setShowSignOut] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+const [feedbackAnswers, setFeedbackAnswers] = useState({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});
+const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+const [feedbackLoading, setFeedbackLoading] = useState(false);
+const [adminFeedback, setAdminFeedback] = useState([]);
+const [adminLoading, setAdminLoading] = useState(false);
 
   // who am i
   const [editingValues, setEditingValues] = useState(false);
@@ -572,7 +578,21 @@ const handleSignOut = async () => {
   setYesterdayAnswer(null);
   goTo("login");
 };
-  
+  const submitFeedback = async () => {
+  setFeedbackLoading(true);
+  try {
+    await supabase.from('feedback').insert([feedbackAnswers]);
+    setFeedbackSubmitted(true);
+  } catch(e) {}
+  setFeedbackLoading(false);
+};
+
+const loadAdminFeedback = async () => {
+  setAdminLoading(true);
+  const {data} = await supabase.from('feedback').select('*').order('submitted_at',{ascending:false});
+  setAdminFeedback(data||[]);
+  setAdminLoading(false);
+};
   const bootFromSupabase = async (uid, googleName) => {
     const [dbProfile, dbSess, dbXpVal] = await Promise.all([
       dbGetProfile(uid),
@@ -1043,6 +1063,85 @@ const handleSignOut = async () => {
 
       {showValChallenge && <ValuesChallenge/>}
       {showOverwrite && <OverwriteModal/>}
+      {showFeedback && (
+  <div className="modal-bg" onClick={()=>setShowFeedback(false)}>
+    <div className="modal" style={{maxWidth:500,maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
+      {feedbackSubmitted ? (
+        <div style={{textAlign:"center",padding:"20px 0"}}>
+          <p style={{fontSize:22,marginBottom:12}}>🙏</p>
+          <p style={{fontFamily:"Fraunces,serif",fontSize:18,fontWeight:600,marginBottom:8}}>Thank you.</p>
+          <p style={{fontSize:14,color:"rgba(240,236,228,.5)",lineHeight:1.6,marginBottom:20}}>Brutal honesty is exactly what this needs.</p>
+          <button className="gbtn" onClick={()=>setShowFeedback(false)}>Close</button>
+        </div>
+      ) : userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e' ? (
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <div>
+              <p style={{fontFamily:"Fraunces,serif",fontSize:17,fontWeight:600}}>Feedback</p>
+              <p style={{fontSize:11,color:"rgba(240,236,228,.35)",marginTop:3}}>Admin view · newest first</p>
+            </div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}>
+              <span style={{background:"rgba(212,163,89,.12)",border:"0.5px solid rgba(212,163,89,.25)",color:"#d4a359",borderRadius:20,padding:"2px 10px",fontSize:11}}>{adminFeedback.length} responses</span>
+              <button className="tbtn" onClick={()=>setShowFeedback(false)}>✕</button>
+            </div>
+          </div>
+          {adminLoading ? (
+            <p style={{fontSize:13,color:"rgba(240,236,228,.3)",textAlign:"center",padding:"20px 0"}}>Loading<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p>
+          ) : adminFeedback.length===0 ? (
+            <p style={{fontSize:13,color:"rgba(240,236,228,.3)",textAlign:"center",padding:"20px 0"}}>No responses yet.</p>
+          ) : adminFeedback.map((f,i)=>(
+            <div key={i} style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"14px 16px",marginBottom:10}}>
+              <p style={{fontSize:11,color:"rgba(240,236,228,.28)",marginBottom:12}}>{new Date(f.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'})}</p>
+              {[['What hit you',f.q1],['Where you got stuck',f.q2],['Come back tomorrow?',f.q3],['What was missing',f.q4],['One word',f.q5],['When you thought about using it and not',f.q6],['Anything else',f.q7]].filter(([,v])=>v).map(([label,val],j)=>(
+                <div key={j} style={{marginBottom:9}}>
+                  <p style={{fontSize:10,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:3}}>{label}</p>
+                  {label==='One word' ? <span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.2)",borderRadius:20,padding:"3px 10px",fontSize:13,color:"#d4a359"}}>{val}</span> : <p style={{fontSize:13,color:"rgba(240,236,228,.78)",lineHeight:1.55}}>{val}</p>}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".08em"}}>Beta Feedback</p>
+            <button className="tbtn" onClick={()=>setShowFeedback(false)}>✕</button>
+          </div>
+          <p style={{fontFamily:"Fraunces,serif",fontSize:18,fontWeight:600,marginBottom:6}}>A few things I'm curious about</p>
+          <p style={{fontSize:13,color:"rgba(240,236,228,.42)",lineHeight:1.6,marginBottom:22}}>No wrong answers — brutal honesty is more useful than being nice 🙏</p>
+          {[
+            {key:'q1',num:'01',q:L("Did anything hit you or feel real?","Что-то зацепило или показалось настоящим?","¿Algo te llegó o se sintió real?"),ph:L("What landed...","Что зацепило...","Lo que llegó..."),type:'textarea'},
+            {key:'q2',num:'02',q:L("Where did you get stuck or lose interest?","Где застрял/а или потерял/а интерес?","¿Dónde te atascaste o perdiste interés?"),ph:L("Where things fell flat...","Где потерялся интерес...","Dónde las cosas se apagaron..."),type:'textarea'},
+            {key:'q3',num:'03',q:L("Would you come back tomorrow?","Вернулся/лась бы завтра?","¿Volverías mañana?"),type:'select',opts:[L("Yes, for sure","Да, точно","Sí, seguro"),L("Maybe","Возможно","Quizás"),L("Probably not","Скорее нет","Probablemente no")]},
+            {key:'q4',num:'04',q:L("What was missing?","Чего не хватало?","¿Qué faltaba?"),ph:L("What you wished was there...","Чего не хватало...","Lo que hubiera querido ver..."),type:'textarea'},
+            {key:'q5',num:'05',q:L("One word for how it felt overall?","Одно слово — как это ощущалось?","¿Una palabra para describir cómo se sintió?"),ph:L("e.g. real, heavy, interesting...","например: настоящее, тяжело, интересно...","ej: real, pesado, interesante..."),type:'input'},
+            {key:'q6',num:'06',q:L("When did you think about using it and not?","Когда думал/а воспользоваться, но не стал/а?","¿Cuándo pensaste usarlo y no lo hiciste?"),ph:L("What got in the way...","Что помешало...","Qué se interpuso..."),type:'textarea'},
+            {key:'q7',num:'07',q:L("Anything else you'd like to share?","Есть что-то ещё?","¿Algo más que quieras compartir?"),ph:L("Open floor...","Всё остальное...","Lo que quieras..."),type:'textarea'},
+          ].map(({key,num,q,ph,type,opts})=>(
+            <div key={key} style={{marginBottom:18}}>
+              <p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".08em",marginBottom:5}}>{num}</p>
+              <p style={{fontSize:14,color:"rgba(240,236,228,.85)",marginBottom:9,lineHeight:1.5}}>{q}</p>
+              {type==='textarea' && <textarea rows={2} placeholder={ph} value={feedbackAnswers[key]} onChange={e=>setFeedbackAnswers(p=>({...p,[key]:e.target.value}))}/>}
+              {type==='input' && <input type="text" placeholder={ph} value={feedbackAnswers[key]} onChange={e=>setFeedbackAnswers(p=>({...p,[key]:e.target.value}))}/>}
+              {type==='select' && (
+                <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                  {opts.map((o,i)=>(
+                    <button key={i} className={`obtn ${feedbackAnswers[key]===o?"sel":""}`} onClick={()=>setFeedbackAnswers(p=>({...p,[key]:o}))}>
+                      <span style={{color:feedbackAnswers[key]===o?"#d4a359":"rgba(240,236,228,.2)",marginRight:8,fontSize:12}}>{feedbackAnswers[key]===o?"✓":"○"}</span>{o}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+          <button className="pbtn" onClick={submitFeedback} disabled={feedbackLoading}>
+            {feedbackLoading ? L("Sending...","Отправляю...","Enviando...") : L("Submit feedback →","Отправить →","Enviar →")}
+          </button>
+        </div>
+      )}
+    </div>
+  </div>
+)}
       {showSignInPrompt && (
   <div className="modal-bg">
     <div className="modal">
@@ -1082,6 +1181,7 @@ const handleSignOut = async () => {
         </div>
       </div>
       <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
+        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"transparent",border:"none",color:"rgba(240,236,228,.35)",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",padding:"2px 4px",whiteSpace:"nowrap"}}>feedback</button>
         {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:20,padding:"2px 7px",fontSize:11,color:"#d4a359",whiteSpace:"nowrap"}}>⚡{xp.toLocaleString()}</span>}
         <div style={{position:"relative"}}>
           <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4}}>
