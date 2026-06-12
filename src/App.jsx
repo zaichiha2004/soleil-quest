@@ -1067,12 +1067,12 @@ const loadAdminFeedback = async () => {
   <div className="modal-bg" onClick={()=>setShowFeedback(false)}>
     <div className="modal" style={{maxWidth:500,maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
       {feedbackSubmitted ? (
-        <div style={{textAlign:"center",padding:"20px 0"}}>
-          <p style={{fontSize:22,marginBottom:12}}>🙏</p>
-          <p style={{fontFamily:"Fraunces,serif",fontSize:18,fontWeight:600,marginBottom:8}}>Thank you.</p>
-          <p style={{fontSize:14,color:"rgba(240,236,228,.5)",lineHeight:1.6,marginBottom:20}}>Brutal honesty is exactly what this needs.</p>
-          <button className="gbtn" onClick={()=>setShowFeedback(false)}>Close</button>
-        </div>
+  <div style={{display:"flex",justifyContent:"center"}}>
+    <div style={{background:"#16161e",border:"0.5px solid rgba(255,255,255,.1)",borderRadius:16,padding:"16px 22px",width:"60%",display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
+      <p style={{fontFamily:"Fraunces,serif",fontSize:15,fontWeight:600}}>Thank you!</p>
+      <button className="gbtn" style={{fontSize:12,padding:"6px 14px"}} onClick={()=>setShowFeedback(false)}>Close</button>
+    </div>
+  </div>
       ) : userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e' && authUser ? (
         <div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
@@ -1108,7 +1108,7 @@ const loadAdminFeedback = async () => {
             <button className="tbtn" onClick={()=>setShowFeedback(false)}>✕</button>
           </div>
           <p style={{fontFamily:"Fraunces,serif",fontSize:18,fontWeight:600,marginBottom:6}}>A few things I'm curious about</p>
-          <p style={{fontSize:13,color:"rgba(240,236,228,.42)",lineHeight:1.6,marginBottom:22}}>No wrong answers — brutal honesty is more useful than being nice 🙏</p>
+          <p style={{fontSize:13,color:"rgba(240,236,228,.42)",lineHeight:1.6,marginBottom:22}}>No wrong answers — brutal honesty is more useful than being nice 🙏<br/><span style={{fontSize:11,color:"rgba(240,236,228,.25)"}}>Anonymous</span></p>
           {[
             {key:'q1',num:'01',q:L("Did anything hit you or feel real?","Что-то зацепило или показалось настоящим?","¿Algo te llegó o se sintió real?"),ph:L("What landed...","Что зацепило...","Lo que llegó..."),type:'textarea'},
             {key:'q2',num:'02',q:L("Where did you get stuck or lose interest?","Где застрял/а или потерял/а интерес?","¿Dónde te atascaste o perdiste interés?"),ph:L("Where things fell flat...","Где потерялся интерес...","Dónde las cosas se apagaron..."),type:'textarea'},
