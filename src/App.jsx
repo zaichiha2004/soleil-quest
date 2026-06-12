@@ -1067,11 +1067,9 @@ const loadAdminFeedback = async () => {
   <div className="modal-bg" onClick={()=>setShowFeedback(false)}>
     <div className="modal" style={{maxWidth:500,maxHeight:"85vh",overflowY:"auto"}} onClick={e=>e.stopPropagation()}>
       {feedbackSubmitted ? (
-  <div style={{display:"flex",justifyContent:"center"}}>
-    <div style={{background:"#16161e",border:"0.5px solid rgba(255,255,255,.1)",borderRadius:16,padding:"16px 22px",width:"60%",display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
-      <p style={{fontFamily:"Fraunces,serif",fontSize:15,fontWeight:600}}>Thank you!</p>
-      <button className="gbtn" style={{fontSize:12,padding:"6px 14px"}} onClick={()=>setShowFeedback(false)}>Close</button>
-    </div>
+  <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12,padding:"16px 22px"}}>
+    <p style={{fontFamily:"Fraunces,serif",fontSize:15,fontWeight:600}}>Thank you!</p>
+    <button className="gbtn" style={{fontSize:12,padding:"6px 14px"}} onClick={()=>setShowFeedback(false)}>Close</button>
   </div>
       ) : userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e' && authUser ? (
         <div>
