@@ -458,6 +458,7 @@ export default function App() {
   const [xpMilestone, setXpMilestone] = useState(null);
   const [langOpen, setLangOpen] = useState(false);
   const [showSignOut, setShowSignOut] = useState(false);
+  const [screen2, setScreen2] = useState(null); // 'paths' | 'deepdive' | 'library'
   const [showFeedback, setShowFeedback] = useState(false);
 const [feedbackAnswers, setFeedbackAnswers] = useState({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});
 const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
@@ -484,6 +485,34 @@ const [adminLoading, setAdminLoading] = useState(false);
   const [vcContext, setVcContext] = useState("onboarding"); // "onboarding" | "whoami"
 
   const goTo = (s) => { setScreen(s); setAnimKey(k=>k+1); };
+  const getBgTheme = () => {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 11) return {
+    img: '/bg-morning.JPEG',
+    overlay: 'rgba(12,5,6,.88)',
+    accent: '#c4786e',
+    accentMuted: 'rgba(196,120,110,.8)',
+    accentBorder: 'rgba(196,120,110,.25)',
+    accentBg: 'rgba(196,120,110,.1)',
+  };
+  if (h >= 11 && h < 17) return {
+    img: '/bg-midday.JPEG',
+    overlay: 'rgba(4,12,10,.9)',
+    accent: '#7aaf96',
+    accentMuted: 'rgba(120,170,145,.8)',
+    accentBorder: 'rgba(120,170,145,.25)',
+    accentBg: 'rgba(100,160,130,.1)',
+  };
+  return {
+    img: '/bg-evening.JPEG',
+    overlay: 'rgba(6,3,1,.9)',
+    accent: '#c8845a',
+    accentMuted: 'rgba(200,132,90,.8)',
+    accentBorder: 'rgba(200,132,90,.25)',
+    accentBg: 'rgba(200,132,90,.1)',
+  };
+};
+const theme = getBgTheme();
   const today = new Date().toLocaleDateString("en-CA");
 
   const checkinOpts = lang==="RU" ? CHECKIN_OPTS_RU : lang==="ES" ? CHECKIN_OPTS_ES : CHECKIN_OPTS_EN;
@@ -643,7 +672,7 @@ const loadAdminFeedback = async () => {
         setShowYesterday(true);
       }
       }
-      goTo("checkin");
+      goTo("paths");
     } else {
       // New user — set name from Google
       setProfile({ name: googleName||'Friend', values: [], valueDepth: {} });
@@ -667,7 +696,7 @@ const loadAdminFeedback = async () => {
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
     const yDate = yesterday.toLocaleDateString('en-CA');
     if (s && s[yDate]) setYesterdaySession(s[yDate]);
-    if(p){setProfile(p);setLang(p.lang||"EN");goTo("checkin");}
+    if(p){setProfile(p);setLang(p.lang||"EN");goTo("paths");}
     else if(supabase && !localStorage.getItem('sq_guest')) goTo("login");
     else goTo("onboarding");
   };
@@ -1261,7 +1290,10 @@ const loadAdminFeedback = async () => {
 
         {/* LOGIN */}
         {screen==="login"&&(
-  <div key={animKey} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"90vh",textAlign:"center",padding:"40px 0"}}>
+  <div key={animKey} style={{position:"fixed",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"40px 20px"}}>
+    <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:"center top",zIndex:0}}/>
+    <div style={{position:"absolute",inset:0,background:`linear-gradient(to top, ${theme.overlay} 0%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.15) 100%)`,zIndex:1}}/>
+    <div style={{position:"relative",zIndex:2,width:"100%",maxWidth:400}}>
     <div style={{display:"flex",justifyContent:"flex-end",width:"100%",marginBottom:40}}>
               <div style={{position:"relative"}}>
                 <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 10px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",gap:5}}>
@@ -1280,6 +1312,7 @@ const loadAdminFeedback = async () => {
                 )}
               </div>
             </div>
+      </div>
             <p className="up d1" style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,color:"#d4a359",marginBottom:12,letterSpacing:"-.5px"}}>Alex Soleil</p>
             <h1 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:38,fontWeight:600,lineHeight:1.1,marginBottom:16,letterSpacing:"-1px"}}>
               {L("Find your ","Найди свою ","Encuentra tu ")}<em style={{color:"#d4a359"}}>{L("inner spark.","искру.","chispa interior.")}</em>
@@ -1297,6 +1330,55 @@ const loadAdminFeedback = async () => {
           </div>
         )}
 
+{/* PATHS */}
+{screen==="paths"&&(
+  <div key={animKey} style={{position:"fixed",inset:0,zIndex:10}}>
+    <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:"center top"}}/>
+    <div style={{position:"absolute",inset:0,background:`linear-gradient(to top, ${theme.overlay} 0%, rgba(0,0,0,.5) 45%, rgba(0,0,0,.1) 100%)`}}/>
+    <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px"}}>
+      <p style={{fontSize:11,letterSpacing:".1em",textTransform:"uppercase",color:theme.accentMuted,marginBottom:10}}>Alex Soleil</p>
+      <h2 style={{fontFamily:"Cormorant Garamond,Georgia,serif",fontSize:28,fontWeight:300,lineHeight:1.2,color:"#f5ede0",marginBottom:32,textAlign:"center"}}>{L("What feels right at the moment?","Что кажется правильным прямо сейчас?","¿Qué se siente bien en este momento?")}</h2>
+      <div style={{display:"flex",flexDirection:"column",gap:10,width:"100%",maxWidth:400}}>
+        {[
+          {icon:"✦",title:L("Daily Practice","Ежедневная практика","Práctica Diaria"),desc:L("Check in, choose your focus, go deeper.","Отметься, выбери фокус, иди глубже.","Haz check-in, elige tu enfoque, ve más profundo."),action:()=>goTo("checkin")},
+          {icon:"◎",title:L("Deep Dive a Challenge","Погрузись в вызов","Sumérgete en un Desafío"),desc:L("Get to the bottom of something specific.","Доберись до сути чего-то конкретного.","Llega al fondo de algo específico."),action:()=>goTo("deepdive")},
+          {icon:"◈",title:L("Practice Library","Библиотека практик","Biblioteca de Prácticas"),desc:L("Explore practices at your own pace.","Исследуй практики в своём темпе.","Explora prácticas a tu propio ritmo."),action:()=>goTo("library")},
+        ].map((r,i)=>(
+          <div key={i} onClick={r.action} style={{background:theme.accentBg,border:`0.5px solid ${theme.accentBorder}`,borderRadius:14,padding:"18px 20px",cursor:"pointer",transition:"all .2s"}}
+            onMouseEnter={e=>e.currentTarget.style.background=`rgba(255,255,255,.08)`}
+            onMouseLeave={e=>e.currentTarget.style.background=theme.accentBg}>
+            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:5}}>
+              <span style={{fontSize:18,color:theme.accent}}>{r.icon}</span>
+              <span style={{fontFamily:"Cormorant Garamond,Georgia,serif",fontSize:18,fontWeight:600,color:"#f5ede0"}}>{r.title}</span>
+            </div>
+            <p style={{fontSize:12,color:"rgba(240,215,195,.45)",lineHeight:1.55,paddingLeft:30}}>{r.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+)}
+
+{/* DEEP DIVE PLACEHOLDER */}
+{screen==="deepdive"&&(
+  <div key={animKey} style={{paddingTop:40}}>
+    <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("paths")}>← {L("Back","Назад","Volver")}</button>
+    <p style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>Deep Dive</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:24,fontWeight:600,marginBottom:12}}>Coming soon</h2>
+    <p style={{fontSize:14,color:"rgba(240,236,228,.45)",lineHeight:1.65}}>This is where you'll get to the bottom of a specific challenge.</p>
+  </div>
+)}
+
+{/* LIBRARY PLACEHOLDER */}
+{screen==="library"&&(
+  <div key={animKey} style={{paddingTop:40}}>
+    <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("paths")}>← {L("Back","Назад","Volver")}</button>
+    <p style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>Practice Library</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:24,fontWeight:600,marginBottom:12}}>Coming soon</h2>
+    <p style={{fontSize:14,color:"rgba(240,236,228,.45)",lineHeight:1.65}}>This is where you'll explore practices at your own pace.</p>
+  </div>
+)}
+        
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
   <div key={animKey} style={{paddingTop:48}}>
