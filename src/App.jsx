@@ -1216,11 +1216,11 @@ const loadAdminFeedback = async () => {
         </div>
       </div>
       <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
-        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4,lineHeight:1}}>💬 <span>Feedback</span></button>
-        {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:7,padding:"4px 8px",fontSize:13,color:"#d4a359",display:"inline-flex",alignItems:"center",lineHeight:1}}>⚡{xp.toLocaleString()}</span>}
+        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:14,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4,lineHeight:1}}>💬 <span>Feedback</span></button>
+        {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:7,padding:"4px 8px",fontSize:14,color:"#d4a359",display:"inline-flex",alignItems:"center",lineHeight:1}}>⚡{xp.toLocaleString()}</span>}
         <div style={{position:"relative"}}>
-          <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:4,lineHeight:1}}>
-  {lang} <span style={{fontSize:10,opacity:.5,lineHeight:1}}>▾</span>
+          <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:4,lineHeight:1}}>
+  {lang} <span style={{fontSize:11,opacity:.5,lineHeight:1}}>▾</span>
           </button>
           {langOpen&&(
             <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:10,overflow:"hidden",zIndex:200,minWidth:60}}>
@@ -1339,7 +1339,7 @@ const loadAdminFeedback = async () => {
       <h2 style={{fontFamily:"Cormorant Garamond,Georgia,serif",fontSize:28,fontWeight:300,lineHeight:1.2,color:"#f5ede0",marginBottom:32,textAlign:"center"}}>{L("What feels right at the moment?","Что кажется правильным прямо сейчас?","¿Qué se siente bien en este momento?")}</h2>
       <div style={{display:"flex",flexDirection:"column",gap:10,width:"100%",maxWidth:400}}>
         {[
-          {icon:"✦",title:L("Daily Practice","Ежедневная практика","Práctica Diaria"),desc:L("Check in, choose your focus, go deeper.","Отметься, выбери фокус, иди глубже.","Haz check-in, elige tu enfoque, ve más profundo."),action:()=>goTo("checkin")},
+          {icon:"✦",title:L("Soleil Quest","Soleil Quest","Soleil Quest"),desc:L("Your daily check-in — choose your focus, go deeper.","Твой ежедневный чек-ин — выбери фокус, иди глубже.","Tu check-in diario — elige tu enfoque, ve más profundo."),action:()=>goTo("checkin")},
           {icon:"◎",title:L("Deep Dive a Challenge","Погрузись в вызов","Sumérgete en un Desafío"),desc:L("Get to the bottom of something specific.","Доберись до сути чего-то конкретного.","Llega al fondo de algo específico."),action:()=>goTo("deepdive")},
           {icon:"◈",title:L("Practice Library","Библиотека практик","Biblioteca de Prácticas"),desc:L("Explore practices at your own pace.","Исследуй практики в своём темпе.","Explora prácticas a tu propio ritmo."),action:()=>goTo("library")},
         ].map((r,i)=>(
