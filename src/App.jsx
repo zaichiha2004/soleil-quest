@@ -962,7 +962,7 @@ const loadAdminFeedback = async () => {
     .gbtn:hover{color:#f0ece4;border-color:rgba(255,255,255,.22)}
     .tbtn{background:transparent;color:rgba(240,236,228,.32);border:none;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;padding:4px 0;transition:color .15s;}
     .tbtn:hover{color:rgba(240,236,228,.7)}
-    .ntab{padding:5px 10px;border-radius:7px;font-size:12px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;font-weight:400;}
+    .ntab{padding:6px 12px;border-radius:7px;font-size:14px;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;white-space:nowrap;font-weight:400;}
     .ntab.on{background:rgba(212,163,89,.12);color:#d4a359;font-weight:400;}.ntab.off{background:transparent;color:rgba(212,163,89,.45);font-weight:400;}.ntab.off:hover{color:rgba(212,163,89,.8);}
     .ltab{padding:4px 9px;border-radius:6px;font-size:11px;cursor:pointer;border:0.5px solid;font-family:'DM Sans',sans-serif;transition:all .15s;}
     .ltab.on{background:rgba(212,163,89,.15);border-color:#d4a359;color:#d4a359;font-weight:500;}
@@ -1216,11 +1216,11 @@ const loadAdminFeedback = async () => {
         </div>
       </div>
       <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
-        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4,lineHeight:1}}>💬 <span>Feedback</span></button>
-        {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:20,padding:"2px 7px",fontSize:11,color:"#d4a359",whiteSpace:"nowrap"}}>⚡{xp.toLocaleString()}</span>}
+        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4,lineHeight:1}}>💬 <span>Feedback</span></button>
+        {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:7,padding:"4px 8px",fontSize:13,color:"#d4a359",display:"inline-flex",alignItems:"center",lineHeight:1}}>⚡{xp.toLocaleString()}</span>}
         <div style={{position:"relative"}}>
-          <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",gap:4,lineHeight:1}}>
-  {lang} <span style={{fontSize:8,opacity:.5,lineHeight:1}}>▾</span>
+          <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:13,cursor:"pointer",display:"flex",alignItems:"center",gap:4,lineHeight:1}}>
+  {lang} <span style={{fontSize:10,opacity:.5,lineHeight:1}}>▾</span>
           </button>
           {langOpen&&(
             <div style={{position:"absolute",top:"calc(100% + 6px)",right:0,background:"#1a1a24",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:10,overflow:"hidden",zIndex:200,minWidth:60}}>
