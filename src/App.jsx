@@ -1336,7 +1336,6 @@ const loadAdminFeedback = async () => {
     <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:"center center"}}/>
     <div style={{position:"absolute",inset:0,background:`linear-gradient(to top, ${theme.overlay} 0%, rgba(0,0,0,.5) 45%, rgba(0,0,0,.1) 100%)`}}/>
     <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px"}}>
-      <p style={{fontSize:11,letterSpacing:".1em",textTransform:"uppercase",color:theme.accentMuted,marginBottom:10}}>Alex Soleil</p>
       <h2 style={{fontFamily:"Cormorant Garamond,Georgia,serif",fontSize:28,fontWeight:300,lineHeight:1.2,color:"#f5ede0",marginBottom:32,textAlign:"center"}}>{L("What feels right at the moment?","Что кажется правильным прямо сейчас?","¿Qué se siente bien en este momento?")}</h2>
       <div style={{display:"flex",flexDirection:"column",gap:10,width:"100%",maxWidth:400}}>
         {[
@@ -1351,7 +1350,7 @@ const loadAdminFeedback = async () => {
               <span style={{fontSize:18,color:theme.accent}}>{r.icon}</span>
               <span style={{fontFamily:"Cormorant Garamond,Georgia,serif",fontSize:18,fontWeight:600,color:"#f5ede0"}}>{r.title}</span>
             </div>
-            <p style={{fontSize:12,color:"rgba(240,215,195,.45)",lineHeight:1.55,paddingLeft:30}}>{r.desc}</p>
+            <p style={{fontSize:12,color:"rgba(255,255,255,.62)",lineHeight:1.4,paddingLeft:30,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{r.desc}</p>
           </div>
         ))}
       </div>
