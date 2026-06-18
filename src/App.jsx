@@ -1312,8 +1312,7 @@ const loadAdminFeedback = async () => {
                 )}
               </div>
             </div>
-          </div>
-            <p className="up d1" style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,color:"#d4a359",marginBottom:12,letterSpacing:"-.5px"}}>Alex Soleil</p>
+            <p className="up d1" style={{fontFamily:"Fraunces,serif",fontSize:28,fontWeight:600,color:"#d4a359",marginBottom:12,letterSpacing:"-.5px",position:"relative",zIndex:2}}>Alex Soleil</p>
             <h1 className="up d2" style={{fontFamily:"Fraunces,serif",fontSize:38,fontWeight:600,lineHeight:1.1,marginBottom:16,letterSpacing:"-1px"}}>
               {L("Find your ","Найди свою ","Encuentra tu ")}<em style={{color:"#d4a359"}}>{L("inner spark.","искру.","chispa interior.")}</em>
             </h1>
@@ -1328,6 +1327,7 @@ const loadAdminFeedback = async () => {
               </button>
             </div>
           </div>
+        </div>
         )}
 
 {/* PATHS */}
