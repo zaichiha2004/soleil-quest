@@ -502,7 +502,6 @@ const [adminLoading, setAdminLoading] = useState(false);
     accentMuted: 'rgba(120,170,145,.8)',
     accentBorder: 'rgba(120,170,145,.25)',
     accentBg: 'rgba(100,160,130,.1)',
-    position: 'center center',
   };
   return {
     img: '/bg-evening.JPEG',
@@ -1292,7 +1291,7 @@ const loadAdminFeedback = async () => {
         {/* LOGIN */}
         {screen==="login"&&(
   <div key={animKey} style={{position:"fixed",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"40px 20px"}}>
-    <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:theme.position||"center center",zIndex:0}}/>
+    <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:"center center",zIndex:0}}/>
     <div style={{position:"absolute",inset:0,background:`linear-gradient(to top, ${theme.overlay} 0%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.15) 100%)`,zIndex:1}}/>
     <div style={{position:"relative",zIndex:2,width:"100%",maxWidth:400}}>
     <div style={{display:"flex",justifyContent:"flex-end",width:"100%",marginBottom:40}}>
