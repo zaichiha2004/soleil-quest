@@ -502,6 +502,7 @@ const [adminLoading, setAdminLoading] = useState(false);
     accentMuted: 'rgba(120,170,145,.8)',
     accentBorder: 'rgba(120,170,145,.25)',
     accentBg: 'rgba(100,160,130,.1)',
+    position: 'center 20%',
   };
   return {
     img: '/bg-evening.JPEG',
@@ -1291,7 +1292,7 @@ const loadAdminFeedback = async () => {
         {/* LOGIN */}
         {screen==="login"&&(
   <div key={animKey} style={{position:"fixed",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"40px 20px"}}>
-    <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:"center center",zIndex:0}}/>
+    <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:theme.position||"center center",zIndex:0}}/>
     <div style={{position:"absolute",inset:0,background:`linear-gradient(to top, ${theme.overlay} 0%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.15) 100%)`,zIndex:1}}/>
     <div style={{position:"relative",zIndex:2,width:"100%",maxWidth:400}}>
     <div style={{display:"flex",justifyContent:"flex-end",width:"100%",marginBottom:40}}>
@@ -1333,7 +1334,7 @@ const loadAdminFeedback = async () => {
 {/* PATHS */}
 {screen==="paths"&&(
   <div key={animKey} style={{position:"fixed",inset:0,zIndex:10}}>
-    <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:"center center"}}/>
+    <div style={{position:"absolute",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:theme.position||"center center"}}/>
     <div style={{position:"absolute",inset:0,background:`linear-gradient(to top, ${theme.overlay} 0%, rgba(0,0,0,.5) 45%, rgba(0,0,0,.1) 100%)`}}/>
     <div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"100vh",padding:"40px 24px"}}>
       <h2 style={{fontFamily:"Cormorant Garamond,Georgia,serif",fontSize:28,fontWeight:300,lineHeight:1.2,color:"#f5ede0",marginBottom:32,textAlign:"center"}}>{L("What feels right at the moment?","Что кажется правильным прямо сейчас?","¿Qué se siente bien en este momento?")}</h2>
@@ -1381,7 +1382,7 @@ const loadAdminFeedback = async () => {
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
   <div key={animKey} style={{paddingTop:48,position:"relative",minHeight:"100vh"}}>
-    <div style={{position:"fixed",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:"center center",zIndex:-2}}/>
+    <div style={{position:"fixed",inset:0,backgroundImage:`url('${theme.img}')`,backgroundSize:"cover",backgroundPosition:theme.position||"center center",zIndex:-2}}/>
     <div style={{position:"fixed",inset:0,background:`linear-gradient(180deg, ${theme.overlay} 0%, rgba(0,0,0,.7) 50%, ${theme.overlay} 100%)`,zIndex:-1}}/>
     <div style={{position:"fixed",top:0,left:0,right:0,zIndex:50,padding:"10px 18px",background:"rgba(12,12,16,.92)",backdropFilter:"blur(16px)",borderBottom:"0.5px solid rgba(255,255,255,.06)",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
   <span style={{fontFamily:"Fraunces,serif",fontSize:18,color:"#d4a359",fontWeight:600,cursor:"pointer",letterSpacing:"-.3px"}} onClick={()=>goTo("login")}>Alex Soleil</span>
