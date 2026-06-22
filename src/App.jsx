@@ -502,7 +502,7 @@ const [adminLoading, setAdminLoading] = useState(false);
     accentMuted: 'rgba(120,170,145,.8)',
     accentBorder: 'rgba(120,170,145,.25)',
     accentBg: 'rgba(100,160,130,.1)',
-    position: 'center 40%',
+    position: 'center center',
   };
   return {
     img: '/bg-evening.JPEG',
