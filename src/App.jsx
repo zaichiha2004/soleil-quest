@@ -496,7 +496,7 @@ const [adminLoading, setAdminLoading] = useState(false);
     accentBg: 'rgba(196,120,110,.1)',
   };
   if (h >= 11 && h < 17) return {
-    img: '/bg-midday.JPEG',
+    img: '/bg-midday.jpg',
     overlay: 'rgba(4,12,10,.9)',
     accent: '#7aaf96',
     accentMuted: 'rgba(120,170,145,.8)',
