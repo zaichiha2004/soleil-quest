@@ -587,9 +587,9 @@ const theme = getBgTheme();
   const signInWithGoogle = async () => {
     if (!supabase) { bootFromStorage(); return; }
     await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin }
-    });
+  provider: 'google',
+  options: { redirectTo: window.location.origin, queryParams: { prompt: 'select_account' } }
+});
   };
 
 const handleSignOut = async () => {
@@ -1269,18 +1269,21 @@ const loadAdminFeedback = async () => {
 {/* MOBILE BOTTOM NAV */}
     <div className="mobile-bottom-nav">
       {[
-        ["howto","○",L("How It Works","Как работает","Cómo funciona")],
-        ["practices","◎",L("Practices","Практики","Prácticas")],
-        ["whoami","◈",L("My Vault","Мой Архив","Mi Bóveda")],
-        ["talk","✉","Talk to Alex"],
-      ].map(([k,icon,label])=>(
-        <button key={k} onClick={()=>{setTab(k);goTo(k==="talk"?"talk":k);}}
-          style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3,background:"transparent",border:"none",cursor:"pointer",padding:"4px 2px"}}>
-          <span style={{fontSize:16,color:tab===k?"#d4a359":"rgba(212,163,89,.35)"}}>{icon}</span>
-          <span style={{fontSize:9,color:tab===k?"#d4a359":"rgba(212,163,89,.35)",fontFamily:"'DM Sans',sans-serif",letterSpacing:".02em",fontWeight:tab===k?500:400}}>{label}</span>
-          {tab===k&&<span style={{width:3,height:3,borderRadius:"50%",background:"#d4a359",display:"block"}}/>}
-        </button>
-      ))}
+  ["howto","○",L("How It Works","Как работает","Cómo funciona")],
+  ["practices","◎",L("Practices","Практики","Prácticas")],
+  ["whoami","◈",L("My Vault","Мой Архив","Mi Bóveda")],
+  ["talk","✉","Talk to Alex"],
+  ["feedback","💬","Feedback"],
+].map(([k,icon,label])=>(
+  <button key={k} onClick={()=>{
+    if(k==="feedback"){setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e')loadAdminFeedback();return;}
+    setTab(k);goTo(k==="talk"?"talk":k);}}
+    style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3,background:"transparent",border:"none",cursor:"pointer",padding:"4px 2px"}}>
+    <span style={{fontSize:16,color:tab===k?"#d4a359":"rgba(212,163,89,.35)"}}>{icon}</span>
+    <span style={{fontSize:9,color:tab===k?"#d4a359":"rgba(212,163,89,.35)",fontFamily:"'DM Sans',sans-serif",letterSpacing:".02em",fontWeight:tab===k?500:400}}>{label}</span>
+    {tab===k&&<span style={{width:3,height:3,borderRadius:"50%",background:"#d4a359",display:"block"}}/>}
+  </button>
+))}
     </div>
   </>
 )}
