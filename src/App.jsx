@@ -733,7 +733,7 @@ const loadAdminFeedback = async () => {
     setShowValChallenge(true);
     try {
       const res = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1200,system:VALUES_CHALLENGE_SYSTEM(lang,vals.length?vals:VALUES_LIST.slice(0,10)),messages:[{role:"user",content:"Generate the values challenge now."}]})});
+        body:JSON.stringify({model:"claude-sonnet-4-6",temperature:1,max_tokens:1200,system:VALUES_CHALLENGE_SYSTEM(lang,vals.length?vals:VALUES_LIST.slice(0,10)),messages:[{role:"user",content:"Generate the values challenge now."}]})});
       const data=await res.json();
       const clean=(data.content?.[0]?.text||"").replace(/```json|```/g,"").trim();
       const parsed=JSON.parse(clean);
@@ -755,7 +755,7 @@ const loadAdminFeedback = async () => {
     const userVals=(vcContext==="onboarding"?selValues:profile?.values)||[];
     try {
       const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,system:VALUES_RESULT_SYSTEM(lang),
+        body:JSON.stringify({model:"claude-sonnet-4-6",temperature:1,max_tokens:600,system:VALUES_RESULT_SYSTEM(lang),
           messages:[{role:"user",content:`Selected values: ${userVals.join(", ")||"not yet selected"}\nChallenge answers:\n${summary}\nGenerate the reflection.`}]})});
       const data=await res.json();
       const clean=(data.content?.[0]?.text||"").replace(/```json|```/g,"").trim();
@@ -862,7 +862,7 @@ const loadAdminFeedback = async () => {
   const callAI=async(messages,isFinal,depth)=>{
     try{
       const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1400,system:SYSTEM(lang),messages})});
+        body:JSON.stringify({model:"claude-sonnet-4-6",temperature:1,max_tokens:1400,system:SYSTEM(lang),messages})});
       const data=await res.json();
       const clean=(data.content?.[0]?.text||"").replace(/```json|```/g,"").trim();
       const parsed=JSON.parse(clean);
@@ -880,7 +880,7 @@ const loadAdminFeedback = async () => {
     const tone=r>=7?"high commitment — bold concrete":r>=4?"some ambivalence — gentle exploratory":"low — one tiny micro-step";
     try{
       const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,system:SYSTEM(lang),
+        body:JSON.stringify({model:"claude-sonnet-4-6",temperature:1,max_tokens:500,system:SYSTEM(lang),
           messages:[{role:"user",content:`Readiness: ${r}/10 (${tone}). Insight: "${plan?.insight}". Generate 4 first step options calibrated to readiness. JSON only: {"options":["a","b","c","d"]}`}]})});
       const data=await res.json();
       const clean=(data.content?.[0]?.text||"").replace(/```json|```/g,"").trim();
