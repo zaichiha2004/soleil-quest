@@ -1004,6 +1004,7 @@ const loadAdminFeedback = async () => {
   .desktop-nav{display:none;}
   .mobile-nav{display:flex;}
   .mobile-bottom-nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(12,12,16,.97);border-top:0.5px solid rgba(255,255,255,.08);padding:8px 0 18px;z-index:50;}
+  .desktop-only{display:none!important;}
 }
   `;
 
@@ -1216,8 +1217,7 @@ const loadAdminFeedback = async () => {
         </div>
       </div>
       <div style={{display:"flex",gap:4,alignItems:"center",flexShrink:0}}>
-        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:14,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4,lineHeight:1}}>💬 <span>Feedback</span></button>
-        {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:7,padding:"4px 8px",fontSize:14,color:"#d4a359",display:"inline-flex",alignItems:"center",lineHeight:1}}>⚡{xp.toLocaleString()}</span>}
+        <button onClick={()=>{setShowFeedback(true);setFeedbackSubmitted(false);setFeedbackAnswers({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''}); if(userId==='7bf3f94a-22f3-4304-9530-0ddeaec6d09e') loadAdminFeedback();}} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:14,cursor:"pointer",display:"inline-flex",alignItems:"center",gap:4,lineHeight:1}} className="desktop-only">💬 <span>Feedback</span></button>        {xp>0&&<span style={{background:"rgba(212,163,89,.1)",border:"0.5px solid rgba(212,163,89,.22)",borderRadius:7,padding:"4px 8px",fontSize:14,color:"#d4a359",display:"inline-flex",alignItems:"center",lineHeight:1}}>⚡{xp.toLocaleString()}</span>}
         <div style={{position:"relative"}}>
           <button onClick={()=>setLangOpen(o=>!o)} style={{background:"rgba(255,255,255,.05)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:7,padding:"4px 8px",color:"#f0ece4",fontFamily:"'DM Sans',sans-serif",fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",gap:4,lineHeight:1}}>
   {lang} <span style={{fontSize:11,opacity:.5,lineHeight:1}}>▾</span>
