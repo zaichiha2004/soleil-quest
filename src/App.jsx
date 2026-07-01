@@ -459,6 +459,10 @@ export default function App() {
   const [langOpen, setLangOpen] = useState(false);
   const [showSignOut, setShowSignOut] = useState(false);
   const [screen2, setScreen2] = useState(null); // 'paths' | 'deepdive' | 'library'
+  const [energyEntries, setEnergyEntries] = useState([]); // {id, text, type:'weekday'|'weekend', rating:'gain'|'drain'|'same'|null, week:string}
+const [energySection, setEnergySection] = useState('weekday');
+const [energyInput, setEnergyInput] = useState('');
+const [energyWeekOffset, setEnergyWeekOffset] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
 const [feedbackAnswers, setFeedbackAnswers] = useState({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});
 const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
@@ -782,6 +786,41 @@ const loadAdminFeedback = async () => {
   // ── ONBOARDING ──
   const buildDob = (y,m,d) => (y&&m&&d) ? `${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}` : null;
 
+  const getWeekKey = (offset=0) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offset*7);
+  const day = d.getDay();
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - (day===0?6:day-1));
+  return monday.toLocaleDateString('en-CA');
+};
+
+const loadEnergyEntries = async () => {
+  const data = await load("energyEntries") || [];
+  setEnergyEntries(data);
+};
+
+const addEnergyEntry = async () => {
+  if (!energyInput.trim()) return;
+  const entry = { id: Date.now().toString(), text: energyInput.trim(), type: energySection, rating: null, week: getWeekKey(energyWeekOffset) };
+  const updated = [...energyEntries, entry];
+  setEnergyEntries(updated);
+  setEnergyInput('');
+  await save("energyEntries", updated);
+};
+
+const rateEnergyEntry = async (id, rating) => {
+  const updated = energyEntries.map(e => e.id===id ? {...e, rating: e.rating===rating?null:rating} : e);
+  setEnergyEntries(updated);
+  await save("energyEntries", updated);
+};
+
+const deleteEnergyEntry = async (id) => {
+  const updated = energyEntries.filter(e => e.id !== id);
+  setEnergyEntries(updated);
+  await save("energyEntries", updated);
+};
+  
   const saveProfile = async () => {
     const dob = buildDob(dobYear, dobMonth, dobDay);
     const lp=dob?calcArcana(dob):null;
@@ -1371,15 +1410,101 @@ const loadAdminFeedback = async () => {
   </div>
 )}
 
-{/* LIBRARY PLACEHOLDER */}
+{/* LIBRARY */}
 {screen==="library"&&(
   <div key={animKey} style={{paddingTop:40}}>
     <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("paths")}>← {L("Back","Назад","Volver")}</button>
-    <p style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>Practice Library</p>
-    <h2 style={{fontFamily:"Fraunces,serif",fontSize:24,fontWeight:600,marginBottom:12}}>Coming soon</h2>
-    <p style={{fontSize:14,color:"rgba(240,236,228,.45)",lineHeight:1.65}}>This is where you'll explore practices at your own pace.</p>
+    <p style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>{L("Practice Library","Библиотека практик","Biblioteca de Prácticas")}</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:10}}>{L("Explore at your own pace","Исследуй в своём темпе","Explora a tu propio ritmo")}</h2>
+    <p style={{fontSize:13,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:26}}>{L("A collection of practices to deepen your self-knowledge, beyond the daily quest.","Коллекция практик для углубления самопознания.","Una colección de prácticas para profundizar tu autoconocimiento.")}</p>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+      <div onClick={()=>{loadEnergyEntries();goTo("energyaudit");}} style={{background:"rgba(122,175,150,.08)",border:"0.5px solid rgba(122,175,150,.22)",borderRadius:13,padding:13,cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:17}}>⚡</span>
+          <span style={{fontFamily:"Fraunces,serif",fontSize:13,fontWeight:600,color:"#7aaf96"}}>{L("Energy Audit","Аудит энергии","Auditoría de Energía")}</span>
+        </div>
+        <p style={{fontSize:10.5,color:"rgba(122,175,150,.65)",lineHeight:1.4,marginTop:5}}>{L("Track what fills you up and what drains you.","Отслеживай, что наполняет, а что истощает.","Rastrea lo que te llena y lo que te agota.")}</p>
+      </div>
+      <div style={{background:"rgba(122,175,150,.08)",border:"0.5px solid rgba(122,175,150,.22)",borderRadius:13,padding:13,position:"relative",opacity:.6}}>
+        <span style={{position:"absolute",top:10,right:10,fontSize:9,background:"rgba(122,175,150,.18)",color:"#7aaf96",borderRadius:20,padding:"2px 7px"}}>{L("soon","скоро","pronto")}</span>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <span style={{fontSize:17}}>🌅</span>
+          <span style={{fontFamily:"Fraunces,serif",fontSize:13,fontWeight:600,color:"#7aaf96"}}>Ikigai</span>
+        </div>
+        <p style={{fontSize:10.5,color:"rgba(122,175,150,.65)",lineHeight:1.4,marginTop:5}}>{L("Find your overlap of love, skill, purpose.","Найди пересечение любви, навыка, цели.","Encuentra tu superposición de amor, habilidad, propósito.")}</p>
+      </div>
+    </div>
   </div>
 )}
+
+{/* ENERGY AUDIT */}
+{screen==="energyaudit"&&(
+  <div key={animKey} style={{paddingTop:40}}>
+    <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("library")}>← {L("Back","Назад","Volver")}</button>
+    <p style={{fontSize:12,color:"#7aaf96",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>{L("Practice Library","Библиотека практик","Biblioteca de Prácticas")}</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:10}}>{L("Energy Audit","Аудит энергии","Auditoría de Energía")}</h2>
+    <p style={{fontSize:13,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:20}}>{L("Log your activities and notice which ones fill you up and which ones drain you.","Записывай свои действия и замечай, что наполняет, а что истощает.","Registra tus actividades y nota cuáles te llenan y cuáles te agotan.")}</p>
+
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,background:"rgba(255,255,255,.03)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:10,padding:"8px 12px"}}>
+      <button onClick={()=>setEnergyWeekOffset(o=>o-1)} style={{background:"transparent",border:"none",color:"rgba(240,236,228,.4)",fontSize:16,cursor:"pointer",padding:"2px 6px"}}>‹</button>
+      <span style={{fontSize:12,color:energyWeekOffset===0?"#7aaf96":"rgba(240,236,228,.6)"}}>{energyWeekOffset===0?L("This week","Эта неделя","Esta semana"):energyWeekOffset<0?L(`${Math.abs(energyWeekOffset)} week(s) ago`,`${Math.abs(energyWeekOffset)} нед. назад`,`hace ${Math.abs(energyWeekOffset)} semana(s)`):L(`In ${energyWeekOffset} week(s)`,`через ${energyWeekOffset} нед.`,`en ${energyWeekOffset} semana(s)`)}</span>
+      <button onClick={()=>setEnergyWeekOffset(o=>o+1)} style={{background:"transparent",border:"none",color:"rgba(240,236,228,.4)",fontSize:16,cursor:"pointer",padding:"2px 6px"}}>›</button>
+    </div>
+
+    <div style={{display:"flex",gap:6,marginBottom:18}}>
+      {['weekday','weekend'].map(s=>(
+        <button key={s} onClick={()=>setEnergySection(s)} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${energySection===s?"#7aaf96":"rgba(255,255,255,.08)"}`,background:energySection===s?"rgba(122,175,150,.13)":"rgba(255,255,255,.04)",color:energySection===s?"#7aaf96":"rgba(240,236,228,.5)",fontWeight:energySection===s?500:400}}>
+          {s==='weekday'?L("Weekday","Будни","Día laboral"):L("Weekend","Выходные","Fin de semana")}
+        </button>
+      ))}
+    </div>
+
+    <div style={{display:"flex",gap:8,marginBottom:20}}>
+      <input type="text" value={energyInput} onChange={e=>setEnergyInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addEnergyEntry()} placeholder={L("What did you do...","Что ты делал(а)...","¿Qué hiciste...")} style={{flex:1}}/>
+      <button className="pbtn" style={{padding:"0 16px"}} onClick={addEnergyEntry}>{L("Add","Добавить","Añadir")}</button>
+    </div>
+
+    {energyEntries.filter(e=>e.type===energySection && e.week===getWeekKey(energyWeekOffset)).length===0 ? (
+      <p style={{fontSize:13,color:"rgba(240,236,228,.25)",textAlign:"center",padding:"20px 0"}}>{L("No entries yet for this section.","Пока нет записей.","Aún no hay entradas.")}</p>
+    ) : energyEntries.filter(e=>e.type===energySection && e.week===getWeekKey(energyWeekOffset)).map(entry=>(
+      <div key={entry.id} style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:12,padding:"13px 15px",marginBottom:8,display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}>
+        <span style={{fontSize:13,color:"rgba(240,236,228,.85)",flex:1}}>{entry.text}</span>
+        <div style={{display:"flex",gap:5,flexShrink:0}}>
+          {entry.rating ? (
+            <span onClick={()=>rateEnergyEntry(entry.id,entry.rating)} style={{padding:"5px 10px",borderRadius:20,fontSize:11,cursor:"pointer",border:"0.5px solid",whiteSpace:"nowrap",
+              ...(entry.rating==='gain'?{background:"rgba(122,175,150,.12)",borderColor:"rgba(122,175,150,.3)",color:"#7aaf96"}:
+                 entry.rating==='drain'?{background:"rgba(196,120,110,.12)",borderColor:"rgba(196,120,110,.3)",color:"#c4786e"}:
+                 {background:"rgba(255,255,255,.05)",borderColor:"rgba(255,255,255,.15)",color:"rgba(240,236,228,.4)"})}}>
+              {entry.rating==='gain'?`⚡ ${L("Gain","Прирост","Gana")}`:entry.rating==='drain'?`🔋 ${L("Drain","Потеря","Drena")}`:`— ${L("Same","Так же","Igual")}`}
+            </span>
+          ) : (
+            <>
+              <span onClick={()=>rateEnergyEntry(entry.id,'gain')} style={{padding:"5px 8px",borderRadius:20,fontSize:10,cursor:"pointer",border:"0.5px solid rgba(255,255,255,.1)",color:"rgba(240,236,228,.3)"}}>{L("Gain","Прирост","Gana")}</span>
+              <span onClick={()=>rateEnergyEntry(entry.id,'drain')} style={{padding:"5px 8px",borderRadius:20,fontSize:10,cursor:"pointer",border:"0.5px solid rgba(255,255,255,.1)",color:"rgba(240,236,228,.3)"}}>{L("Drain","Потеря","Drena")}</span>
+              <span onClick={()=>rateEnergyEntry(entry.id,'same')} style={{padding:"5px 8px",borderRadius:20,fontSize:10,cursor:"pointer",border:"0.5px solid rgba(255,255,255,.1)",color:"rgba(240,236,228,.3)"}}>{L("Same","Так же","Igual")}</span>
+            </>
+          )}
+          <span onClick={()=>deleteEnergyEntry(entry.id)} style={{color:"rgba(240,236,228,.2)",fontSize:14,cursor:"pointer",padding:"0 2px"}}>✕</span>
+        </div>
+      </div>
+    ))}
+
+    {(() => {
+      const weekEntries = energyEntries.filter(e=>e.week===getWeekKey(energyWeekOffset));
+      const gain = weekEntries.filter(e=>e.rating==='gain').length;
+      const drain = weekEntries.filter(e=>e.rating==='drain').length;
+      const same = weekEntries.filter(e=>e.rating==='same').length;
+      return weekEntries.length>0 ? (
+        <div style={{marginTop:24,paddingTop:18,borderTop:"0.5px solid rgba(255,255,255,.08)"}}>
+          <p style={{fontSize:11,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10}}>{L("This week so far","Эта неделя","Esta semana")}</p>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:13,color:"rgba(240,236,228,.6)",padding:"5px 0"}}><span>⚡ {L("Energy-giving","Дающие энергию","Que dan energía")}</span><span style={{color:"#7aaf96",fontWeight:500}}>{gain}</span></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:13,color:"rgba(240,236,228,.6)",padding:"5px 0"}}><span>🔋 {L("Energy-draining","Истощающие","Que agotan")}</span><span style={{color:"#c4786e",fontWeight:500}}>{drain}</span></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:13,color:"rgba(240,236,228,.6)",padding:"5px 0"}}><span>— {L("Neutral","Нейтральные","Neutral")}</span><span style={{color:"rgba(240,236,228,.5)",fontWeight:500}}>{same}</span></div>
+        </div>
+      ) : null;
+    })()}
+  </div>
+)}  
         
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
