@@ -657,8 +657,10 @@ const loadAdminFeedback = async () => {
 
     setSessions(dbSess||{});
 setXp(dbXpVal||0);
-const savedEnergy = await load("energyEntries") || [];
-setEnergyEntries(savedEnergy);
+if (supabase) {
+  const {data: energyData} = await supabase.from('energy_entries').select('*').eq('user_id', uid);
+  setEnergyEntries(energyData || []);
+}
     // Check yesterday's session
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
     const yDate = yesterday.toLocaleDateString('en-CA');
@@ -697,8 +699,10 @@ setEnergyEntries(savedEnergy);
     const p=await load("profile"), s=await load("sessions")||{};
     const savedXp=await load("xp")||0;
     setSessions(s); setXp(savedXp);
-const savedEnergy = await load("energyEntries") || [];
-setEnergyEntries(savedEnergy);
+if (supabase) {
+  const {data: energyData} = await supabase.from('energy_entries').select('*').eq('user_id', uid);
+  setEnergyEntries(energyData || []);
+}
     const dayIdx = new Date().getDate() % 10;
     setAffirmation(AFFIRMATIONS[lang]?.[dayIdx] || AFFIRMATIONS.EN[0]);
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
@@ -800,29 +804,37 @@ setEnergyEntries(savedEnergy);
 };
 
 const loadEnergyEntries = async () => {
-  const data = await load("energyEntries") || [];
-  setEnergyEntries(data);
+  if (userId && supabase) {
+    const {data} = await supabase.from('energy_entries').select('*').eq('user_id', userId);
+    setEnergyEntries(data || []);
+  }
 };
-
 const addEnergyEntry = async () => {
   if (!energyInput.trim()) return;
   const entry = { id: Date.now().toString(), text: energyInput.trim(), type: energySection, rating: null, week: getWeekKey(energyWeekOffset) };
   const updated = [...energyEntries, entry];
   setEnergyEntries(updated);
   setEnergyInput('');
-  await save("energyEntries", updated);
+  if (userId && supabase) {
+    await supabase.from('energy_entries').insert([{...entry, user_id: userId}]);
+  }
 };
 
 const rateEnergyEntry = async (id, rating) => {
-  const updated = energyEntries.map(e => e.id===id ? {...e, rating: e.rating===rating?null:rating} : e);
+  const newRating = energyEntries.find(e=>e.id===id)?.rating === rating ? null : rating;
+  const updated = energyEntries.map(e => e.id===id ? {...e, rating: newRating} : e);
   setEnergyEntries(updated);
-  await save("energyEntries", updated);
+  if (userId && supabase) {
+    await supabase.from('energy_entries').update({rating: newRating}).eq('id', id).eq('user_id', userId);
+  }
 };
 
 const deleteEnergyEntry = async (id) => {
   const updated = energyEntries.filter(e => e.id !== id);
   setEnergyEntries(updated);
-  await save("energyEntries", updated);
+  if (userId && supabase) {
+    await supabase.from('energy_entries').delete().eq('id', id).eq('user_id', userId);
+  }
 };
   
   const saveProfile = async () => {
