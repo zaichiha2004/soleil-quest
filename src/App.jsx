@@ -656,7 +656,9 @@ const loadAdminFeedback = async () => {
     }
 
     setSessions(dbSess||{});
-    setXp(dbXpVal||0);
+setXp(dbXpVal||0);
+const savedEnergy = await load("energyEntries") || [];
+setEnergyEntries(savedEnergy);
     // Check yesterday's session
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
     const yDate = yesterday.toLocaleDateString('en-CA');
@@ -695,6 +697,8 @@ const loadAdminFeedback = async () => {
     const p=await load("profile"), s=await load("sessions")||{};
     const savedXp=await load("xp")||0;
     setSessions(s); setXp(savedXp);
+const savedEnergy = await load("energyEntries") || [];
+setEnergyEntries(savedEnergy);
     const dayIdx = new Date().getDate() % 10;
     setAffirmation(AFFIRMATIONS[lang]?.[dayIdx] || AFFIRMATIONS.EN[0]);
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
