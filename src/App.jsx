@@ -2145,7 +2145,7 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
                         const arcName = parts[0];
                         const arcDesc = parts[1] || null;
                         return <div style={{marginBottom:10}}><p style={{fontSize:12,color:"rgba(240,236,228,.35)"}}>{L("Archetype","Архетип","Arquetipo")}: <span style={{color:"rgba(240,236,228,.65)"}}>{arcName}</span></p>{arcDesc&&<p style={{fontSize:12,color:"rgba(240,236,228,.4)",fontStyle:"italic",marginTop:3,lineHeight:1.5}}>{arcDesc}</p>}</div>;
-                      })()}
+                      })())}
                       {s.plan?.insight&&<div style={{background:"rgba(212,163,89,.07)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:10,padding:"12px 14px",marginBottom:14}}><p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.85)"}}>{`"${s.plan.insight}"`}</p></div>}
                       {s.first_step&&<div style={{background:"rgba(212,163,89,.07)",borderRadius:8,padding:"9px 12px",marginBottom:14}}><p style={{fontSize:11,color:"#d4a359",textTransform:"uppercase",letterSpacing:".05em",marginBottom:4}}>{L("First step committed","Первый шаг","Primer paso")}</p><p style={{fontSize:13,color:"rgba(240,236,228,.82)",lineHeight:1.5}}>{s.first_step}</p></div>}
                       {s.plan?.practices?.length>0&&(
@@ -2171,7 +2171,7 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
                   )}
                 </div>
               ));
-            })())}
+            })()}
           </div>
         )}
 
