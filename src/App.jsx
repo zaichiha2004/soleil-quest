@@ -2096,7 +2096,8 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
                       <span style={{fontSize:12,color:"rgba(240,236,228,.58)",lineHeight:1.55}}>{p}</span>
                     </div>
                   ))}
-                </div>}
+                </div>
+                </div>)}
               </div>
             ))}
           </div>
