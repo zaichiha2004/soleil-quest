@@ -454,6 +454,7 @@ export default function App() {
   const [expanded, setExpanded] = useState(null);
   const [practicesTab, setPracticesTab] = useState('calendar'); // 'calendar' | 'recap'
 const [recapData, setRecapData] = useState(null);
+const [recapCache, setRecapCache] = useState({});
 const [recapLoading, setRecapLoading] = useState(false);
 
   // xp
@@ -816,6 +817,13 @@ const generateRecap = async () => {
   setRecapLoading(true);
   const yr = calMonth.getFullYear();
   const mo = calMonth.getMonth();
+  const cacheKey = `${yr}-${mo}`;
+  const isCurrentMonth = yr === new Date().getFullYear() && mo === new Date().getMonth();
+  if (!isCurrentMonth && recapCache[cacheKey]) {
+    setRecapData(recapCache[cacheKey]);
+    setRecapLoading(false);
+    return;
+  }
   const monthSessions = Object.entries(sessions).filter(([d]) => {
     const dt = new Date(d + 'T12:00');
     return dt.getFullYear() === yr && dt.getMonth() === mo;
@@ -859,9 +867,12 @@ Make the questions specific to what came up in their sessions. Make practices co
     const data = await res.json();
     const clean = (data.content?.[0]?.text || '').replace(/```json|```/g,'').trim();
     const parsed = JSON.parse(clean);
-    setRecapData({ ...parsed, topChallenges, total, challengeCounts });
+    const result = { ...parsed, topChallenges, total, challengeCounts };
+setRecapData(result);
+if (!isCurrentMonth) setRecapCache(prev => ({...prev, [cacheKey]: result}));
   } catch(e) {
-    setRecapData({ error: true, topChallenges, total, challengeCounts });
+    const result = { error: true, topChallenges, total, challengeCounts };
+setRecapData(result);
   }
   setRecapLoading(false);
 };
@@ -2002,14 +2013,14 @@ const deleteEnergyEntry = async (id) => {
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
       <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600}}>{L("My Practices","Мои практики","Mis Prácticas")}</h2>
       <div style={{display:"flex",gap:5,alignItems:"center"}}>
-        <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>{setCalMonth(new Date(calMonth.getFullYear(),calMonth.getMonth()-1));setRecapData(null);}}>‹</button>
+        <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>{const nm=new Date(calMonth.getFullYear(),calMonth.getMonth()-1);setCalMonth(nm);const k=`${nm.getFullYear()}-${nm.getMonth()}`;setRecapData(recapCache[k]||null);}}>‹</button>
         <span style={{fontSize:12,color:"rgba(240,236,228,.48)",minWidth:88,textAlign:"center"}}>{calMonth.toLocaleDateString(lang==="RU"?"ru-RU":"en-US",{month:"long",year:"numeric"})}</span>
-        <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>{setCalMonth(new Date(calMonth.getFullYear(),calMonth.getMonth()+1));setRecapData(null);}}>›</button>
+        <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>{const nm=new Date(calMonth.getFullYear(),calMonth.getMonth()+1);setCalMonth(nm);const k=`${nm.getFullYear()}-${nm.getMonth()}`;setRecapData(recapCache[k]||null);}}>›</button>
       </div>
     </div>
     <div style={{display:"flex",gap:6,marginBottom:20}}>
       <button onClick={()=>setPracticesTab('calendar')} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${practicesTab==='calendar'?"#d4a359":"rgba(255,255,255,.08)"}`,background:practicesTab==='calendar'?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",color:practicesTab==='calendar'?"#d4a359":"rgba(240,236,228,.5)",fontWeight:practicesTab==='calendar'?500:400}}>📅 {L("Calendar","Календарь","Calendario")}</button>
-      <button onClick={()=>{setPracticesTab('recap');if(!recapData)generateRecap();}} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${practicesTab==='recap'?"#d4a359":"rgba(255,255,255,.08)"}`,background:practicesTab==='recap'?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",color:practicesTab==='recap'?"#d4a359":"rgba(240,236,228,.5)",fontWeight:practicesTab==='recap'?500:400}}>📊 {L("Monthly Recap","Итоги месяца","Resumen Mensual")}</button>
+      <button onClick={()=>setPracticesTab('recap')} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${practicesTab==='recap'?"#d4a359":"rgba(255,255,255,.08)"}`,background:practicesTab==='recap'?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",color:practicesTab==='recap'?"#d4a359":"rgba(240,236,228,.5)",fontWeight:practicesTab==='recap'?500:400}}>📊 {L("Monthly Recap","Итоги месяца","Resumen Mensual")}</button>
     </div>
             {practicesTab==='recap' ? (
   <div>
@@ -2104,7 +2115,12 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
         )}
         <button className="gbtn" style={{fontSize:12,marginTop:8}} onClick={()=>{setRecapData(null);generateRecap();}}>{L("Regenerate","Пересоздать","Regenerar")}</button>
       </div>
-    ) : null}
+    ) : (
+      <div style={{textAlign:"center",padding:"40px 0"}}>
+        <p style={{fontSize:14,color:"rgba(240,236,228,.45)",lineHeight:1.65,marginBottom:20}}>{L("Ready to see your month in review?","Готов увидеть итоги месяца?","¿Listo para ver tu resumen mensual?")}</p>
+        <button className="pbtn" onClick={generateRecap}>{L("Summarize my month →","Подвести итоги →","Resumir mi mes →")}</button>
+      </div>
+    )}
   </div>
 ) : (()=>{
               const yr=calMonth.getFullYear(),mo=calMonth.getMonth();
