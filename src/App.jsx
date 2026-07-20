@@ -2088,7 +2088,7 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
                     </div>
                   ))}
                 </div>
-                <div style={{borderTop:"0.5px solid rgba(255,255,255,.07)",paddingTop:12}}>
+              <div style={{borderTop:"0.5px solid rgba(255,255,255,.07)",paddingTop:12}}>
                   <p style={{fontSize:10,color:"rgba(240,236,228,.28)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:8}}>{L("Practices to try","Практики для работы","Prácticas para probar")}</p>
                   {item.practices?.map((p,j)=>(
                     <div key={j} style={{display:"flex",gap:9,alignItems:"flex-start",marginBottom:6}}>
@@ -2097,7 +2097,7 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
                     </div>
                   ))}
                 </div>
-                )}
+                </div>}
               </div>
             ))}
           </div>
