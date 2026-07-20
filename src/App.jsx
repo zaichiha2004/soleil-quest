@@ -2029,8 +2029,8 @@ const deleteEnergyEntry = async (id) => {
         {(()=>{
           const entries = Object.entries(recapData.challengeCounts||{}).sort((a,b)=>b[1]-a[1]);
           const total = recapData.total || 1;
-          const colors = ['#c4786e','#d4a359','#7aaf96','rgba(160,140,220,1)','rgba(255,255,255,1)'];
-          const opacities = [1, 0.9, 0.7, 0.55, 0.15];
+          const colors = ['#c4786e','#d4a359','#7aaf96','rgba(160,140,220,1)','#6ab0c8','#c8a55a','#a07aaf','rgba(255,255,255,1)'];
+const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
           let angle = 0;
           const slices = entries.map((e,i) => {
             const deg = (e[1]/total)*360;
@@ -2122,7 +2122,7 @@ const deleteEnergyEntry = async (id) => {
                 </div>
               );
             })()}
-            {(()=>{
+            {practicesTab==='calendar' && (()=>{
               const yr=calMonth.getFullYear(),mo=calMonth.getMonth();
               const list=Object.entries(sessions).filter(([d])=>{const dt=new Date(d+"T12:00");return dt.getFullYear()===yr&&dt.getMonth()===mo;}).sort((a,b)=>b[0].localeCompare(a[0]));
               if(!list.length) return <p style={{fontSize:13,color:"rgba(240,236,228,.28)",textAlign:"center",padding:"20px 0"}}>{L("Complete your first practice to see it here.","Заверши первую практику, чтобы увидеть её здесь.","Completa tu primera práctica para verla aquí.")}</p>;
@@ -2171,7 +2171,7 @@ const deleteEnergyEntry = async (id) => {
                   )}
                 </div>
               ));
-            })()}
+            })())}
           </div>
         )}
 
