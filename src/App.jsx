@@ -2097,6 +2097,7 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
                     </div>
                   ))}
                 </div>
+                </div>
                 </div>)}
               </div>
             ))}
