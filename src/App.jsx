@@ -2075,7 +2075,11 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
             {recapData.top2.map((item,i)=>(
               <div key={i} style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:14,padding:16,marginBottom:10,position:"relative",overflow:"hidden"}}>
                 <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:`linear-gradient(90deg,${i===0?"#c4786e":"#d4a359"},transparent)`}}/>
-                <p style={{fontFamily:"Fraunces,serif",fontSize:15,fontWeight:600,color:i===0?"#c4786e":"#d4a359",marginBottom:12}}>{item.emoji} {item.challenge}</p>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",marginBottom:expanded===`recap-${i}`?12:0}} onClick={()=>setExpanded(expanded===`recap-${i}`?null:`recap-${i}`)}>
+                  <p style={{fontFamily:"Fraunces,serif",fontSize:15,fontWeight:600,color:i===0?"#c4786e":"#d4a359"}}>{item.emoji} {item.challenge}</p>
+                  <span style={{fontSize:12,color:"rgba(240,236,228,.28)",transition:"transform .2s",display:"inline-block",transform:expanded===`recap-${i}`?"rotate(90deg)":"none"}}>›</span>
+                </div>
+                {expanded===`recap-${i}`&&<div>
                 <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:14}}>
                   {item.questions?.map((q,j)=>(
                     <div key={j} style={{display:"flex",gap:9,alignItems:"flex-start"}}>
@@ -2092,7 +2096,7 @@ const opacities = [1, 1, 1, 1, 1, 1, 1, 0.3];
                       <span style={{fontSize:12,color:"rgba(240,236,228,.58)",lineHeight:1.55}}>{p}</span>
                     </div>
                   ))}
-                </div>
+                </div>}
               </div>
             ))}
           </div>
