@@ -452,6 +452,9 @@ export default function App() {
   const [sessions, setSessions] = useState({});
   const [calMonth, setCalMonth] = useState(new Date());
   const [expanded, setExpanded] = useState(null);
+  const [practicesTab, setPracticesTab] = useState('calendar'); // 'calendar' | 'recap'
+const [recapData, setRecapData] = useState(null);
+const [recapLoading, setRecapLoading] = useState(false);
 
   // xp
   const [xp, setXp]                 = useState(0);
@@ -809,7 +812,61 @@ const loadEnergyEntries = async () => {
     setEnergyEntries(data || []);
   }
 };
-const addEnergyEntry = async () => {
+const generateRecap = async () => {
+  setRecapLoading(true);
+  const yr = calMonth.getFullYear();
+  const mo = calMonth.getMonth();
+  const monthSessions = Object.entries(sessions).filter(([d]) => {
+    const dt = new Date(d + 'T12:00');
+    return dt.getFullYear() === yr && dt.getMonth() === mo;
+  }).map(([d, s]) => s);
+
+  if (monthSessions.length === 0) {
+    setRecapData({ empty: true });
+    setRecapLoading(false);
+    return;
+  }
+
+  const challengeCounts = {};
+  monthSessions.forEach(s => {
+    const c = s.challenge || 'Other';
+    challengeCounts[c] = (challengeCounts[c] || 0) + 1;
+  });
+  const topChallenges = Object.entries(challengeCounts).sort((a,b)=>b[1]-a[1]);
+  const total = monthSessions.length;
+
+  const sessionSummary = monthSessions.map(s =>
+    `Challenge: ${s.challenge}. Insight: "${s.plan?.insight}". First step: "${s.first_step}".`
+  ).join('\n');
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1200,
+        temperature: 1,
+        system: `You are Alex Soleil, a warm and perceptive life coach. Analyze this user's monthly coaching sessions and generate a recap. Respond in ${lang==='RU'?'Russian':lang==='ES'?'Latin American Spanish':'English'}. Output strict JSON only, no markdown:
+{"narrative":"2-3 sentence warm insightful read on the month — what pattern or theme stands out, what it reveals about this person. First person voice from Alex Soleil. Italic-worthy prose.","top2":[{"challenge":"challenge name","emoji":"emoji","questions":["question 1","question 2","question 3"],"practices":["practice suggestion 1","practice suggestion 2"]}]}
+Make the questions specific to what came up in their sessions. Make practices concrete and actionable — journaling prompts, physical practices, daily habits. Not generic advice.`,
+        messages: [{
+          role: 'user',
+          content: `Month: ${calMonth.toLocaleDateString('en-US', {month:'long', year:'numeric'})}. Total sessions: ${total}.\n\nSessions:\n${sessionSummary}\n\nTop challenges: ${topChallenges.slice(0,2).map(([c,n])=>`${c} (${n}x)`).join(', ')}.\n\nGenerate the monthly recap.`
+        }]
+      })
+    });
+    const data = await res.json();
+    const clean = (data.content?.[0]?.text || '').replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    setRecapData({ ...parsed, topChallenges, total, challengeCounts });
+  } catch(e) {
+    setRecapData({ error: true, topChallenges, total, challengeCounts });
+  }
+  setRecapLoading(false);
+};
+  
+  const addEnergyEntry = async () => {
   if (!energyInput.trim()) return;
   const entry = { id: Date.now().toString(), text: energyInput.trim(), type: energySection, rating: null, week: getWeekKey(energyWeekOffset) };
   const updated = [...energyEntries, entry];
@@ -1941,20 +1998,114 @@ const deleteEnergyEntry = async (id) => {
 
         {/* PRACTICES / CALENDAR */}
         {screen==="practices"&&(
-          <div key={animKey} style={{paddingTop:40}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
-              <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600}}>{L("My Practices","Мои практики","Mis Prácticas")}</h2>
-              <div style={{display:"flex",gap:5,alignItems:"center"}}>
-                <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>setCalMonth(new Date(calMonth.getFullYear(),calMonth.getMonth()-1))}>‹</button>
-                <span style={{fontSize:12,color:"rgba(240,236,228,.48)",minWidth:88,textAlign:"center"}}>{calMonth.toLocaleDateString(lang==="RU"?"ru-RU":"en-US",{month:"long",year:"numeric"})}</span>
-                <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>setCalMonth(new Date(calMonth.getFullYear(),calMonth.getMonth()+1))}>›</button>
+  <div key={animKey} style={{paddingTop:40}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+      <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600}}>{L("My Practices","Мои практики","Mis Prácticas")}</h2>
+      <div style={{display:"flex",gap:5,alignItems:"center"}}>
+        <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>{setCalMonth(new Date(calMonth.getFullYear(),calMonth.getMonth()-1));setRecapData(null);}}>‹</button>
+        <span style={{fontSize:12,color:"rgba(240,236,228,.48)",minWidth:88,textAlign:"center"}}>{calMonth.toLocaleDateString(lang==="RU"?"ru-RU":"en-US",{month:"long",year:"numeric"})}</span>
+        <button className="gbtn" style={{padding:"5px 10px"}} onClick={()=>{setCalMonth(new Date(calMonth.getFullYear(),calMonth.getMonth()+1));setRecapData(null);}}>›</button>
+      </div>
+    </div>
+    <div style={{display:"flex",gap:6,marginBottom:20}}>
+      <button onClick={()=>setPracticesTab('calendar')} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${practicesTab==='calendar'?"#d4a359":"rgba(255,255,255,.08)"}`,background:practicesTab==='calendar'?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",color:practicesTab==='calendar'?"#d4a359":"rgba(240,236,228,.5)",fontWeight:practicesTab==='calendar'?500:400}}>📅 {L("Calendar","Календарь","Calendario")}</button>
+      <button onClick={()=>{setPracticesTab('recap');if(!recapData)generateRecap();}} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${practicesTab==='recap'?"#d4a359":"rgba(255,255,255,.08)"}`,background:practicesTab==='recap'?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",color:practicesTab==='recap'?"#d4a359":"rgba(240,236,228,.5)",fontWeight:practicesTab==='recap'?500:400}}>📊 {L("Monthly Recap","Итоги месяца","Resumen Mensual")}</button>
+    </div>
+            {practicesTab==='recap' ? (
+  <div>
+    {recapLoading ? (
+      <div style={{textAlign:"center",padding:"40px 0"}}>
+        <p style={{color:"rgba(240,236,228,.35)",fontSize:14}}>{L("Analyzing your month","Анализирую твой месяц","Analizando tu mes")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></p>
+      </div>
+    ) : recapData?.empty ? (
+      <p style={{fontSize:13,color:"rgba(240,236,228,.28)",textAlign:"center",padding:"30px 0"}}>{L("No sessions this month yet.","В этом месяце пока нет практик.","Aún no hay sesiones este mes.")}</p>
+    ) : recapData?.error ? (
+      <div style={{textAlign:"center",padding:"30px 0"}}>
+        <p style={{fontSize:13,color:"rgba(240,236,228,.28)",marginBottom:12}}>{L("Couldn't generate recap. Try again.","Не удалось создать итоги. Попробуй снова.","No se pudo generar el resumen.")}</p>
+        <button className="gbtn" onClick={generateRecap}>{L("Retry","Повторить","Reintentar")}</button>
+      </div>
+    ) : recapData ? (
+      <div>
+        {(()=>{
+          const entries = Object.entries(recapData.challengeCounts||{}).sort((a,b)=>b[1]-a[1]);
+          const total = recapData.total || 1;
+          const colors = ['#c4786e','#d4a359','#7aaf96','rgba(160,140,220,1)','rgba(255,255,255,1)'];
+          const opacities = [1, 0.9, 0.7, 0.55, 0.15];
+          let angle = 0;
+          const slices = entries.map((e,i) => {
+            const deg = (e[1]/total)*360;
+            const startA = angle; angle += deg;
+            return {name:e[0], count:e[1], deg, startA, endA:angle, color:colors[i%colors.length], opacity:opacities[i%opacities.length]};
+          });
+          const toArc = (cx,cy,r,s,e) => {
+            const sr = (s-90)*Math.PI/180, er = (e-90)*Math.PI/180;
+            const x1=cx+r*Math.cos(sr),y1=cy+r*Math.sin(sr),x2=cx+r*Math.cos(er),y2=cy+r*Math.sin(er);
+            return `M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${e-s>180?1:0},1 ${x2.toFixed(2)},${y2.toFixed(2)} Z`;
+          };
+          return (
+            <div style={{display:"flex",alignItems:"center",gap:20,marginBottom:24}}>
+              <svg width="130" height="130" viewBox="0 0 130 130" style={{flexShrink:0}}>
+                {slices.map((s,i)=><path key={i} d={toArc(65,65,58,s.startA,s.endA)} fill={s.color} opacity={s.opacity}/>)}
+                <circle cx="65" cy="65" r="30" fill="#0c0c10"/>
+                <text x="65" y="61" textAnchor="middle" fill="#d4a359" fontSize="16" fontFamily="Fraunces,serif" fontWeight="600">{total}</text>
+                <text x="65" y="74" textAnchor="middle" fill="rgba(240,236,228,.35)" fontSize="8" fontFamily="DM Sans,sans-serif">{L("sessions","сессий","sesiones")}</text>
+              </svg>
+              <div style={{display:"flex",flexDirection:"column",gap:8,flex:1}}>
+                {slices.map((s,i)=>(
+                  <div key={i} style={{display:"flex",alignItems:"center",gap:8,fontSize:12}}>
+                    <div style={{width:10,height:10,borderRadius:"50%",background:s.color,opacity:s.opacity,flexShrink:0}}/>
+                    <span style={{color:"rgba(240,236,228,.75)",flex:1,fontSize:11}}>{s.name}</span>
+                    <span style={{color:"rgba(240,236,228,.35)",fontSize:11,whiteSpace:"nowrap"}}>{s.count} · {Math.round(s.count/total*100)}%</span>
+                  </div>
+                ))}
               </div>
             </div>
-            {(()=>{
+          );
+        })()}
+        {recapData.narrative && (
+          <div style={{background:"rgba(212,163,89,.06)",border:"0.5px solid rgba(212,163,89,.15)",borderRadius:14,padding:18,position:"relative",overflow:"hidden",marginBottom:20}}>
+            <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:"linear-gradient(90deg,#d4a359,transparent)"}}/>
+            <p style={{fontSize:11,color:"rgba(212,163,89,.6)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10}}>{L("Alex Soleil's read on your month","Читает Алекс Солей","La lectura de Alex Soleil")}</p>
+            <p style={{fontSize:14,color:"rgba(240,236,228,.82)",lineHeight:1.75,fontStyle:"italic"}}>"{recapData.narrative}"</p>
+          </div>
+        )}
+        {recapData.top2?.length > 0 && (
+          <div>
+            <p style={{fontSize:11,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:14}}>{L("Going deeper on what came up","Углубляемся в то, что возникло","Profundizando en lo que surgió")}</p>
+            {recapData.top2.map((item,i)=>(
+              <div key={i} style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:14,padding:16,marginBottom:10,position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:`linear-gradient(90deg,${i===0?"#c4786e":"#d4a359"},transparent)`}}/>
+                <p style={{fontFamily:"Fraunces,serif",fontSize:15,fontWeight:600,color:i===0?"#c4786e":"#d4a359",marginBottom:12}}>{item.emoji} {item.challenge}</p>
+                <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:14}}>
+                  {item.questions?.map((q,j)=>(
+                    <div key={j} style={{display:"flex",gap:9,alignItems:"flex-start"}}>
+                      <span style={{color:"rgba(240,236,228,.25)",fontSize:11,marginTop:2,flexShrink:0}}>→</span>
+                      <span style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.55}}>{q}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{borderTop:"0.5px solid rgba(255,255,255,.07)",paddingTop:12}}>
+                  <p style={{fontSize:10,color:"rgba(240,236,228,.28)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:8}}>{L("Practices to try","Практики для работы","Prácticas para probar")}</p>
+                  {item.practices?.map((p,j)=>(
+                    <div key={j} style={{display:"flex",gap:9,alignItems:"flex-start",marginBottom:6}}>
+                      <span style={{color:"rgba(240,236,228,.2)",fontSize:11,marginTop:2,flexShrink:0}}>·</span>
+                      <span style={{fontSize:12,color:"rgba(240,236,228,.58)",lineHeight:1.55}}>{p}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <button className="gbtn" style={{fontSize:12,marginTop:8}} onClick={()=>{setRecapData(null);generateRecap();}}>{L("Regenerate","Пересоздать","Regenerar")}</button>
+      </div>
+    ) : null}
+  </div>
+) : (()=>{
               const yr=calMonth.getFullYear(),mo=calMonth.getMonth();
               const firstDay=new Date(yr,mo,1).getDay(),dim=new Date(yr,mo+1,0).getDate();
-              const days=[]; for(let i=0;i<firstDay;i++) days.push(null); for(let d=1;d<=dim;d++) days.push(d);
-              const dayLabels=lang==="RU"?["Вс","Пн","Вт","Ср","Чт","Пт","Сб"]:["Su","Mo","Tu","We","Th","Fr","Sa"];
+              const days=[]; const mondayFirst=(firstDay===0?6:firstDay-1); for(let i=0;i<mondayFirst;i++) days.push(null); for(let d=1;d<=dim;d++) days.push(d);
+              const dayLabels=lang==="RU"?["Пн","Вт","Ср","Чт","Пт","Сб","Вс"]:lang==="ES"?["Lu","Ma","Mi","Ju","Vi","Sa","Do"]:["Mo","Tu","We","Th","Fr","Sa","Su"];
               return(
                 <div style={{marginBottom:22}}>
                   <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3,marginBottom:3}}>
