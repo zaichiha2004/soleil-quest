@@ -472,6 +472,7 @@ const [ikigaiEditing, setIkigaiEditing] = useState({love:false, good:false, need
 const [ikigaiSynthesis, setIkigaiSynthesis] = useState('');
 const [ikigaiLoading, setIkigaiLoading] = useState(false);
 const [ikigaiTip, setIkigaiTip] = useState(null);
+  const [ikigaiGuideOpen, setIkigaiGuideOpen] = useState(true);
   const [ikigaiDraft, setIkigaiDraft] = useState({love:'', good:'', need:'', paid:''});
   const [showFeedback, setShowFeedback] = useState(false);
 const [feedbackAnswers, setFeedbackAnswers] = useState({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});
@@ -1653,15 +1654,12 @@ const deleteEnergyEntry = async (id) => {
     <p style={{fontSize:12,color:"#7aaf96",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>{L("Practice Library","Библиотека практик","Biblioteca de Prácticas")}</p>
     <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:6}}>{L("Ikigai Exploration","Исследование Икигай","Exploración del Ikigai")}</h2>
     <p style={{fontSize:13,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:24}}>{L("Your reason for being — where love, skill, purpose and livelihood meet.","Твоя причина существовать — там, где любовь, навык, цель и средства к жизни встречаются.","Tu razón de ser — donde el amor, la habilidad, el propósito y el sustento se encuentran.")}</p>
-    {(()=>{
-  const [guideOpen, setGuideOpen] = useState(true);
-  return (
     <div style={{background:"rgba(122,175,150,.06)",border:"0.5px solid rgba(122,175,150,.18)",borderRadius:14,overflow:"hidden",marginBottom:24}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",cursor:"pointer"}} onClick={()=>setGuideOpen(o=>!o)}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",cursor:"pointer"}} onClick={()=>setIkigaiGuideOpen(o=>!o)}>
         <span style={{fontSize:12,color:"#7aaf96",textTransform:"uppercase",letterSpacing:".07em",fontWeight:500}}>{L("How to use this practice","Как использовать эту практику","Cómo usar esta práctica")}</span>
-        <span style={{fontSize:12,color:"rgba(122,175,150,.5)"}}>{guideOpen?"▾ Hide":"▸ Show"}</span>
+        <span style={{fontSize:12,color:"rgba(122,175,150,.5)"}}>{ikigaiGuideOpen?"▾ Hide":"▸ Show"}</span>
       </div>
-      {guideOpen&&(
+      {ikigaiGuideOpen&&(
         <div style={{padding:"14px 16px 16px",borderTop:"0.5px solid rgba(122,175,150,.12)"}}>
           {[
             {n:"1",title:L("Create space","Создай пространство","Crea espacio"),desc:L("Set aside 30–60 minutes. This is about thinking slowly and honestly — not finding perfect answers.","Выдели 30–60 минут. Речь идёт о медленном и честном размышлении — не о поиске идеальных ответов.","Reserva 30–60 minutos. Se trata de pensar despacio y con honestidad — no de encontrar respuestas perfectas.")},
@@ -1681,8 +1679,7 @@ const deleteEnergyEntry = async (id) => {
         </div>
       )}
     </div>
-  );
-})()}
+  </div>
     
     {/* DIAGRAM */}
     {(()=>{
