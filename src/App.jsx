@@ -1679,7 +1679,6 @@ const deleteEnergyEntry = async (id) => {
         </div>
       )}
     </div>
-  </div>
     
     {/* DIAGRAM */}
     {(()=>{
