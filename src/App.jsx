@@ -854,7 +854,7 @@ const generateIkigaiSynthesis = async (answers) => {
         max_tokens: 800,
         temperature: 1,
         system: `You are Alex Soleil, a warm and perceptive life coach. A user has completed their Ikigai exploration. Generate a synthesis in ${lang==='RU'?'Russian':lang==='ES'?'Latin American Spanish':'English'}. Output strict JSON only:
-{"ikigai":"2-3 sentence synthesis of their reason for being based on all 4 answers. Warm, specific, not generic. Alex Soleil voice.","meaning":["paragraph 1 — what's already alive and working in their Ikigai based on their answers — which intersections are strong and how they show up","paragraph 2 — optional second paragraph if there is another meaningful theme in what's working"],"gaps":["paragraph 1 — where the gaps are — which intersections are underdeveloped or missing and what that costs them","paragraph 2 — optional: what leaning into what's missing could look like"],"question":"One provocative question based on what's most alive or missing in their Ikigai."}`,
+{"ikigai":"2-3 sentence synthesis of their reason for being based on all 4 answers. Warm, specific, not generic. Alex Soleil voice.","meaning":["paragraph 1 — what's already alive and working in their Ikigai based on their answers — which intersections are strong and how they show up","paragraph 2 — optional second paragraph if there is another meaningful theme in what's working"],"gaps":["paragraph 1 — 1-3 honest sentences. Name the weakest intersection specifically. What is actually missing based on what they wrote — not generic advice. What does that gap cost them in real terms?","optional: one concrete reframe or action specific to their situation — not generic self-help","paragraph 2 — optional: what leaning into what's missing could look like"],"question":"One short, punchy question. Should feel slightly uncomfortable. No fluff. Cut to what they actually need to confront."}`,
         messages: [{
           role: 'user',
           content: `What I love: ${answers.love}\nWhat I'm good at: ${answers.good}\nWhat the world needs: ${answers.need}\nWhat I can be paid for: ${answers.paid}\n\nGenerate my Ikigai synthesis.`
@@ -1653,7 +1653,37 @@ const deleteEnergyEntry = async (id) => {
     <p style={{fontSize:12,color:"#7aaf96",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>{L("Practice Library","Библиотека практик","Biblioteca de Prácticas")}</p>
     <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:6}}>{L("Ikigai Exploration","Исследование Икигай","Exploración del Ikigai")}</h2>
     <p style={{fontSize:13,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:24}}>{L("Your reason for being — where love, skill, purpose and livelihood meet.","Твоя причина существовать — там, где любовь, навык, цель и средства к жизни встречаются.","Tu razón de ser — donde el amor, la habilidad, el propósito y el sustento se encuentran.")}</p>
-
+    {(()=>{
+  const [guideOpen, setGuideOpen] = React.useState(true);
+  return (
+    <div style={{background:"rgba(122,175,150,.06)",border:"0.5px solid rgba(122,175,150,.18)",borderRadius:14,overflow:"hidden",marginBottom:24}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",cursor:"pointer"}} onClick={()=>setGuideOpen(o=>!o)}>
+        <span style={{fontSize:12,color:"#7aaf96",textTransform:"uppercase",letterSpacing:".07em",fontWeight:500}}>{L("How to use this practice","Как использовать эту практику","Cómo usar esta práctica")}</span>
+        <span style={{fontSize:12,color:"rgba(122,175,150,.5)"}}>{guideOpen?"▾ Hide":"▸ Show"}</span>
+      </div>
+      {guideOpen&&(
+        <div style={{padding:"14px 16px 16px",borderTop:"0.5px solid rgba(122,175,150,.12)"}}>
+          {[
+            {n:"1",title:L("Create space","Создай пространство","Crea espacio"),desc:L("Set aside 30–60 minutes. This is about thinking slowly and honestly — not finding perfect answers.","Выдели 30–60 минут. Речь идёт о медленном и честном размышлении — не о поиске идеальных ответов.","Reserva 30–60 minutos. Se trata de pensar despacio y con honestidad — no de encontrar respuestas perfectas.")},
+            {n:"2",title:L("Fill in each circle","Заполни каждый круг","Rellena cada círculo"),desc:L("5–10 minutes per section. Don't censor yourself.","5–10 минут на каждый раздел. Не цензурируй себя.","5–10 minutos por sección. No te censures.")},
+            {n:"3",title:L("Generate your analysis","Сгенерируй свой анализ","Genera tu análisis"),desc:L("Think of it as a working hypothesis, not a lifelong commitment.","Воспринимай это как рабочую гипотезу, а не пожизненное обязательство.","Piénsalo como una hipótesis de trabajo, no un compromiso de por vida.")},
+            {n:"4",title:L("Take one small step","Сделай один маленький шаг","Da un pequeño paso"),desc:L("If you notice a gap, take one concrete action. Clarity often follows action.","Если заметишь пробел, сделай одно конкретное действие. Ясность часто приходит после действия.","Si notas una brecha, toma una acción concreta. La claridad suele seguir a la acción.")},
+          ].map(({n,title,desc})=>(
+            <div key={n} style={{display:"flex",gap:12,marginBottom:12}}>
+              <span style={{fontSize:11,color:"#7aaf96",fontWeight:600,minWidth:18,marginTop:1}}>{n}</span>
+              <div>
+                <p style={{fontSize:13,color:"rgba(240,236,228,.85)",fontWeight:500,marginBottom:2}}>{title}</p>
+                <p style={{fontSize:12,color:"rgba(240,236,228,.45)",lineHeight:1.6}}>{desc}</p>
+              </div>
+            </div>
+          ))}
+          <p style={{fontSize:11,color:"rgba(122,175,150,.5)",fontStyle:"italic",borderTop:"0.5px solid rgba(122,175,150,.1)",paddingTop:12,marginTop:4,lineHeight:1.65}}>{L("Ikigai isn't about finding a single perfect role. It's about developing a clearer sense of direction — purpose becomes your anchor, learning becomes your way forward.","Икигай — это не поиск единственной идеальной роли. Это развитие более чёткого чувства направления — цель становится твоим якорем, обучение — твоим путём вперёд.","El Ikigai no se trata de encontrar un único rol perfecto. Se trata de desarrollar un sentido más claro de dirección — el propósito se convierte en tu ancla, el aprendizaje en tu camino.")}</p>
+        </div>
+      )}
+    </div>
+  );
+})()}
+    
     {/* DIAGRAM */}
     {(()=>{
       const tipData = {
