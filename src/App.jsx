@@ -716,9 +716,9 @@ if (supabase) {
     if (s && s[yDate]) setYesterdaySession(s[yDate]);
     if(p){setProfile(p);setLang(p.lang||"EN");goTo("paths");}
     else if(supabase && !localStorage.getItem('sq_guest')) goTo("login");
-    const savedRecapCache = JSON.parse(localStorage.getItem('sq_recap_cache') || '{}');
-setRecapCache(savedRecapCache);
     else goTo("onboarding");
+    const savedRecapCache = JSON.parse(localStorage.getItem('sq_recap_cache') || '{}');
+    setRecapCache(savedRecapCache);
   };
 
   useEffect(()=>{
