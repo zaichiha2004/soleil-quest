@@ -1784,6 +1784,7 @@ const deleteEnergyEntry = async (id) => {
               <div key={i} style={{position:"absolute",fontSize:9,color:"#ffffff",fontWeight:500,lineHeight:1.4,pointerEvents:"none",whiteSpace:"pre-line",textShadow:"0 1px 4px rgba(0,0,0,1)",...l.style}}>{l.label}</div>
             ))}
           </div>
+        </div>
 
           {ikigaiTip && tipData[ikigaiTip] && (
             <div style={{background:"rgba(26,26,46,.9)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:12,padding:"12px 14px",marginBottom:16}}>
