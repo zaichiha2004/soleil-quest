@@ -1747,12 +1747,12 @@ const deleteEnergyEntry = async (id) => {
                   <p style={{fontSize:11,color:"rgba(122,175,150,.7)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10}}>{L("Your Ikigai","Твой Икигай","Tu Ikigai")}</p>
                   <p style={{fontSize:14,color:"rgba(240,236,228,.85)",lineHeight:1.75,fontStyle:"italic",marginBottom:0}}>"{parsed.ikigai}"</p>
                 </div>
-                {parsed.meaning?.length > 0 && (
+                {parsed.meaning && (
                   <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:14,padding:18,marginBottom:10}}>
                     <p style={{fontSize:11,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:14}}>{L("What this means for you","Что это значит для тебя","Lo que esto significa para ti")}</p>
-                    {parsed.meaning.filter(Boolean).map((p,i)=>(
+                    {Array.isArray(parsed.meaning) ? parsed.meaning.filter(Boolean).map((p,i)=>(
                       <p key={i} style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,marginBottom:i<parsed.meaning.length-1?12:0}}>{p}</p>
-                    ))}
+                    )) : <p style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7}}>{parsed.meaning}</p>}
                   </div>
                 )}
                 {parsed.question && (
