@@ -472,7 +472,7 @@ const [ikigaiEditing, setIkigaiEditing] = useState({love:false, good:false, need
 const [ikigaiSynthesis, setIkigaiSynthesis] = useState('');
 const [ikigaiLoading, setIkigaiLoading] = useState(false);
 const [ikigaiTip, setIkigaiTip] = useState(null);
-  const [ikigaiGuideOpen, setIkigaiGuideOpen] = useState(true);
+  const [ikigaiGuideOpen, setIkigaiGuideOpen] = useState(false);
   const [ikigaiDraft, setIkigaiDraft] = useState({love:'', good:'', need:'', paid:''});
   const [showFeedback, setShowFeedback] = useState(false);
 const [feedbackAnswers, setFeedbackAnswers] = useState({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});
@@ -1708,7 +1708,7 @@ const deleteEnergyEntry = async (id) => {
               {key:'profession', label:L("Profession","Профессия","Profesión"), style:{bottom:'30%',left:'24%'}},
               {key:'vocation', label:L("Vocation","Призвание","Vocación"), style:{bottom:'30%',right:'25%'}},
             ].map(z=>(
-              <div key={z.key} onClick={()=>setIkigaiTip(ikigaiTip===z.key?null:z.key)} style={{position:"absolute",fontSize:8,fontWeight:400,color:"rgba(240,236,228,.8)",textTransform:"uppercase",letterSpacing:".05em",cursor:"pointer",background:"rgba(0,0,0,.3)",borderRadius:6,padding:"3px 5px",textShadow:"0 1px 2px rgba(0,0,0,.6)",zIndex:5,...z.style}}>{z.label}</div>
+              <div key={z.key} style={{position:"absolute",fontSize:8,fontWeight:400,color:"rgba(240,236,228,.8)",textTransform:"uppercase",letterSpacing:".05em",cursor:"pointer",background:"rgba(0,0,0,.3)",borderRadius:6,padding:"3px 5px",textShadow:"0 1px 2px rgba(0,0,0,.6)",zIndex:5,...z.style}}>{z.label}</div>
             ))}
             <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:76,height:76,borderRadius:"50%",background:"rgba(20,18,28,.95)",border:"1.5px solid rgba(255,255,255,.9)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#d4a359",textAlign:"center",zIndex:10,letterSpacing:".05em"}}>IKIGAI</div>
             {[
@@ -1720,16 +1720,6 @@ const deleteEnergyEntry = async (id) => {
               <div key={i} style={{position:"absolute",fontSize:9,color:"#ffffff",fontWeight:500,lineHeight:1.4,pointerEvents:"none",whiteSpace:"pre-line",textShadow:"0 1px 4px rgba(0,0,0,1)",...l.style}}>{l.label}</div>
             ))}
           </div>
-
-          {ikigaiTip && tipData[ikigaiTip] && (
-            <div style={{background:"rgba(26,26,46,.9)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:12,padding:"12px 14px",marginBottom:16}}>
-              <p style={{fontSize:13,fontWeight:500,color:"#f0ece4",marginBottom:5}}>{tipData[ikigaiTip].title}</p>
-              <p style={{fontSize:12,color:"rgba(240,236,228,.65)",lineHeight:1.6,marginBottom:6}}>{tipData[ikigaiTip].desc}</p>
-              <p style={{fontSize:11,color:"rgba(240,236,228,.35)",fontStyle:"italic"}}>{tipData[ikigaiTip].gap}</p>
-            </div>
-          )}
-
-          <p style={{fontSize:11,color:"rgba(240,236,228,.25)",textAlign:"center",marginBottom:24}}>{L("Tap any intersection to learn more","Нажми на любое пересечение","Toca cualquier intersección")}</p>
 
           {/* 4 SECTIONS */}
           {[
