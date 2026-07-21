@@ -844,7 +844,8 @@ const saveIkigai = async (answers, synthesis) => {
   }
 };
 
-const generateIkigaiSynthesis = async (answers) => {
+const stripMd = (str) => str?.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1') || '';
+  const generateIkigaiSynthesis = async (answers) => {
   setIkigaiLoading(true);
   try {
     const res = await fetch('/api/chat', {
@@ -1771,13 +1772,13 @@ const deleteEnergyEntry = async (id) => {
                 <div style={{background:"rgba(122,175,150,.07)",border:"0.5px solid rgba(122,175,150,.2)",borderRadius:14,padding:18,position:"relative",overflow:"hidden",marginBottom:10}}>
                   <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:"linear-gradient(90deg,#7aaf96,transparent)"}}/>
                   <p style={{fontSize:11,color:"rgba(122,175,150,.7)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10}}>{L("Your Ikigai","Твой Икигай","Tu Ikigai")}</p>
-                  <p style={{fontSize:14,color:"rgba(240,236,228,.85)",lineHeight:1.75,fontStyle:"italic",marginBottom:0}}>"{parsed.ikigai}"</p>
+                  <p style={{fontSize:14,color:"rgba(240,236,228,.85)",lineHeight:1.75,fontStyle:"italic",marginBottom:0}}>"{stripMd(parsed.ikigai)}"</p>
                 </div>
                 {parsed.meaning && (
                   <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:14,padding:18,marginBottom:10}}>
                     <p style={{fontSize:11,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:14}}>{L("What this means for you","Что это значит для тебя","Lo que esto significa para ti")}</p>
                     {Array.isArray(parsed.meaning) ? parsed.meaning.filter(Boolean).map((p,i)=>(
-                      <p key={i} style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,marginBottom:i<parsed.meaning.length-1?12:0}}>{p}</p>
+                      <p key={i} style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,marginBottom:i<parsed.meaning.length-1?12:0}}>{stripMd(p)}</p>
                     )) : <p style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7}}>{parsed.meaning}</p>}
                   </div>
                 )}
@@ -1786,14 +1787,14 @@ const deleteEnergyEntry = async (id) => {
                     <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:"linear-gradient(90deg,#c4786e,transparent)"}}/>
                     <p style={{fontSize:11,color:"rgba(196,120,110,.7)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:14}}>{L("What's missing","Чего не хватает","Lo que falta")}</p>
                     {parsed.gaps.filter(Boolean).map((p,i)=>(
-                      <p key={i} style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,marginBottom:i<parsed.gaps.length-1?12:0}}>{p}</p>
+                      <p key={i} style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,marginBottom:i<parsed.gaps.length-1?12:0}}>{stripMd(p)}</p>
                     ))}
                   </div>
                 )}
                 {parsed.question && (
                   <div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.15)",borderRadius:14,padding:"14px 16px",marginBottom:10}}>
                     <p style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(160,140,220,.5)",marginBottom:7}}>{L("A question to sit with","Вопрос для размышления","Una pregunta para reflexionar")}</p>
-                    <p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.76)"}}>{`"${parsed.question}"`}</p>
+                    <p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.76)"}}>{`"${stripMd(parsed.question)}"`}</p>
                   </div>
                 )}
                 <button className="gbtn" style={{fontSize:12,marginTop:4}} onClick={()=>{setIkigaiSynthesis('');}}>{L("Regenerate","Пересоздать","Regenerar")}</button>
