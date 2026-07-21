@@ -467,6 +467,11 @@ const [recapLoading, setRecapLoading] = useState(false);
 const [energySection, setEnergySection] = useState('weekday');
 const [energyInput, setEnergyInput] = useState('');
 const [energyWeekOffset, setEnergyWeekOffset] = useState(0);
+  const [ikigai, setIkigai] = useState({love:'', good:'', need:'', paid:''});
+const [ikigaiEditing, setIkigaiEditing] = useState({love:false, good:false, need:false, paid:false});
+const [ikigaiSynthesis, setIkigaiSynthesis] = useState('');
+const [ikigaiLoading, setIkigaiLoading] = useState(false);
+const [ikigaiTip, setIkigaiTip] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
 const [feedbackAnswers, setFeedbackAnswers] = useState({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});
 const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
@@ -667,6 +672,10 @@ if (supabase) {
 }
     const savedRecapCache = dbProfile?.recap_cache || JSON.parse(localStorage.getItem('sq_recap_cache') || '{}');
 setRecapCache(savedRecapCache);
+    if (dbProfile?.ikigai) {
+  setIkigai(dbProfile.ikigai.answers || {love:'',good:'',need:'',paid:''});
+  setIkigaiSynthesis(dbProfile.ikigai.synthesis || '');
+}
     // Check yesterday's session
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
     const yDate = yesterday.toLocaleDateString('en-CA');
@@ -816,6 +825,49 @@ const loadEnergyEntries = async () => {
     const {data} = await supabase.from('energy_entries').select('*').eq('user_id', userId);
     setEnergyEntries(data || []);
   }
+};
+  const loadIkigai = async () => {
+  if (userId && supabase) {
+    const {data} = await supabase.from('profiles').select('ikigai').eq('user_id', userId).single();
+    if (data?.ikigai) {
+      setIkigai(data.ikigai.answers || {love:'',good:'',need:'',paid:''});
+      setIkigaiSynthesis(data.ikigai.synthesis || '');
+    }
+  }
+};
+
+const saveIkigai = async (answers, synthesis) => {
+  if (userId && supabase) {
+    await supabase.from('profiles').update({ikigai: {answers, synthesis}}).eq('user_id', userId);
+  }
+};
+
+const generateIkigaiSynthesis = async (answers) => {
+  setIkigaiLoading(true);
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 800,
+        temperature: 1,
+        system: `You are Alex Soleil, a warm and perceptive life coach. A user has completed their Ikigai exploration. Generate a synthesis in ${lang==='RU'?'Russian':lang==='ES'?'Latin American Spanish':'English'}. Output strict JSON only:
+{"ikigai":"2-3 sentence synthesis of their reason for being based on all 4 answers. Warm, specific, not generic. Alex Soleil voice.","meaning":"1 paragraph connecting their answers to the 4 intersection zones (Passion, Mission, Profession, Vocation) — which are already active, which need development.","question":"One provocative question based on what's most alive or missing in their Ikigai."}`,
+        messages: [{
+          role: 'user',
+          content: `What I love: ${answers.love}\nWhat I'm good at: ${answers.good}\nWhat the world needs: ${answers.need}\nWhat I can be paid for: ${answers.paid}\n\nGenerate my Ikigai synthesis.`
+        }]
+      })
+    });
+    const data = await res.json();
+    const clean = (data.content?.[0]?.text || '').replace(/```json|```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    const synthesis = JSON.stringify(parsed);
+    setIkigaiSynthesis(synthesis);
+    await saveIkigai(answers, synthesis);
+  } catch(e) {}
+  setIkigaiLoading(false);
 };
 const generateRecap = async () => {
   setRecapLoading(true);
@@ -1513,8 +1565,7 @@ const deleteEnergyEntry = async (id) => {
         </div>
         <p style={{fontSize:10.5,color:"rgba(122,175,150,.65)",lineHeight:1.4,marginTop:5}}>{L("Track what fills you up and what drains you.","Отслеживай, что наполняет, а что истощает.","Rastrea lo que te llena y lo que te agota.")}</p>
       </div>
-      <div style={{background:"rgba(122,175,150,.08)",border:"0.5px solid rgba(122,175,150,.22)",borderRadius:13,padding:13,position:"relative",opacity:.6}}>
-        <span style={{position:"absolute",top:10,right:10,fontSize:9,background:"rgba(122,175,150,.18)",color:"#7aaf96",borderRadius:20,padding:"2px 7px"}}>{L("soon","скоро","pronto")}</span>
+      <div onClick={()=>{loadIkigai();goTo("ikigai");}} style={{background:"rgba(122,175,150,.08)",border:"0.5px solid rgba(122,175,150,.22)",borderRadius:13,padding:13,position:"relative",cursor:"pointer"}}>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <span style={{fontSize:17}}>🌅</span>
           <span style={{fontFamily:"Fraunces,serif",fontSize:13,fontWeight:600,color:"#7aaf96"}}>Ikigai</span>
@@ -1593,6 +1644,129 @@ const deleteEnergyEntry = async (id) => {
     })()}
   </div>
 )}  
+        
+{/* IKIGAI */}
+{screen==="ikigai"&&(
+  <div key={animKey} style={{paddingTop:40}}>
+    <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("library")}>← {L("Back","Назад","Volver")}</button>
+    <p style={{fontSize:12,color:"#7aaf96",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>{L("Practice Library","Библиотека практик","Biblioteca de Prácticas")}</p>
+    <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:6}}>{L("Ikigai Exploration","Исследование Икигай","Exploración del Ikigai")}</h2>
+    <p style={{fontSize:13,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:24}}>{L("Your reason for being — where love, skill, purpose and livelihood meet.","Твоя причина существовать — там, где любовь, навык, цель и средства к жизни встречаются.","Tu razón de ser — donde el amor, la habilidad, el propósito y el sustento se encuentran.")}</p>
+
+    {/* DIAGRAM */}
+    {(()=>{
+      const tipData = {
+        passion: {title:L("Passion","Страсть","Pasión"), desc:L("Love + Good At. Energizing and natural — but without connection to what the world needs, it can feel self-indulgent.","Любовь + Умение. Заряжает и приходит естественно — но без связи с тем, что нужно миру, может ощущаться как самоудовлетворение.","Amor + Bueno en ello. Energizante y natural — pero sin conexión con lo que el mundo necesita, puede sentirse autoindulgente."), gap:L("Without 'What the world needs' → Satisfaction, but feeling of uselessness","Без 'Что нужно миру' → Удовлетворение, но ощущение бесполезности","Sin 'Lo que el mundo necesita' → Satisfacción, pero sensación de inutilidad")},
+        mission: {title:L("Mission","Миссия","Misión"), desc:L("Love + World Needs. You care deeply and it matters — but without livelihood, passion alone can exhaust you.","Любовь + Потребности мира. Ты искренне заботишься — но без дохода страсть может истощить.","Amor + Lo que el mundo necesita. Te importa profundamente — pero sin sustento, la pasión sola puede agotarte."), gap:L("Without 'What you can be paid for' → Delight and fullness, but no wealth","Без 'За что могут платить' → Радость и полнота, но без богатства","Sin 'Por lo que puedes ser pagado' → Deleite y plenitud, pero sin riqueza")},
+        profession: {title:L("Profession","Профессия","Profesión"), desc:L("Good At + Paid For. Skilled and compensated — but without love or meaning, it can feel hollow.","Умение + Оплата. Мастерство и вознаграждение — но без любви или смысла может ощущаться пустым.","Bueno en ello + Pagado. Hábil y compensado — pero sin amor o significado, puede sentirse vacío."), gap:L("Without 'What you love' → Comfortable, but feeling of emptiness","Без 'Что ты любишь' → Комфорт, но ощущение пустоты","Sin 'Lo que amas' → Cómodo, pero sensación de vacío")},
+        vocation: {title:L("Vocation","Призвание","Vocación"), desc:L("World Needs + Paid For. Useful and earning — but without love or natural skill, it can feel draining.","Потребности мира + Оплата. Полезно и оплачивается — но без любви или природного таланта может истощать.","Lo que el mundo necesita + Pagado. Útil y remunerado — pero sin amor o habilidad natural, puede sentirse agotador."), gap:L("Without 'What you're good at' → Excitement and complacency, but sense of uncertainty","Без 'В чём ты хорош' → Воодушевление и самодовольство, но ощущение неопределённости","Sin 'En lo que eres bueno' → Emoción y complacencia, pero sensación de incertidumbre")},
+      };
+      const allFilled = ikigai.love && ikigai.good && ikigai.need && ikigai.paid;
+      const filled = {love:!!ikigai.love, good:!!ikigai.good, need:!!ikigai.need, paid:!!ikigai.paid};
+      return (
+        <div>
+          <div style={{position:"relative",width:280,height:280,margin:"0 auto 12px"}}>
+            {[
+              {key:'love', color:'#c4786e', style:{top:0,left:'50%',transform:'translateX(-50%)'}},
+              {key:'good', color:'#d4a359', style:{top:'50%',left:0,transform:'translateY(-50%)'}},
+              {key:'need', color:'#7aaf96', style:{top:'50%',right:0,transform:'translateY(-50%)'}},
+              {key:'paid', color:'rgba(130,110,180,1)', style:{bottom:0,left:'50%',transform:'translateX(-50%)'}},
+            ].map(c=>(
+              <div key={c.key} style={{position:"absolute",width:168,height:168,borderRadius:"50%",background:c.color,opacity:filled[c.key]?0.5:0.15,transition:"opacity .4s",border:"1px solid rgba(255,255,255,.2)",...c.style}}/>
+            ))}
+            {[
+              {key:'passion', label:L("Passion","Страсть","Pasión"), style:{top:'32%',left:'22%'}},
+              {key:'mission', label:L("Mission","Миссия","Misión"), style:{top:'32%',right:'22%'}},
+              {key:'profession', label:L("Profession","Профессия","Profesión"), style:{bottom:'32%',left:'18%'}},
+              {key:'vocation', label:L("Vocation","Призвание","Vocación"), style:{bottom:'32%',right:'18%'}},
+            ].map(z=>(
+              <div key={z.key} onClick={()=>setIkigaiTip(ikigaiTip===z.key?null:z.key)} style={{position:"absolute",fontSize:8,fontWeight:400,color:"rgba(240,236,228,.8)",textTransform:"uppercase",letterSpacing:".05em",cursor:"pointer",background:"rgba(0,0,0,.3)",borderRadius:6,padding:"3px 5px",textShadow:"0 1px 2px rgba(0,0,0,.6)",zIndex:5,...z.style}}>{z.label}</div>
+            ))}
+            <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:60,height:60,borderRadius:"50%",background:"rgba(20,18,28,.9)",border:"1.5px solid rgba(255,255,255,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,color:"#f0ece4",textAlign:"center",zIndex:10}}>IKIGAI</div>
+            {[
+              {label:L("What you\nLOVE","Что ты\nЛЮБИШЬ","Lo que\nAMAS"), style:{top:6,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
+              {label:L("What you're\nGOOD AT","В чём ты\nХОРОШ","En lo que\nERES BUENO"), style:{top:'50%',left:4,transform:'translateY(-50%)',textAlign:'left'}},
+              {label:L("What the\nworld NEEDS","Что нужно\nМИРУ","Lo que el\nmundo NECESITA"), style:{top:'50%',right:4,transform:'translateY(-50%)',textAlign:'right'}},
+              {label:L("What you can\nbe PAID FOR","За что тебе\nМОГУТ ПЛАТИТЬ","Por lo que\npuedes SER PAGADO"), style:{bottom:6,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
+            ].map((l,i)=>(
+              <div key={i} style={{position:"absolute",fontSize:8,color:"rgba(240,236,228,.7)",fontWeight:400,lineHeight:1.3,pointerEvents:"none",whiteSpace:"pre-line",...l.style}}>{l.label}</div>
+            ))}
+          </div>
+
+          {ikigaiTip && tipData[ikigaiTip] && (
+            <div style={{background:"rgba(26,26,46,.9)",border:"0.5px solid rgba(255,255,255,.12)",borderRadius:12,padding:"12px 14px",marginBottom:16}}>
+              <p style={{fontSize:13,fontWeight:500,color:"#f0ece4",marginBottom:5}}>{tipData[ikigaiTip].title}</p>
+              <p style={{fontSize:12,color:"rgba(240,236,228,.65)",lineHeight:1.6,marginBottom:6}}>{tipData[ikigaiTip].desc}</p>
+              <p style={{fontSize:11,color:"rgba(240,236,228,.35)",fontStyle:"italic"}}>{tipData[ikigaiTip].gap}</p>
+            </div>
+          )}
+
+          <p style={{fontSize:11,color:"rgba(240,236,228,.25)",textAlign:"center",marginBottom:24}}>{L("Tap any intersection to learn more","Нажми на любое пересечение","Toca cualquier intersección")}</p>
+
+          {/* 4 SECTIONS */}
+          {[
+            {key:'love', color:'#c4786e', label:L("What you love","Что ты любишь","Lo que amas"), prompt:L("What activities make you lose track of time? What would you do even if you weren't paid?","Какие занятия заставляют тебя терять счёт времени? Что бы ты делал(а), даже если бы не платили?","¿Qué actividades te hacen perder la noción del tiempo? ¿Qué harías aunque no te pagaran?")},
+            {key:'good', color:'#d4a359', label:L("What you're good at","В чём ты хорош","En lo que eres bueno"), prompt:L("What comes naturally to you that others find difficult? What do people consistently ask for your help with?","Что даётся тебе легко, но другим сложно? За помощью в чём к тебе обращаются?","¿Qué te sale naturalmente que a otros les resulta difícil? ¿Con qué te piden ayuda constantemente?")},
+            {key:'need', color:'#7aaf96', label:L("What the world needs","Что нужно миру","Lo que el mundo necesita"), prompt:L("What problems do you see around you that feel personal? What change do you most want to see?","Какие проблемы вокруг тебя ощущаются как личные? Какие перемены ты больше всего хочешь видеть?","¿Qué problemas ves a tu alrededor que se sienten personales? ¿Qué cambio quieres ver más?")},
+            {key:'paid', color:'rgba(130,110,180,1)', label:L("What you can be paid for","За что тебе могут платить","Por lo que puedes ser pagado"), prompt:L("What skills or services do people already pay you for — or would pay for? What value do you create?","За какие навыки или услуги тебе уже платят — или заплатили бы? Какую ценность ты создаёшь?","¿Por qué habilidades o servicios te pagan ya — o pagarían? ¿Qué valor creas?")},
+          ].map(({key, color, label, prompt})=>(
+            <div key={key} style={{background:"rgba(255,255,255,.04)",border:`0.5px solid rgba(255,255,255,.08)`,borderRadius:14,padding:16,marginBottom:10,position:"relative",overflow:"hidden"}}>
+              <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:`linear-gradient(90deg,${color},transparent)`}}/>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <p style={{fontSize:11,fontWeight:500,color,textTransform:"uppercase",letterSpacing:".07em"}}>{label}</p>
+                {ikigai[key] && !ikigaiEditing[key] && <button className="tbtn" style={{fontSize:11}} onClick={()=>setIkigaiEditing(p=>({...p,[key]:true}))}>{L("Edit","Изменить","Editar")}</button>}
+              </div>
+              {ikigai[key] && !ikigaiEditing[key] ? (
+                <p style={{fontSize:13,color:"rgba(240,236,228,.82)",lineHeight:1.65}}>{ikigai[key]}</p>
+              ) : (
+                <div>
+                  <p style={{fontSize:13,color:"rgba(240,236,228,.45)",lineHeight:1.55,marginBottom:10,fontStyle:"italic"}}>{prompt}</p>
+                  <textarea rows={3} value={ikigai[key]} onChange={e=>setIkigai(p=>({...p,[key]:e.target.value}))} placeholder={L("Your thoughts...","Твои мысли...","Tus pensamientos...")}/>
+                  {ikigai[key] && <button className="pbtn" style={{fontSize:13,padding:"8px 16px",marginTop:8}} onClick={()=>setIkigaiEditing(p=>({...p,[key]:false}))}>{L("Save","Сохранить","Guardar")}</button>}
+                </div>
+              )}
+            </div>
+          ))}
+
+          {/* GENERATE BUTTON */}
+          {allFilled && !ikigaiSynthesis && (
+            <button className="pbtn" style={{width:"100%",marginTop:8}} onClick={()=>generateIkigaiSynthesis(ikigai)}>
+              {ikigaiLoading ? <span>{L("Generating","Генерирую","Generando")}<span className="dot">.</span><span className="dot dot2">.</span><span className="dot dot3">.</span></span> : L("Generate my Ikigai →","Сгенерировать мой Икигай →","Generar mi Ikigai →")}
+            </button>
+          )}
+
+          {/* SYNTHESIS */}
+          {ikigaiSynthesis && (()=>{
+            let parsed;
+            try { parsed = JSON.parse(ikigaiSynthesis); } catch { return null; }
+            return (
+              <div style={{marginTop:20}}>
+                <div style={{background:"rgba(122,175,150,.07)",border:"0.5px solid rgba(122,175,150,.2)",borderRadius:14,padding:18,position:"relative",overflow:"hidden",marginBottom:10}}>
+                  <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:"linear-gradient(90deg,#7aaf96,transparent)"}}/>
+                  <p style={{fontSize:11,color:"rgba(122,175,150,.7)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10}}>{L("Your Ikigai","Твой Икигай","Tu Ikigai")}</p>
+                  <p style={{fontSize:14,color:"rgba(240,236,228,.85)",lineHeight:1.75,fontStyle:"italic",marginBottom:0}}>"{parsed.ikigai}"</p>
+                </div>
+                {parsed.meaning && (
+                  <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:14,padding:18,marginBottom:10}}>
+                    <p style={{fontSize:11,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10}}>{L("What this means for you","Что это значит для тебя","Lo que esto significa para ti")}</p>
+                    <p style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7}}>{parsed.meaning}</p>
+                  </div>
+                )}
+                {parsed.question && (
+                  <div style={{background:"rgba(100,80,200,.07)",border:"0.5px solid rgba(100,80,200,.15)",borderRadius:14,padding:"14px 16px",marginBottom:10}}>
+                    <p style={{fontSize:11,textTransform:"uppercase",letterSpacing:".08em",color:"rgba(160,140,220,.5)",marginBottom:7}}>{L("A question to sit with","Вопрос для размышления","Una pregunta para reflexionar")}</p>
+                    <p style={{fontSize:14,lineHeight:1.65,fontStyle:"italic",color:"rgba(240,236,228,.76)"}}>{`"${parsed.question}"`}</p>
+                  </div>
+                )}
+                <button className="gbtn" style={{fontSize:12,marginTop:4}} onClick={()=>{setIkigaiSynthesis('');}}>{L("Regenerate","Пересоздать","Regenerar")}</button>
+              </div>
+            );
+          })()}
+        </div>
+      );
+    })()}
+  </div>
+)}
         
         {/* ONBOARDING */}
         {screen==="onboarding"&&(
