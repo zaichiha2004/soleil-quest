@@ -854,7 +854,7 @@ const generateIkigaiSynthesis = async (answers) => {
         max_tokens: 800,
         temperature: 1,
         system: `You are Alex Soleil, a warm and perceptive life coach. A user has completed their Ikigai exploration. Generate a synthesis in ${lang==='RU'?'Russian':lang==='ES'?'Latin American Spanish':'English'}. Output strict JSON only:
-{"ikigai":"2-3 sentence synthesis of their reason for being based on all 4 answers. Warm, specific, not generic. Alex Soleil voice.","meaning":"1 paragraph connecting their answers to the 4 intersection zones (Passion, Mission, Profession, Vocation) — which are already active, which need development.","question":"One provocative question based on what's most alive or missing in their Ikigai."}`,
+{"ikigai":"2-3 sentence synthesis of their reason for being based on all 4 answers. Warm, specific, not generic. Alex Soleil voice.","meaning":["paragraph 1 — first natural theme or insight from their answers","paragraph 2 — second natural theme or insight","paragraph 3 — optional third if needed"],"question":"One provocative question based on what's most alive or missing in their Ikigai."}`,
         messages: [{
           role: 'user',
           content: `What I love: ${answers.love}\nWhat I'm good at: ${answers.good}\nWhat the world needs: ${answers.need}\nWhat I can be paid for: ${answers.paid}\n\nGenerate my Ikigai synthesis.`
@@ -1666,31 +1666,31 @@ const deleteEnergyEntry = async (id) => {
       const filled = {love:!!ikigai.love, good:!!ikigai.good, need:!!ikigai.need, paid:!!ikigai.paid};
       return (
         <div>
-          <div style={{position:"relative",width:280,height:280,margin:"0 auto 12px"}}>
+          <div style={{position:"relative",width:360,height:360,margin:"0 auto 12px"}}>
             {[
               {key:'love', color:'#c4786e', style:{top:0,left:'50%',transform:'translateX(-50%)'}},
               {key:'good', color:'#d4a359', style:{top:'50%',left:0,transform:'translateY(-50%)'}},
               {key:'need', color:'#7aaf96', style:{top:'50%',right:0,transform:'translateY(-50%)'}},
               {key:'paid', color:'rgba(130,110,180,1)', style:{bottom:0,left:'50%',transform:'translateX(-50%)'}},
             ].map(c=>(
-              <div key={c.key} style={{position:"absolute",width:168,height:168,borderRadius:"50%",background:c.color,opacity:filled[c.key]?0.5:0.15,transition:"opacity .4s",border:"1.5px solid rgba(255,255,255,1)",...c.style}}/>
+              <div key={c.key} style={{position:"absolute",width:210,height:210,borderRadius:"50%",background:c.color,opacity:filled[c.key]?0.5:0.15,transition:"opacity .4s",border:"2px solid rgba(255,255,255,.9)",...c.style}}/>
             ))}
             {[
-              {key:'passion', label:L("Passion","Страсть","Pasión"), style:{top:'32%',left:'22%'}},
-              {key:'mission', label:L("Mission","Миссия","Misión"), style:{top:'32%',right:'22%'}},
-              {key:'profession', label:L("Profession","Профессия","Profesión"), style:{bottom:'32%',left:'18%'}},
-              {key:'vocation', label:L("Vocation","Призвание","Vocación"), style:{bottom:'32%',right:'18%'}},
+              {key:'passion', label:L("Passion","Страсть","Pasión"), style:{top:'30%',left:'27%'}},
+              {key:'mission', label:L("Mission","Миссия","Misión"), style:{top:'30%',right:'27%'}},
+              {key:'profession', label:L("Profession","Профессия","Profesión"), style:{bottom:'30%',left:'24%'}},
+              {key:'vocation', label:L("Vocation","Призвание","Vocación"), style:{bottom:'30%',right:'25%'}},
             ].map(z=>(
               <div key={z.key} onClick={()=>setIkigaiTip(ikigaiTip===z.key?null:z.key)} style={{position:"absolute",fontSize:8,fontWeight:400,color:"rgba(240,236,228,.8)",textTransform:"uppercase",letterSpacing:".05em",cursor:"pointer",background:"rgba(0,0,0,.3)",borderRadius:6,padding:"3px 5px",textShadow:"0 1px 2px rgba(0,0,0,.6)",zIndex:5,...z.style}}>{z.label}</div>
             ))}
-            <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:60,height:60,borderRadius:"50%",background:"rgba(20,18,28,.9)",border:"2px solid rgba(255,255,255,1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,color:"#f0ece4",textAlign:"center",zIndex:10}}>IKIGAI</div>
+            <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:76,height:76,borderRadius:"50%",background:"rgba(20,18,28,.95)",border:"1.5px solid rgba(255,255,255,.9)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#d4a359",textAlign:"center",zIndex:10,letterSpacing:".05em"}}>IKIGAI</div>
             {[
-              {label:L("What you\nLOVE","Что ты\nЛЮБИШЬ","Lo que\nAMAS"), style:{top:6,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
-              {label:L("What you're\nGOOD AT","В чём ты\nХОРОШ","En lo que\nERES BUENO"), style:{top:'50%',left:4,transform:'translateY(-50%)',textAlign:'left'}},
-              {label:L("What the\nworld NEEDS","Что нужно\nМИРУ","Lo que el\nmundo NECESITA"), style:{top:'50%',right:4,transform:'translateY(-50%)',textAlign:'right'}},
-              {label:L("What you can\nbe PAID FOR","За что тебе\nМОГУТ ПЛАТИТЬ","Por lo que\npuedes SER PAGADO"), style:{bottom:6,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
+              {label:L("What you\nLOVE","Что ты\nЛЮБИШЬ","Lo que\nAMAS"), style:{top:30,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
+              {label:L("What you're\nGOOD AT","В чём ты\nХОРОШ","En lo que\nERES BUENO"), style:{top:'50%',left:12,transform:'translateY(-50%)',textAlign:'left'}},
+              {label:L("What the\nworld NEEDS","Что нужно\nМИРУ","Lo que el\nmundo NECESITA"), style:{top:'50%',right:12,transform:'translateY(-50%)',textAlign:'right'}},
+              {label:L("What you can\nbe PAID FOR","За что тебе\nМОГУТ ПЛАТИТЬ","Por lo que\npuedes SER PAGADO"), style:{bottom:30,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
             ].map((l,i)=>(
-              <div key={i} style={{position:"absolute",fontSize:8,color:"rgba(240,236,228,.7)",fontWeight:400,lineHeight:1.3,pointerEvents:"none",whiteSpace:"pre-line",...l.style}}>{l.label}</div>
+              <div key={i} style={{position:"absolute",fontSize:9,color:"#ffffff",fontWeight:500,lineHeight:1.4,pointerEvents:"none",whiteSpace:"pre-line",textShadow:"0 1px 4px rgba(0,0,0,1)",...l.style}}>{l.label}</div>
             ))}
           </div>
 
@@ -1747,10 +1747,12 @@ const deleteEnergyEntry = async (id) => {
                   <p style={{fontSize:11,color:"rgba(122,175,150,.7)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10}}>{L("Your Ikigai","Твой Икигай","Tu Ikigai")}</p>
                   <p style={{fontSize:14,color:"rgba(240,236,228,.85)",lineHeight:1.75,fontStyle:"italic",marginBottom:0}}>"{parsed.ikigai}"</p>
                 </div>
-                {parsed.meaning && (
+                {parsed.meaning?.length > 0 && (
                   <div style={{background:"rgba(255,255,255,.04)",border:"0.5px solid rgba(255,255,255,.08)",borderRadius:14,padding:18,marginBottom:10}}>
-                    <p style={{fontSize:11,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:10}}>{L("What this means for you","Что это значит для тебя","Lo que esto significa para ti")}</p>
-                    <p style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7}}>{parsed.meaning}</p>
+                    <p style={{fontSize:11,color:"rgba(240,236,228,.3)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:14}}>{L("What this means for you","Что это значит для тебя","Lo que esto significa para ti")}</p>
+                    {parsed.meaning.filter(Boolean).map((p,i)=>(
+                      <p key={i} style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,marginBottom:i<parsed.meaning.length-1?12:0}}>{p}</p>
+                    ))}
                   </div>
                 )}
                 {parsed.question && (
