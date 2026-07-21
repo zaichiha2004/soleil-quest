@@ -2024,7 +2024,7 @@ const deleteEnergyEntry = async (id) => {
     </div>
     <div style={{display:"flex",gap:6,marginBottom:20}}>
       <button onClick={()=>setPracticesTab('calendar')} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${practicesTab==='calendar'?"#d4a359":"rgba(255,255,255,.08)"}`,background:practicesTab==='calendar'?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",color:practicesTab==='calendar'?"#d4a359":"rgba(240,236,228,.5)",fontWeight:practicesTab==='calendar'?500:400}}>📅 {L("Calendar","Календарь","Calendario")}</button>
-      <button onClick={()=>setPracticesTab('recap')} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${practicesTab==='recap'?"#d4a359":"rgba(255,255,255,.08)"}`,background:practicesTab==='recap'?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",color:practicesTab==='recap'?"#d4a359":"rgba(240,236,228,.5)",fontWeight:practicesTab==='recap'?500:400}}>📊 {L("Monthly Recap","Итоги месяца","Resumen Mensual")}</button>
+      <button onClick={()=>{setPracticesTab('recap');const k=`${calMonth.getFullYear()}-${calMonth.getMonth()}`;if(recapCache[k])setRecapData(recapCache[k]);}} style={{flex:1,textAlign:"center",padding:9,borderRadius:9,fontSize:13,cursor:"pointer",border:`0.5px solid ${practicesTab==='recap'?"#d4a359":"rgba(255,255,255,.08)"}`,background:practicesTab==='recap'?"rgba(212,163,89,.13)":"rgba(255,255,255,.04)",color:practicesTab==='recap'?"#d4a359":"rgba(240,236,228,.5)",fontWeight:practicesTab==='recap'?500:400}}>📊 {L("Monthly Recap","Итоги месяца","Resumen Mensual")}</button>
     </div>
             {practicesTab==='recap' ? (
   <div>
