@@ -665,7 +665,7 @@ if (supabase) {
   const {data: energyData} = await supabase.from('energy_entries').select('*').eq('user_id', uid);
   setEnergyEntries(energyData || []);
 }
-    const savedRecapCache = JSON.parse(localStorage.getItem('sq_recap_cache') || '{}');
+    const savedRecapCache = dbProfile?.recap_cache || JSON.parse(localStorage.getItem('sq_recap_cache') || '{}');
 setRecapCache(savedRecapCache);
     // Check yesterday's session
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
@@ -873,7 +873,7 @@ Make the questions specific to what came up in their sessions. Make practices co
     const parsed = JSON.parse(clean);
     const result = { ...parsed, topChallenges, total, challengeCounts };
 setRecapData(result);
-if (!isCurrentMonth) setRecapCache(prev => {   const updated = {...prev, [cacheKey]: result};   localStorage.setItem('sq_recap_cache', JSON.stringify(updated));   return updated; });
+if (!isCurrentMonth) setRecapCache(prev => {   const updated = {...prev, [cacheKey]: result};   localStorage.setItem('sq_recap_cache', JSON.stringify(updated));   if (userId && supabase) dbSaveProfile(userId, {recap_cache: updated});   return updated; });
   } catch(e) {
     const result = { error: true, topChallenges, total, challengeCounts };
 setRecapData(result);
