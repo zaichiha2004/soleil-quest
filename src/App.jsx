@@ -1654,7 +1654,7 @@ const deleteEnergyEntry = async (id) => {
     <h2 style={{fontFamily:"Fraunces,serif",fontSize:22,fontWeight:600,marginBottom:6}}>{L("Ikigai Exploration","Исследование Икигай","Exploración del Ikigai")}</h2>
     <p style={{fontSize:13,color:"rgba(240,236,228,.48)",lineHeight:1.65,marginBottom:24}}>{L("Your reason for being — where love, skill, purpose and livelihood meet.","Твоя причина существовать — там, где любовь, навык, цель и средства к жизни встречаются.","Tu razón de ser — donde el amor, la habilidad, el propósito y el sustento se encuentran.")}</p>
     {(()=>{
-  const [guideOpen, setGuideOpen] = React.useState(true);
+  const [guideOpen, setGuideOpen] = useState(true);
   return (
     <div style={{background:"rgba(122,175,150,.06)",border:"0.5px solid rgba(122,175,150,.18)",borderRadius:14,overflow:"hidden",marginBottom:24}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"14px 16px",cursor:"pointer"}} onClick={()=>setGuideOpen(o=>!o)}>
