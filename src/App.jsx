@@ -854,7 +854,7 @@ const generateIkigaiSynthesis = async (answers) => {
         max_tokens: 800,
         temperature: 1,
         system: `You are Alex Soleil, a warm and perceptive life coach. A user has completed their Ikigai exploration. Generate a synthesis in ${lang==='RU'?'Russian':lang==='ES'?'Latin American Spanish':'English'}. Output strict JSON only:
-{"ikigai":"2-3 sentence synthesis of their reason for being based on all 4 answers. Warm, specific, not generic. Alex Soleil voice.","meaning":["paragraph 1 — first natural theme or insight from their answers","paragraph 2 — second natural theme or insight","paragraph 3 — optional third if needed"],"question":"One provocative question based on what's most alive or missing in their Ikigai."}`,
+{"ikigai":"2-3 sentence synthesis of their reason for being based on all 4 answers. Warm, specific, not generic. Alex Soleil voice.","meaning":["paragraph 1 — what's already alive and working in their Ikigai based on their answers — which intersections are strong and how they show up","paragraph 2 — optional second paragraph if there is another meaningful theme in what's working"],"gaps":["paragraph 1 — where the gaps are — which intersections are underdeveloped or missing and what that costs them","paragraph 2 — optional: what leaning into what's missing could look like"],"question":"One provocative question based on what's most alive or missing in their Ikigai."}`,
         messages: [{
           role: 'user',
           content: `What I love: ${answers.love}\nWhat I'm good at: ${answers.good}\nWhat the world needs: ${answers.need}\nWhat I can be paid for: ${answers.paid}\n\nGenerate my Ikigai synthesis.`
@@ -1753,6 +1753,15 @@ const deleteEnergyEntry = async (id) => {
                     {Array.isArray(parsed.meaning) ? parsed.meaning.filter(Boolean).map((p,i)=>(
                       <p key={i} style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,marginBottom:i<parsed.meaning.length-1?12:0}}>{p}</p>
                     )) : <p style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7}}>{parsed.meaning}</p>}
+                  </div>
+                )}
+                {Array.isArray(parsed.gaps) && parsed.gaps.filter(Boolean).length > 0 && (
+                  <div style={{background:"rgba(196,120,110,.06)",border:"0.5px solid rgba(196,120,110,.15)",borderRadius:14,padding:18,marginBottom:10,position:"relative",overflow:"hidden"}}>
+                    <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:"linear-gradient(90deg,#c4786e,transparent)"}}/>
+                    <p style={{fontSize:11,color:"rgba(196,120,110,.7)",textTransform:"uppercase",letterSpacing:".07em",marginBottom:14}}>{L("What's missing","Чего не хватает","Lo que falta")}</p>
+                    {parsed.gaps.filter(Boolean).map((p,i)=>(
+                      <p key={i} style={{fontSize:13,color:"rgba(240,236,228,.72)",lineHeight:1.7,marginBottom:i<parsed.gaps.length-1?12:0}}>{p}</p>
+                    ))}
                   </div>
                 )}
                 {parsed.question && (
