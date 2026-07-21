@@ -472,7 +472,7 @@ const [ikigaiEditing, setIkigaiEditing] = useState({love:false, good:false, need
 const [ikigaiSynthesis, setIkigaiSynthesis] = useState('');
 const [ikigaiLoading, setIkigaiLoading] = useState(false);
 const [ikigaiTip, setIkigaiTip] = useState(null);
-  const [ikigaiGuideOpen, setIkigaiGuideOpen] = useState(true);
+  const [ikigaiGuideOpen, setIkigaiGuideOpen] = useState(false);
   const [ikigaiDraft, setIkigaiDraft] = useState({love:'', good:'', need:'', paid:''});
   const [showFeedback, setShowFeedback] = useState(false);
 const [feedbackAnswers, setFeedbackAnswers] = useState({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});
@@ -1693,7 +1693,71 @@ const deleteEnergyEntry = async (id) => {
       const filled = {love:!!ikigai.love, good:!!ikigai.good, need:!!ikigai.need, paid:!!ikigai.paid};
       return (
         <div>
-          <div style={{position:"relative",width:360,height:360,margin:"0 auto 12px"}}>
+          <div style={{position:"relative",width:360,height:440,margin:"0 auto 12px"}}>   
+            {/* Callouts */}   
+            <div style={{position:"absolute",top:55,left:8,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:72,zIndex:30}}>Satisfaction,<br/>but feeling of<br/>uselessness</div>   
+            <div style={{position:"absolute",top:55,right:8,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:72,textAlign:"right",zIndex:30}}>Delight and<br/>fullness, but<br/>no wealth</div>   
+            <div style={{position:"absolute",bottom:55,left:8,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:72,zIndex:30}}>Comfortable,<br/>but feeling of<br/>emptiness</div>   
+            <div style={{position:"absolute",bottom:55,right:8,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:72,textAlign:"right",zIndex:30}}>Excitement<br/>and sense of<br/>uncertainty</div>    
+            
+            {/* Wavy lines SVG */}
+  <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",zIndex:20}} viewBox="0 0 360 440">
+    {(()=>{
+      const wavyPath = (x1,y1,x2,y2) => {
+        const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+        const ux=dx/len,uy=dy/len,px=-uy,py=ux;
+        const steps=60,amp=6,waves=1;
+        let d=`M ${x1} ${y1}`;
+        for(let i=1;i<=steps;i++){
+          const t=i/steps;
+          const lx=x1+t*dx,ly=y1+t*dy;
+          const off=amp*Math.sin(t*waves*2*Math.PI);
+          d+=` L ${(lx+off*px).toFixed(1)} ${(ly+off*py).toFixed(1)}`;
+        }
+        return d;
+      };
+      return (<>
+        <path d={wavyPath(58,42,138,210)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="138" cy="210" r="2.5" fill="rgba(255,255,255,.5)"/>
+        <path d={wavyPath(302,42,180,168)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="180" cy="168" r="2.5" fill="rgba(255,255,255,.5)"/>
+        <path d={wavyPath(58,398,180,252)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="180" cy="252" r="2.5" fill="rgba(255,255,255,.5)"/>
+        <path d={wavyPath(302,398,222,210)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="222" cy="210" r="2.5" fill="rgba(255,255,255,.5)"/>
+      </>);
+    })()}
+  </svg>
+    
+        {/* Diagram circles */}   
+        <div style={{position:"absolute",top:60,left:30,width:300,height:300}}>     
+          {[       
+          {key:'love', color:'#c4786e', style:{top:0,left:'50%',transform:'translateX(-50%)'}},       
+          {key:'good', color:'#d4a359', style:{top:'50%',left:0,transform:'translateY(-50%)'}},       
+          {key:'need', color:'#7aaf96', style:{top:'50%',right:0,transform:'translateY(-50%)'}},       
+          {key:'paid', color:'rgba(130,110,180,1)', style:{bottom:0,left:'50%',transform:'translateX(-50%)'}},     
+        ].map(c=>(       
+          <div key={c.key} style={{position:"absolute",width:210,height:210,borderRadius:"50%",background:c.color,opacity:filled[c.key]?0.5:0.15,transition:"opacity .4s",border:"2px solid rgba(255,255,255,.9)",...c.style}}/>     
+        ))}     
+        {[       
+          {key:'passion', label:L("Passion","Страсть","Pasión"), style:{top:'30%',left:'27%'}},       
+          {key:'mission', label:L("Mission","Миссия","Misión"), style:{top:'30%',right:'27%'}},       
+          {key:'profession', label:L("Profession","Профессия","Profesión"), style:{bottom:'30%',left:'24%'}},       
+          {key:'vocation', label:L("Vocation","Призвание","Vocación"), style:{bottom:'30%',right:'25%'}},     
+        ].map(z=>(       
+          <div key={z.key} onClick={()=>setIkigaiTip(ikigaiTip===z.key?null:z.key)} style={{position:"absolute",fontSize:8,fontWeight:400,color:"rgba(240,236,228,.8)",textTransform:"uppercase",letterSpacing:".05em",cursor:"pointer",background:"rgba(0,0,0,.3)",borderRadius:6,padding:"3px 5px",textShadow:"0 1px 2px rgba(0,0,0,.6)",zIndex:5,...z.style}}>{z.label}</div>     
+        ))}     
+          {[       
+          {label:L("What you\nLOVE","Что ты\nЛЮБИШЬ","Lo que\nAMAS"), style:{top:30,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
+          {label:L("What you're\nGOOD AT","В чём ты\nХОРОШ","En lo que\nERES BUENO"), style:{top:'50%',left:12,transform:'translateY(-50%)',textAlign:'left'}},
+          {label:L("What the\nworld NEEDS","Что нужно\nМИРУ","Lo que el\nmundo NECESITA"), style:{top:'50%',right:12,transform:'translateY(-50%)',textAlign:'right'}},
+          {label:L("What you can\nbe PAID FOR","За что тебе\nМОГУТ ПЛАТИТЬ","Por lo que\npuedes SER PAGADO"), style:{bottom:30,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
+    ].map((l,i)=>(       
+          <div key={i} style={{position:"absolute",fontSize:9,color:"#ffffff",fontWeight:500,lineHeight:1.4,pointerEvents:"none",whiteSpace:"pre-line",textShadow:"0 1px 4px rgba(0,0,0,1)",...l.style}}>{l.label}</div>     
+    ))}     
+          <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:76,height:76,borderRadius:"50%",background:"rgba(20,18,28,.95)",border:"1.5px solid rgba(255,255,255,.9)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#d4a359",textAlign:"center",zIndex:10,letterSpacing:".05em"}}>IKIGAI</div>   
+        </div> 
+          </div>
             {[
               {key:'love', color:'#c4786e', style:{top:0,left:'50%',transform:'translateX(-50%)'}},
               {key:'good', color:'#d4a359', style:{top:'50%',left:0,transform:'translateY(-50%)'}},
