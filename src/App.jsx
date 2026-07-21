@@ -472,6 +472,7 @@ const [ikigaiEditing, setIkigaiEditing] = useState({love:false, good:false, need
 const [ikigaiSynthesis, setIkigaiSynthesis] = useState('');
 const [ikigaiLoading, setIkigaiLoading] = useState(false);
 const [ikigaiTip, setIkigaiTip] = useState(null);
+  const [ikigaiDraft, setIkigaiDraft] = useState({love:'', good:'', need:'', paid:''});
   const [showFeedback, setShowFeedback] = useState(false);
 const [feedbackAnswers, setFeedbackAnswers] = useState({q1:'',q2:'',q3:'',q4:'',q5:'',q6:'',q7:''});
 const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
@@ -1672,7 +1673,7 @@ const deleteEnergyEntry = async (id) => {
               {key:'need', color:'#7aaf96', style:{top:'50%',right:0,transform:'translateY(-50%)'}},
               {key:'paid', color:'rgba(130,110,180,1)', style:{bottom:0,left:'50%',transform:'translateX(-50%)'}},
             ].map(c=>(
-              <div key={c.key} style={{position:"absolute",width:168,height:168,borderRadius:"50%",background:c.color,opacity:filled[c.key]?0.5:0.15,transition:"opacity .4s",border:"1px solid rgba(255,255,255,.2)",...c.style}}/>
+              <div key={c.key} style={{position:"absolute",width:168,height:168,borderRadius:"50%",background:c.color,opacity:filled[c.key]?0.5:0.15,transition:"opacity .4s",border:"1.5px solid rgba(255,255,255,1)",...c.style}}/>
             ))}
             {[
               {key:'passion', label:L("Passion","Страсть","Pasión"), style:{top:'32%',left:'22%'}},
@@ -1682,7 +1683,7 @@ const deleteEnergyEntry = async (id) => {
             ].map(z=>(
               <div key={z.key} onClick={()=>setIkigaiTip(ikigaiTip===z.key?null:z.key)} style={{position:"absolute",fontSize:8,fontWeight:400,color:"rgba(240,236,228,.8)",textTransform:"uppercase",letterSpacing:".05em",cursor:"pointer",background:"rgba(0,0,0,.3)",borderRadius:6,padding:"3px 5px",textShadow:"0 1px 2px rgba(0,0,0,.6)",zIndex:5,...z.style}}>{z.label}</div>
             ))}
-            <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:60,height:60,borderRadius:"50%",background:"rgba(20,18,28,.9)",border:"1.5px solid rgba(255,255,255,.25)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,color:"#f0ece4",textAlign:"center",zIndex:10}}>IKIGAI</div>
+            <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:60,height:60,borderRadius:"50%",background:"rgba(20,18,28,.9)",border:"2px solid rgba(255,255,255,1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:8,fontWeight:700,color:"#f0ece4",textAlign:"center",zIndex:10}}>IKIGAI</div>
             {[
               {label:L("What you\nLOVE","Что ты\nЛЮБИШЬ","Lo que\nAMAS"), style:{top:6,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
               {label:L("What you're\nGOOD AT","В чём ты\nХОРОШ","En lo que\nERES BUENO"), style:{top:'50%',left:4,transform:'translateY(-50%)',textAlign:'left'}},
@@ -1714,15 +1715,15 @@ const deleteEnergyEntry = async (id) => {
               <div style={{position:"absolute",top:0,left:0,right:0,height:"1.5px",background:`linear-gradient(90deg,${color},transparent)`}}/>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                 <p style={{fontSize:11,fontWeight:500,color,textTransform:"uppercase",letterSpacing:".07em"}}>{label}</p>
-                {ikigai[key] && !ikigaiEditing[key] && <button className="tbtn" style={{fontSize:11}} onClick={()=>setIkigaiEditing(p=>({...p,[key]:true}))}>{L("Edit","Изменить","Editar")}</button>}
+                {ikigai[key] && !ikigaiEditing[key] && <button className="tbtn" style={{fontSize:11}} onClick={()=>{setIkigaiDraft(p=>({...p,[key]:ikigai[key]}));setIkigaiEditing(p=>({...p,[key]:true}));}}>{L("Edit","Изменить","Editar")}</button>}
               </div>
               {ikigai[key] && !ikigaiEditing[key] ? (
                 <p style={{fontSize:13,color:"rgba(240,236,228,.82)",lineHeight:1.65}}>{ikigai[key]}</p>
               ) : (
                 <div>
                   <p style={{fontSize:13,color:"rgba(240,236,228,.45)",lineHeight:1.55,marginBottom:10,fontStyle:"italic"}}>{prompt}</p>
-                  <textarea rows={3} value={ikigai[key]} onChange={e=>setIkigai(p=>({...p,[key]:e.target.value}))} placeholder={L("Your thoughts...","Твои мысли...","Tus pensamientos...")}/>
-                  {ikigai[key] && <button className="pbtn" style={{fontSize:13,padding:"8px 16px",marginTop:8}} onClick={()=>setIkigaiEditing(p=>({...p,[key]:false}))}>{L("Save","Сохранить","Guardar")}</button>}
+                  <textarea rows={3} value={ikigaiDraft[key]} onChange={e=>setIkigaiDraft(p=>({...p,[key]:e.target.value}))} placeholder={L("Your thoughts...","Твои мысли...","Tus pensamientos...")}/>
+                  {ikigaiDraft[key] && <button className="pbtn" style={{fontSize:13,padding:"8px 16px",marginTop:8}} onClick={()=>{setIkigai(p=>({...p,[key]:ikigaiDraft[key]}));setIkigaiEditing(p=>({...p,[key]:false}));saveIkigai({...ikigai,[key]:ikigaiDraft[key]},ikigaiSynthesis);}}>{L("Save","Сохранить","Guardar")}</button>}
                 </div>
               )}
             </div>
