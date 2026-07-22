@@ -1695,7 +1695,7 @@ const deleteEnergyEntry = async (id) => {
         <div>
           <div style={{position:"relative",width:360,height:440,margin:"0 auto 12px"}}>
             {/* Callouts */}
-  <div style={{position:"absolute",top:8,left:0,fontSize:11,color:"rgba(245,243,240,.18))",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Satisfaction,<br/>but feeling of<br/>uselessness</div>
+  <div style={{position:"absolute",top:8,left:0,fontSize:10,color:"rgba(234,229,219,.18)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Satisfaction,<br/>but feeling of<br/>uselessness</div>
   <div style={{position:"absolute",top:8,right:0,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,textAlign:"right",zIndex:30}}>Delight and<br/>fullness, but<br/>no wealth</div>
   <div style={{position:"absolute",bottom:8,left:0,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Comfortable,<br/>but feeling of<br/>emptiness</div>
   <div style={{position:"absolute",bottom:8,right:0,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,textAlign:"right",zIndex:30}}>Excitement<br/>and sense of<br/>uncertainty</div>
@@ -1748,7 +1748,7 @@ const deleteEnergyEntry = async (id) => {
               {label:L("What the\nworld NEEDS","Что нужно\nМИРУ","Lo que el\nmundo NECESITA"), style:{top:'50%',right:12,transform:'translateY(-50%)',textAlign:'right'}},
               {label:L("What you can\nbe PAID FOR","За что тебе\nМОГУТ ПЛАТИТЬ","Por lo que\npuedes SER PAGADO"), style:{bottom:30,left:'50%',transform:'translateX(-50%)',textAlign:'center'}},
             ].map((l,i)=>(
-              <div key={i} style={{position:"absolute",fontSize:9,color:"#ffffff",fontWeight:500,lineHeight:1.4,pointerEvents:"none",whiteSpace:"pre-line",textShadow:"0 1px 4px rgba(0,0,0,1)",...l.style}}>{l.label}</div>
+              <div key={i} style={{position:"absolute",fontSize:11,color:"#ffffff",fontWeight:500,lineHeight:1.4,pointerEvents:"none",whiteSpace:"pre-line",textShadow:"0 1px 4px rgba(0,0,0,1)",...l.style}}>{l.label}</div>
             ))}
           </div>
       </div>
