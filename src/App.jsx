@@ -1713,8 +1713,8 @@ const deleteEnergyEntry = async (id) => {
       return(<>
         <path d={wp(40,42,138,250)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
 <circle cx="138" cy="250" r="2.5" fill="rgba(255,255,255,.5)"/>
-<path d={wp(320,42,180,184)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
-<circle cx="180" cy="184" r="2.5" fill="rgba(255,255,255,.5)"/>
+<path d={wp(320,42,180,186)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+<circle cx="180" cy="186" r="2.5" fill="rgba(255,255,255,.5)"/>
         <path d={wp(40,398,180,292)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
         <circle cx="180" cy="292" r="2.5" fill="rgba(255,255,255,.5)"/>
 <path d={wp(320,398,262,250)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
