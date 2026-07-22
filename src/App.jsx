@@ -1711,14 +1711,14 @@ const deleteEnergyEntry = async (id) => {
         return d;
       };
       return(<>
-        <path d={wp(40,42,138,235)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
-<circle cx="138" cy="235" r="2.5" fill="rgba(255,255,255,.5)"/>
-<path d={wp(320,42,180,186)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
-<circle cx="180" cy="186" r="2.5" fill="rgba(255,255,255,.5)"/>
+<path d={wp(40,42,128,240)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+<circle cx="128" cy="240" r="2.5" fill="rgba(255,255,255,.5)"/>
+        <path d={wp(320,42,180,186)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="180" cy="186" r="2.5" fill="rgba(255,255,255,.5)"/>
         <path d={wp(40,398,180,292)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
         <circle cx="180" cy="292" r="2.5" fill="rgba(255,255,255,.5)"/>
-<path d={wp(320,398,262,240)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
-<circle cx="262" cy="240" r="2.5" fill="rgba(255,255,255,.5)"/>
+<path d={wp(320,398,242,240)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+<circle cx="242" cy="240" r="2.5" fill="rgba(255,255,255,.5)"/>
       </>);
     })()}
   </svg>
