@@ -1695,10 +1695,10 @@ const deleteEnergyEntry = async (id) => {
         <div>
           <div style={{position:"relative",width:360,height:440,margin:"0 auto 12px"}}>
             {/* Callouts */}
-  <div style={{position:"absolute",top:8,left:0,fontSize:10,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Satisfaction,<br/>but feeling of<br/>uselessness</div>
-  <div style={{position:"absolute",top:8,right:0,fontSize:10,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,textAlign:"right",zIndex:30}}>Delight and<br/>fullness, but<br/>no wealth</div>
-  <div style={{position:"absolute",bottom:8,left:0,fontSize:10,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Comfortable,<br/>but feeling of<br/>emptiness</div>
-  <div style={{position:"absolute",bottom:8,right:0,fontSize:10,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,textAlign:"right",zIndex:30}}>Excitement<br/>and sense of<br/>uncertainty</div>
+  <div style={{position:"absolute",top:8,left:0,fontSize:10,color:"rgba(240,236,228,.9)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Satisfaction,<br/>but feeling of<br/>uselessness</div>
+  <div style={{position:"absolute",top:8,right:0,fontSize:10,color:"rgba(240,236,228,.9)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,textAlign:"right",zIndex:30}}>Delight and<br/>fullness, but<br/>no wealth</div>
+  <div style={{position:"absolute",bottom:8,left:0,fontSize:10,color:"rgba(240,236,228,.9)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Comfortable,<br/>but feeling of<br/>emptiness</div>
+  <div style={{position:"absolute",bottom:8,right:0,fontSize:10,color:"rgba(240,236,228,.9)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,textAlign:"right",zIndex:30}}>Excitement<br/>and sense of<br/>uncertainty</div>
 
             {/* Wavy dashed lines */}
   <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",zIndex:20}} viewBox="0 0 360 440">
