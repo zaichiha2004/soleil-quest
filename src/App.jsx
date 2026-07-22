@@ -1693,7 +1693,38 @@ const deleteEnergyEntry = async (id) => {
       const filled = {love:!!ikigai.love, good:!!ikigai.good, need:!!ikigai.need, paid:!!ikigai.paid};
       return (
         <div>
-          <div style={{position:"relative",width:360,height:360,margin:"0 auto 12px"}}>
+          <div style={{position:"relative",width:360,height:440,margin:"0 auto 12px"}}>
+            {/* Callouts */}
+  <div style={{position:"absolute",top:8,left:0,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Satisfaction,<br/>but feeling of<br/>uselessness</div>
+  <div style={{position:"absolute",top:8,right:0,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,textAlign:"right",zIndex:30}}>Delight and<br/>fullness, but<br/>no wealth</div>
+  <div style={{position:"absolute",bottom:8,left:0,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,zIndex:30}}>Comfortable,<br/>but feeling of<br/>emptiness</div>
+  <div style={{position:"absolute",bottom:8,right:0,fontSize:9,color:"rgba(240,236,228,.5)",lineHeight:1.45,fontStyle:"italic",maxWidth:75,textAlign:"right",zIndex:30}}>Excitement<br/>and sense of<br/>uncertainty</div>
+
+            {/* Wavy dashed lines */}
+  <svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",zIndex:20}} viewBox="0 0 360 440">
+    {(()=>{
+      const wp=(x1,y1,x2,y2)=>{
+        const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+        const px=-dy/len,py=dx/len;
+        let d=`M ${x1} ${y1}`;
+        for(let i=1;i<=60;i++){const t=i/60;const off=6*Math.sin(t*2*Math.PI);d+=` L ${(x1+t*dx+off*px).toFixed(1)} ${(y1+t*dy+off*py).toFixed(1)}`;}
+        return d;
+      };
+      return(<>
+        <path d={wp(40,42,138,250)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="138" cy="250" r="2.5" fill="rgba(255,255,255,.5)"/>
+        <path d={wp(320,42,180,208)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="180" cy="208" r="2.5" fill="rgba(255,255,255,.5)"/>
+        <path d={wp(40,398,180,292)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="180" cy="292" r="2.5" fill="rgba(255,255,255,.5)"/>
+        <path d={wp(320,398,262,250)} stroke="rgba(255,255,255,.35)" strokeWidth="1.2" fill="none" strokeDasharray="3,3"/>
+        <circle cx="262" cy="250" r="2.5" fill="rgba(255,255,255,.5)"/>
+      </>);
+    })()}
+  </svg>
+  {/* Diagram offset to center within taller wrapper */}
+  <div style={{position:"absolute",top:60,left:0,width:360,height:360}}>
+    
             {[
               {key:'love', color:'#c4786e', style:{top:0,left:'50%',transform:'translateX(-50%)'}},
               {key:'good', color:'#d4a359', style:{top:'50%',left:0,transform:'translateY(-50%)'}},
@@ -1708,7 +1739,7 @@ const deleteEnergyEntry = async (id) => {
               {key:'profession', label:L("Profession","Профессия","Profesión"), style:{bottom:'30%',left:'24%'}},
               {key:'vocation', label:L("Vocation","Призвание","Vocación"), style:{bottom:'30%',right:'25%'}},
             ].map(z=>(
-              <div key={z.key} style={{position:"absolute",fontSize:8,fontWeight:400,color:"rgba(240,236,228,.8)",textTransform:"uppercase",letterSpacing:".05em",cursor:"pointer",background:"rgba(0,0,0,.3)",borderRadius:6,padding:"3px 5px",textShadow:"0 1px 2px rgba(0,0,0,.6)",zIndex:5,...z.style}}>{z.label}</div>
+              <div key={z.key} style={{position:"absolute",fontSize:8,fontWeight:400,color:"rgba(255,255,255,.85)",textTransform:"uppercase",letterSpacing:".05em",background:"transparent",border:"0.5px solid rgba(255,255,255,.35)",borderRadius:6,padding:"3px 6px",zIndex:5,...z.style}}>{z.label}</div>
             ))}
             <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",width:76,height:76,borderRadius:"50%",background:"rgba(20,18,28,.95)",border:"1.5px solid rgba(255,255,255,.9)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#d4a359",textAlign:"center",zIndex:10,letterSpacing:".05em"}}>IKIGAI</div>
             {[
@@ -1720,6 +1751,7 @@ const deleteEnergyEntry = async (id) => {
               <div key={i} style={{position:"absolute",fontSize:9,color:"#ffffff",fontWeight:500,lineHeight:1.4,pointerEvents:"none",whiteSpace:"pre-line",textShadow:"0 1px 4px rgba(0,0,0,1)",...l.style}}>{l.label}</div>
             ))}
           </div>
+      </div>
 
           {/* 4 SECTIONS */}
           {[
