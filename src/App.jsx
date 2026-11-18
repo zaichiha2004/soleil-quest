@@ -1546,7 +1546,7 @@ const deleteEnergyEntry = async (id) => {
     <button className="tbtn" style={{marginBottom:16}} onClick={()=>goTo("paths")}>← {L("Back","Назад","Volver")}</button>
     <p style={{fontSize:12,color:"#d4a359",letterSpacing:".1em",textTransform:"uppercase",marginBottom:8}}>Deep Dive</p>
     <h2 style={{fontFamily:"Fraunces,serif",fontSize:24,fontWeight:600,marginBottom:12}}>Coming soon</h2>
-    <p style={{fontSize:14,color:"rgba(240,236,228,.45)",lineHeight:1.65}}>This is where you'll get to the bottom of a specific challenge.</p>
+    <p style={{fontSize:14,color:"rgba(240,236,228,.45)",lineHeight:1.65}}>This is where you'll get to the bottom of that one thing that keeps you up at night.</p>
   </div>
 )}
 
