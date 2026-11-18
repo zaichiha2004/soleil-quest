@@ -716,10 +716,7 @@ setRecapCache(savedRecapCache);
     const p=await load("profile"), s=await load("sessions")||{};
     const savedXp=await load("xp")||0;
     setSessions(s); setXp(savedXp);
-if (supabase) {
-  const {data: energyData} = await supabase.from('energy_entries').select('*').eq('user_id', uid);
-  setEnergyEntries(energyData || []);
-}
+
     const dayIdx = new Date().getDate() % 10;
     setAffirmation(AFFIRMATIONS[lang]?.[dayIdx] || AFFIRMATIONS.EN[0]);
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate()-1);
